@@ -1,0 +1,2551 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Concise revision notes for combinatorics.">
+  <title>Combinatorics Notes</title>
+  <style>
+    :root {
+      --ink: #111;
+      --muted: #555;
+      --line: #d9dce1;
+      --soft: #f5f6f8;
+      --paper: #fff;
+      --page: #f1f2f4;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--page);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.68;
+    }
+
+    a { color: inherit; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 58px;
+      padding: 0 24px;
+      color: #fff;
+      background: #111;
+      border-bottom: 1px solid #000;
+    }
+
+    .brand {
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: -0.2px;
+    }
+
+    .topbar-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .author-credit {
+      color: #bbb;
+      font-size: 12px;
+    }
+
+    .author-credit strong { color: #fff; }
+
+    .course-tag {
+      padding: 3px 9px;
+      border: 1px solid #666;
+      border-radius: 999px;
+      color: #ddd;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 232px minmax(0, 1fr);
+      gap: 24px;
+      width: min(1280px, calc(100% - 40px));
+      margin: 24px auto;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 74px;
+      align-self: start;
+      max-height: calc(100dvh - 90px);
+      overflow-x: hidden;
+      overflow-y: scroll;
+      overscroll-behavior-y: contain;
+      scrollbar-gutter: stable;
+      scrollbar-color: #9a9a9a transparent;
+      scrollbar-width: auto;
+      padding: 4px 14px 12px 0;
+      border-right: 1px solid var(--line);
+    }
+
+    .sidebar::-webkit-scrollbar { width: 10px; }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: #aaa;
+      border: 2px solid var(--page);
+      border-radius: 999px;
+    }
+
+    .sidebar nav {
+      display: grid;
+      gap: 2px;
+    }
+
+    .sidebar-title {
+      margin: 0 0 10px 10px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 8px 10px;
+      border-left: 3px solid transparent;
+      color: #333;
+      font-size: 13.5px;
+      font-weight: 650;
+      line-height: 1.4;
+      text-decoration: none;
+    }
+
+    .sidebar a:hover,
+    .sidebar a:focus-visible {
+      color: #000;
+      background: var(--paper);
+      border-left-color: var(--ink);
+      outline: none;
+    }
+
+    main {
+      min-width: 0;
+      padding: clamp(24px, 4vw, 46px);
+      background: var(--paper);
+      border-radius: 3px;
+      box-shadow: 0 3px 14px rgb(0 0 0 / 4%);
+    }
+
+    .eyebrow {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 3.4vw, 38px);
+      line-height: 1.12;
+      letter-spacing: -1.4px;
+    }
+
+    .subtitle {
+      max-width: 700px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .rule {
+      margin-top: 28px;
+      padding-top: 25px;
+      border-top: 2px solid var(--ink);
+      scroll-margin-top: 82px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-number {
+      color: var(--muted);
+      font: 700 13px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 23px;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+    }
+
+    .definition {
+      max-width: 850px;
+      margin: 0 0 16px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 16px;
+    }
+
+    .study-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(300px, 1.1fr);
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .panel {
+      padding: 16px;
+      border: 0;
+      border-top: 2px solid var(--ink);
+      background: #fafafa;
+    }
+
+    .panel-label {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .formula {
+      display: grid;
+      min-height: 74px;
+      place-items: center;
+      padding: 14px;
+      background: var(--soft);
+      border: 0;
+      font-family: "Cambria Math", Cambria, Georgia, serif;
+      font-size: clamp(17px, 2vw, 21px);
+      text-align: center;
+    }
+
+    .condition {
+      margin: 14px 0 0;
+      padding: 11px 13px;
+      border-left: 4px solid var(--ink);
+      background: var(--soft);
+      font-size: 13px;
+    }
+
+    .condition strong { display: block; margin-bottom: 2px; }
+
+    .example-title {
+      margin: 0 0 8px;
+      font-size: 14px;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin: 0 0 12px;
+    }
+
+    .choice {
+      padding: 10px 12px;
+      background: var(--soft);
+      border: 0;
+      border-left: 3px solid var(--line);
+      font-size: 13px;
+    }
+
+    .choice strong {
+      display: block;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .calculation {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .calculation p { margin: 0; font-size: 13px; }
+
+    .result {
+      flex: 0 0 auto;
+      padding: 7px 12px;
+      color: #fff;
+      background: var(--ink);
+      border: 0;
+      font: 700 16px/1.2 "Cambria Math", Cambria, serif;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .comparison-table th {
+      background: var(--soft);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .comparison-table td:nth-child(3),
+    .comparison-table td:nth-child(4) {
+      white-space: nowrap;
+      font-family: "Cambria Math", Cambria, Georgia, serif;
+      font-size: 14px;
+    }
+
+    .comparison-table.logic-table td:nth-child(3),
+    .comparison-table.logic-table td:nth-child(4) {
+      white-space: normal;
+      font-family: inherit;
+      font-size: inherit;
+    }
+
+    .memory-rule {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .memory-item {
+      padding: 11px 14px;
+      background: var(--soft);
+      border-top: 2px solid var(--ink);
+      text-align: center;
+      font-weight: 750;
+    }
+
+    .note {
+      margin: 12px 0 0;
+      padding: 11px 13px;
+      border-left: 4px solid var(--ink);
+      background: var(--soft);
+      font-size: 13px;
+    }
+
+    .question-box {
+      padding: 12px 16px;
+      border: 0;
+      border-left: 3px solid var(--ink);
+      background: var(--soft);
+    }
+
+    .question-box p { margin: 0 0 8px; }
+    .question-box ol { margin: 0; padding-left: 22px; }
+
+    .solution-list {
+      display: grid;
+      gap: 0;
+      margin-top: 12px;
+      border-top: 1px solid var(--line);
+    }
+
+    .solution-row {
+      display: grid;
+      grid-template-columns: 56px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 14px 4px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .part-label {
+      font-weight: 800;
+      align-self: start;
+    }
+
+    .solution-row p { margin: 0; }
+
+    .working {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .solution-answer {
+      min-width: 122px;
+      padding: 7px 10px;
+      color: #fff;
+      background: var(--ink);
+      border: 0;
+      border-radius: 3px;
+      font: 700 15px/1.2 "Cambria Math", Cambria, serif;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .subtopic {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      scroll-margin-top: 82px;
+    }
+
+    .subtopic h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+      line-height: 1.3;
+    }
+
+    .derivation {
+      display: grid;
+      gap: 8px;
+      margin: 14px 0;
+      padding: 2px 2px 2px 16px;
+      border-left: 1px solid var(--line);
+    }
+
+    .derivation p { margin: 0; }
+
+    .inline-math {
+      font-family: "Cambria Math", Cambria, Georgia, serif;
+      font-size: 1.08em;
+    }
+
+    .equation {
+      margin: 12px 0;
+      padding: 10px 14px;
+      overflow-x: auto;
+      border-left: 3px solid var(--ink);
+      background: var(--soft);
+      font-family: "Cambria Math", Cambria, Georgia, serif;
+      font-size: 16px;
+      line-height: 1.65;
+      text-align: center;
+    }
+
+    .formula-stack {
+      display: grid;
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    @media (max-width: 760px) {
+      .topbar { padding: 0 16px; }
+      .author-credit { display: none; }
+      .layout {
+        display: block;
+        width: min(100% - 20px, 720px);
+        margin: 10px auto;
+      }
+      .sidebar {
+        position: sticky;
+        top: 58px;
+        z-index: 9;
+        max-height: none;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 7px 0;
+        background: var(--page);
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+        scrollbar-gutter: auto;
+      }
+      .sidebar-title { display: none; }
+      .sidebar nav {
+        display: flex;
+        gap: 3px;
+        width: max-content;
+      }
+      .sidebar a {
+        padding: 7px 9px;
+        border-left: 0;
+        border-bottom: 2px solid transparent;
+        white-space: nowrap;
+      }
+      .sidebar a:hover,
+      .sidebar a:focus-visible { border-bottom-color: var(--ink); }
+      main { padding: 22px 18px; }
+      .study-grid { grid-template-columns: 1fr; }
+      .table-wrap { overflow-x: auto; }
+      .comparison-table { min-width: 670px; }
+      .solution-row { grid-template-columns: 56px minmax(0, 1fr); }
+      .solution-answer { grid-column: 2; justify-self: start; }
+    }
+
+    @media (max-width: 430px) {
+      .choices { grid-template-columns: 1fr; }
+      .calculation { align-items: flex-start; flex-direction: column; }
+      .memory-rule { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Combinatorics Notes</div>
+    <div class="topbar-meta">
+      <span class="author-credit">By <strong>ProFonCoDe</strong></span>
+      <span class="course-tag">GATE · DM</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="Table of contents">
+      <p class="sidebar-title">Contents</p>
+      <nav>
+        <a href="#sum-rule">01&nbsp;&nbsp;Sum Rule</a>
+        <a href="#or-and">02&nbsp;&nbsp;OR vs AND</a>
+        <a href="#four-letter-words">03&nbsp;&nbsp;Solved Question</a>
+        <a href="#matrix-count">04&nbsp;&nbsp;Matrix Count</a>
+        <a href="#subtraction-rule">05&nbsp;&nbsp;Subtraction Rule</a>
+        <a href="#complement-rule">06&nbsp;&nbsp;Complement Rule</a>
+        <a href="#cards-at-least-one-ace">07&nbsp;&nbsp;Cards &amp; Aces</a>
+        <a href="#job-assignment">08&nbsp;&nbsp;Job Assignment</a>
+        <a href="#full-house">09&nbsp;&nbsp;Full House</a>
+        <a href="#committee-selection">10&nbsp;&nbsp;Committee</a>
+        <a href="#tallahassee">11&nbsp;&nbsp;Repeated Letters</a>
+        <a href="#binomial-coefficients">12&nbsp;&nbsp;Binomial</a>
+        <a href="#objects-boxes">13&nbsp;&nbsp;Objects &amp; Boxes</a>
+        <a href="#dodb">14&nbsp;&nbsp;DODB</a>
+        <a href="#iodb">15&nbsp;&nbsp;IODB</a>
+        <a href="#doib">16&nbsp;&nbsp;DOIB</a>
+        <a href="#ioib">17&nbsp;&nbsp;IOIB</a>
+        <a href="#inclusion-exclusion">18&nbsp;&nbsp;Inclusion&ndash;Exclusion</a>
+        <a href="#derangements">19&nbsp;&nbsp;Derangements</a>
+        <a href="#pigeonhole-principle">20&nbsp;&nbsp;Pigeonhole Principle</a>
+      </nav>
+    </aside>
+
+    <main>
+      <header>
+        <p class="eyebrow">Discrete Mathematics</p>
+        <h1>Combinatorics</h1>
+        <p class="subtitle">Concise concepts, conditions, formulas, and examples for quick revision.</p>
+      </header>
+
+      <section class="rule" id="sum-rule">
+        <div class="section-heading">
+          <span class="section-number">01</span>
+          <h2>Sum Rule</h2>
+        </div>
+
+        <p class="definition">If a task can be performed by choosing <strong>exactly one</strong> of several mutually exclusive options, the total number of ways is the sum of the ways for each option.</p>
+
+        <div class="study-grid">
+          <div class="panel">
+            <p class="panel-label">Rule</p>
+            <div class="formula" aria-label="T equals T one plus T two through T n">
+              <span>|T| = |T<sub>1</sub>| + |T<sub>2</sub>| + &middot;&middot;&middot; + |T<sub>n</sub>|</span>
+            </div>
+            <div class="condition">
+              <strong>Condition</strong>
+              The options must be disjoint—no outcome may belong to more than one option.
+            </div>
+          </div>
+
+          <div class="panel">
+            <p class="panel-label">Example</p>
+            <h3 class="example-title">Choose exactly one movie</h3>
+            <div class="choices">
+              <div class="choice"><strong>6</strong>Indian movies</div>
+              <div class="choice"><strong>3</strong>Hollywood movies</div>
+            </div>
+            <div class="calculation">
+              <p>The categories are disjoint, so their choices are added.</p>
+              <div class="result">6 + 3 = 9 ways</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="rule" id="or-and">
+        <div class="section-heading">
+          <span class="section-number">02</span>
+          <h2>OR vs AND</h2>
+        </div>
+
+        <p class="definition">For 6 Indian movies and 3 Hollywood movies, use addition for an <strong>OR</strong> choice and multiplication for an <strong>AND</strong> choice. Correct the count when the sets overlap.</p>
+
+        <div class="table-wrap">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Case</th>
+                <th>Rule</th>
+                <th>Calculation</th>
+                <th>Answer</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>OR, no common movie</strong></td>
+                <td>Add</td>
+                <td>6 + 3</td>
+                <td><strong>9</strong></td>
+              </tr>
+              <tr>
+                <td><strong>AND, no common movie</strong></td>
+                <td>Multiply</td>
+                <td>6 &times; 3</td>
+                <td><strong>18</strong></td>
+              </tr>
+              <tr>
+                <td><strong>OR, 1 common movie</strong></td>
+                <td>Add and subtract the overlap</td>
+                <td>6 + 3 &minus; 1</td>
+                <td><strong>8</strong></td>
+              </tr>
+              <tr>
+                <td><strong>AND, 1 common movie</strong></td>
+                <td>Multiply; remove (X, X) when two distinct movies are required</td>
+                <td>6 &times; 3 &minus; 1</td>
+                <td><strong>17</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="memory-rule" aria-label="Memory rule">
+          <div class="memory-item">OR &rarr; Add</div>
+          <div class="memory-item">AND &rarr; Multiply</div>
+        </div>
+
+        <p class="note"><strong>Overlap:</strong> Correct any double or invalid counting. In the final case, the answer is <strong>17</strong> only when two different movies must be chosen. If the common movie may serve as both choices simultaneously, the count remains <strong>18</strong>.</p>
+      </section>
+
+      <section class="rule" id="four-letter-words">
+        <div class="section-heading">
+          <span class="section-number">03</span>
+          <h2>Four-Letter Words</h2>
+        </div>
+
+        <div class="question-box">
+          <p><strong>Question:</strong> How many four-letter words can be formed from the 26-letter English alphabet when:</p>
+          <ol type="a">
+            <li>repetition is allowed?</li>
+            <li>repetition is not allowed?</li>
+            <li>repetition is allowed, but not consecutively?</li>
+          </ol>
+        </div>
+
+        <div class="solution-list" aria-label="Solutions">
+          <div class="solution-row">
+            <div class="part-label">a.</div>
+            <div>
+              <p><strong>Repetition allowed:</strong> Each of the four positions has 26 choices.</p>
+              <p class="working">26 &times; 26 &times; 26 &times; 26 = 26<sup>4</sup></p>
+            </div>
+            <div class="solution-answer">456,976</div>
+          </div>
+
+          <div class="solution-row">
+            <div class="part-label">b.</div>
+            <div>
+              <p><strong>No repetition:</strong> The number of choices decreases after each position.</p>
+              <p class="working">26 &times; 25 &times; 24 &times; 23 = <sup>26</sup>P<sub>4</sub></p>
+            </div>
+            <div class="solution-answer">358,800</div>
+          </div>
+
+          <div class="solution-row">
+            <div class="part-label">c.</div>
+            <div>
+              <p><strong>No consecutive repetition:</strong> The first position has 26 choices; each later position can use any letter except the immediately preceding one.</p>
+              <p class="working">26 &times; 25 &times; 25 &times; 25 = 26(25<sup>3</sup>)</p>
+            </div>
+            <div class="solution-answer">406,250</div>
+          </div>
+        </div>
+
+        <p class="note"><strong>Interpretation of (c):</strong> Non-adjacent repetition is allowed, such as <em>ABAC</em>; identical adjacent letters, such as the <em>AA</em> in <em>AABC</em>, are not allowed.</p>
+      </section>
+
+      <section class="rule" id="matrix-count">
+        <div class="section-heading">
+          <span class="section-number">04</span>
+          <h2>Counting Matrices</h2>
+        </div>
+
+        <div class="question-box">
+          <p><strong>Question:</strong> Let <em>n</em> &ge; 2 and let <em>S</em><sub>1</sub> be the set of all <em>n</em> &times; <em>n</em> matrices whose entries belong to {<em>a</em>, <em>b</em>, <em>c</em>}. Find |<em>S</em><sub>1</sub>|.</p>
+        </div>
+
+        <div class="solution-list" aria-label="Solution">
+          <div class="solution-row">
+            <div class="part-label">1.</div>
+            <div>
+              <p>An <em>n</em> &times; <em>n</em> matrix contains <strong><em>n</em><sup>2</sup> independent positions</strong>.</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">2.</div>
+            <div>
+              <p>Each position has <strong>3 choices</strong>: <em>a</em>, <em>b</em>, or <em>c</em>.</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">3.</div>
+            <div>
+              <p>By the product rule, multiply 3 once for every matrix position.</p>
+              <p class="working">3 &times; 3 &times; &middot;&middot;&middot; &times; 3 &nbsp;(<em>n</em><sup>2</sup> times)</p>
+            </div>
+            <div class="solution-answer">|S<sub>1</sub>| = 3<sup><em>n</em>&sup2;</sup></div>
+          </div>
+        </div>
+
+        <p class="note"><strong>Key idea:</strong> Number of matrices = (choices per entry)<sup>number of entries</sup>.</p>
+      </section>
+
+      <section class="rule" id="subtraction-rule">
+        <div class="section-heading">
+          <span class="section-number">05</span>
+          <h2>Subtraction Rule</h2>
+        </div>
+
+        <p class="definition">When two sets overlap, add their sizes and subtract the intersection once to ensure that each element is counted exactly once.</p>
+
+        <div class="study-grid">
+          <div class="panel">
+            <p class="panel-label">Inclusion&ndash;Exclusion for Two Sets</p>
+            <div class="formula">
+              <span>|A &cup; B| = |A| + |B| &minus; |A &cap; B|</span>
+            </div>
+            <div class="condition">
+              <strong>Why subtract?</strong>
+              Elements in A &cap; B are included once in |A| and once in |B|, so they are initially counted twice.
+            </div>
+          </div>
+
+          <div class="panel">
+            <p class="panel-label">Memory Rule</p>
+            <h3 class="example-title">Add both sets, then remove one copy of the overlap.</h3>
+            <div class="calculation">
+              <p>Every element in the union is then counted exactly once.</p>
+              <div class="result">Add &minus; Overlap</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="question-box" style="margin-top: 14px;">
+          <p><strong>Question:</strong> How many bit strings of length 8 either start with 1 or end with 00?</p>
+          <p>A. 32 &nbsp;&nbsp; B. 128 &nbsp;&nbsp; C. 160 &nbsp;&nbsp; D. 192</p>
+        </div>
+
+        <div class="solution-list" aria-label="Solution">
+          <div class="solution-row">
+            <div class="part-label">A</div>
+            <div>
+              <p><strong>Strings starting with 1:</strong> The first bit is fixed; the remaining 7 bits are free.</p>
+              <p class="working">|A| = 2<sup>7</sup> = 128</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">B</div>
+            <div>
+              <p><strong>Strings ending with 00:</strong> The final 2 bits are fixed; the first 6 bits are free.</p>
+              <p class="working">|B| = 2<sup>6</sup> = 64</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">A&cap;B</div>
+            <div>
+              <p><strong>Strings satisfying both:</strong> The first bit and final 2 bits are fixed; the middle 5 bits are free.</p>
+              <p class="working">|A &cap; B| = 2<sup>5</sup> = 32</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">&there4;</div>
+            <div>
+              <p>Apply the subtraction rule.</p>
+              <p class="working">|A &cup; B| = 128 + 64 &minus; 32</p>
+            </div>
+            <div class="solution-answer">160 &mdash; Option C</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="rule" id="complement-rule">
+        <div class="section-heading">
+          <span class="section-number">06</span>
+          <h2>Complement Rule</h2>
+        </div>
+
+        <p class="definition">When the desired outcomes are difficult to count directly, count all outcomes and subtract those that do not satisfy the requirement.</p>
+
+        <div class="study-grid">
+          <div class="panel">
+            <p class="panel-label">Rule</p>
+            <div class="formula">
+              <span>Desired = Total &minus; Undesired</span>
+            </div>
+            <div class="condition">
+              <strong>Set Form</strong>
+              |A| = |U| &minus; |A<sup>c</sup>|, where U is the universal set and A<sup>c</sup> is the complement of A.
+            </div>
+          </div>
+
+          <div class="panel">
+            <p class="panel-label">When to Use</p>
+            <h3 class="example-title">Look for phrases such as:</h3>
+            <div class="choices">
+              <div class="choice"><strong>&ge; 1</strong>at least one</div>
+              <div class="choice"><strong>Not all</strong>one or more exceptions</div>
+            </div>
+            <p class="working">Counting the opposite event is often much simpler.</p>
+          </div>
+        </div>
+
+        <div class="question-box" style="margin-top: 14px;">
+          <p><strong>Question:</strong> How many strings of four lowercase English letters contain the letter <em>x</em> at least once?</p>
+        </div>
+
+        <div class="solution-list" aria-label="Solution">
+          <div class="solution-row">
+            <div class="part-label">1.</div>
+            <div>
+              <p><strong>Total strings:</strong> Each of the four positions has 26 choices.</p>
+              <p class="working">26<sup>4</sup> = 456,976</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">2.</div>
+            <div>
+              <p><strong>Undesired strings:</strong> If <em>x</em> is absent, each position has 25 choices.</p>
+              <p class="working">25<sup>4</sup> = 390,625</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">&there4;</div>
+            <div>
+              <p>Apply the complement rule.</p>
+              <p class="working">26<sup>4</sup> &minus; 25<sup>4</sup> = 456,976 &minus; 390,625</p>
+            </div>
+            <div class="solution-answer">66,351 strings</div>
+          </div>
+        </div>
+
+        <p class="note"><strong>Why this works:</strong> Subtracting strings with no <em>x</em> leaves precisely the strings containing one or more occurrences of <em>x</em>.</p>
+      </section>
+
+      <section class="rule" id="cards-at-least-one-ace">
+        <div class="section-heading">
+          <span class="section-number">07</span>
+          <h2>Ordered Card Selection</h2>
+        </div>
+
+        <div class="panel" style="margin-bottom: 14px;">
+          <p class="panel-label">Standard Deck Theory</p>
+          <p class="definition">A standard deck contains <strong>52 unique cards</strong>, with no jokers. Each card is identified by one suit and one rank.</p>
+          <div class="choices">
+            <div class="choice">
+              <strong>4 suits</strong>
+              Hearts, Diamonds, Clubs, Spades
+            </div>
+            <div class="choice">
+              <strong>13 ranks</strong>
+              A, 2&ndash;10, J, Q, K
+            </div>
+            <div class="choice">
+              <strong>26 red</strong>
+              Hearts and Diamonds
+            </div>
+            <div class="choice">
+              <strong>26 black</strong>
+              Clubs and Spades
+            </div>
+          </div>
+          <div class="condition">
+            <strong>Useful Counting Facts</strong>
+            Each suit has 13 cards. Each rank has 4 cards&mdash;one from each suit. Therefore, the deck contains 4 aces, 12 face cards (J, Q, K), and 48 non-aces.
+          </div>
+        </div>
+
+        <div class="question-box">
+          <p><strong>Question:</strong> Two cards are picked one after another from a standard 52-card deck. If order matters, how many selections contain at least one ace?</p>
+        </div>
+
+        <div class="solution-list" aria-label="Solution">
+          <div class="solution-row">
+            <div class="part-label">1.</div>
+            <div>
+              <p><strong>Total ordered selections:</strong> There are 52 choices for the first card and 51 for the second.</p>
+              <p class="working">52 &times; 51 = 2,652</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">2.</div>
+            <div>
+              <p><strong>Selections with no ace:</strong> Choose both cards from the 48 non-aces.</p>
+              <p class="working">48 &times; 47 = 2,256</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">&there4;</div>
+            <div>
+              <p>Use the Complement Rule: at least one ace = all selections &minus; no-ace selections.</p>
+              <p class="working">(52 &times; 51) &minus; (48 &times; 47) = 2,652 &minus; 2,256</p>
+            </div>
+            <div class="solution-answer">396 ways</div>
+          </div>
+        </div>
+
+        <p class="note"><strong>Assumption:</strong> Cards are drawn <strong>without replacement</strong>. As order matters, drawing Ace&ndash;King and King&ndash;Ace gives two different outcomes.</p>
+      </section>
+
+      <section class="rule" id="job-assignment">
+        <div class="section-heading">
+          <span class="section-number">08</span>
+          <h2>Job Assignment</h2>
+        </div>
+
+        <div class="question-box">
+          <p><strong>Question:</strong> There are 6 jobs with distinct difficulty levels and 3 computers with distinct processing speeds. Each job is assigned to one computer such that:</p>
+          <ul>
+            <li>the fastest computer receives the toughest job;</li>
+            <li>the slowest computer receives the easiest job; and</li>
+            <li>every computer receives at least one job.</li>
+          </ul>
+          <p>Find the number of valid assignments.</p>
+        </div>
+
+        <div class="solution-list" aria-label="Solution">
+          <div class="solution-row">
+            <div class="part-label">1.</div>
+            <div>
+              <p><strong>Assign the extreme jobs:</strong> The toughest job is fixed on the fastest computer, and the easiest job is fixed on the slowest computer.</p>
+              <p class="working">These assignments contribute 1 &times; 1 way.</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">2.</div>
+            <div>
+              <p><strong>Assign the remaining 4 jobs:</strong> Each job may independently go to any of the 3 computers.</p>
+              <p class="working">Total assignments = 3<sup>4</sup> = 81</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">3.</div>
+            <div>
+              <p><strong>Remove invalid assignments:</strong> The fastest and slowest computers are already nonempty. An assignment is invalid only when the middle-speed computer receives none of the remaining jobs.</p>
+              <p class="working">Invalid assignments = 2<sup>4</sup> = 16</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">&there4;</div>
+            <div>
+              <p>Apply the Complement Rule.</p>
+              <p class="working">3<sup>4</sup> &minus; 2<sup>4</sup> = 81 &minus; 16</p>
+            </div>
+            <div class="solution-answer">65 ways</div>
+          </div>
+        </div>
+
+        <p class="note"><strong>Key observation:</strong> Only the middle-speed computer can be empty after the two compulsory assignments; therefore, exclude the cases in which all four remaining jobs go only to the fastest or slowest computer.</p>
+      </section>
+
+      <section class="rule" id="full-house">
+        <div class="section-heading">
+          <span class="section-number">09</span>
+          <h2>Counting Full Houses</h2>
+        </div>
+
+        <div class="question-box">
+          <p><strong>Question:</strong> A poker hand consists of 5 cards chosen from a standard 52-card deck. A <strong>full house</strong> contains 3 cards of one rank and 2 cards of a different rank—for example, 3 kings and 2 eights. How many different full houses are possible?</p>
+        </div>
+
+        <div class="solution-list" aria-label="Solution">
+          <div class="solution-row">
+            <div class="part-label">1.</div>
+            <div>
+              <p><strong>Choose the rank of the triple:</strong> Any of the 13 ranks may be used.</p>
+              <p class="working">13 choices</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">2.</div>
+            <div>
+              <p><strong>Choose 3 suits for that rank:</strong> Each rank has 4 cards, one per suit.</p>
+              <p class="working">C(4, 3) = 4 choices</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">3.</div>
+            <div>
+              <p><strong>Choose the rank of the pair:</strong> It must differ from the triple's rank.</p>
+              <p class="working">12 choices</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">4.</div>
+            <div>
+              <p><strong>Choose 2 suits for that rank:</strong></p>
+              <p class="working">C(4, 2) = 6 choices</p>
+            </div>
+          </div>
+          <div class="solution-row">
+            <div class="part-label">&there4;</div>
+            <div>
+              <p>Apply the Product Rule.</p>
+              <p class="working">13 &times; C(4, 3) &times; 12 &times; C(4, 2) = 13 &times; 4 &times; 12 &times; 6</p>
+            </div>
+            <div class="solution-answer">3,744 hands</div>
+          </div>
+        </div>
+
+        <p class="note"><strong>No double counting:</strong> The rank appearing three times and the rank appearing twice have different roles, so every full house is counted exactly once.</p>
+      </section>
+
+      <section class="rule" id="committee-selection">
+        <div class="section-heading">
+          <span class="section-number">10</span>
+          <h2>Committee Selection</h2>
+        </div>
+
+        <div class="question-box">
+          <p><strong>Question:</strong> A committee of 12 is selected from 10 men and 10 women. Find the number of selections when:</p>
+          <ol type="a">
+            <li>there are no restrictions;</li>
+            <li>there must be 6 men and 6 women;</li>
+            <li>there must be an even number of women;</li>
+            <li>there must be more women than men; and</li>
+            <li>there must be at least 8 men.</li>
+          </ol>
+        </div>
+
+        <div class="solution-list" aria-label="Solutions">
+          <div class="solution-row">
+            <div class="part-label">a.</div>
+            <div>
+              <p><strong>No restrictions:</strong> Choose any 12 of the 20 people.</p>
+              <p class="working">C(20, 12) = C(20, 8)</p>
+            </div>
+            <div class="solution-answer">125,970</div>
+          </div>
+
+          <div class="solution-row">
+            <div class="part-label">b.</div>
+            <div>
+              <p><strong>Exactly 6 men and 6 women:</strong></p>
+              <p class="working">C(10, 6)C(10, 6) = 210 &times; 210</p>
+            </div>
+            <div class="solution-answer">44,100</div>
+          </div>
+
+          <div class="solution-row">
+            <div class="part-label">c.</div>
+            <div>
+              <p><strong>Even number of women:</strong> The feasible numbers of women are 2, 4, 6, 8, and 10.</p>
+              <p class="working">C(10,2)C(10,10) + C(10,4)C(10,8) + C(10,6)C(10,6) + C(10,8)C(10,4) + C(10,10)C(10,2)</p>
+              <p class="working">= 45 + 9,450 + 44,100 + 9,450 + 45</p>
+            </div>
+            <div class="solution-answer">63,090</div>
+          </div>
+
+          <div class="solution-row">
+            <div class="part-label">d.</div>
+            <div>
+              <p><strong>More women than men:</strong> The possible (women, men) counts are (7,5), (8,4), (9,3), and (10,2).</p>
+              <p class="working">C(10,7)C(10,5) + C(10,8)C(10,4) + C(10,9)C(10,3) + C(10,10)C(10,2)</p>
+              <p class="working">= 30,240 + 9,450 + 1,200 + 45</p>
+            </div>
+            <div class="solution-answer">40,935</div>
+          </div>
+
+          <div class="solution-row">
+            <div class="part-label">e.</div>
+            <div>
+              <p><strong>At least 8 men:</strong> The possible (men, women) counts are (8,4), (9,3), and (10,2).</p>
+              <p class="working">C(10,8)C(10,4) + C(10,9)C(10,3) + C(10,10)C(10,2)</p>
+              <p class="working">= 9,450 + 1,200 + 45</p>
+            </div>
+            <div class="solution-answer">10,695</div>
+          </div>
+        </div>
+
+        <p class="note"><strong>Method:</strong> For each valid split, choose the men and women independently using combinations, multiply those choices, and then add the results for all permissible splits.</p>
+      </section>
+
+      <section class="rule" id="tallahassee">
+        <div class="section-heading">
+          <span class="section-number">11</span>
+          <h2>Permutations with Repeated Elements</h2>
+        </div>
+
+        <p class="definition">When some objects are identical, swapping identical copies does not produce a new arrangement. Divide the ordinary factorial count by the factorial of each repetition count.</p>
+
+        <div class="study-grid">
+          <div class="panel">
+            <p class="panel-label">Repeated-Element Formula</p>
+            <div class="formula">
+              <span>Number of arrangements = <span style="white-space: nowrap;"><em>n</em>! / (<em>n</em><sub>1</sub>! <em>n</em><sub>2</sub>! &middot;&middot;&middot; <em>n</em><sub>k</sub>!)</span></span>
+            </div>
+            <div class="condition">
+              <strong>Meaning</strong>
+              There are <em>n</em> total objects, with identical groups of sizes <em>n</em><sub>1</sub>, <em>n</em><sub>2</sub>, &hellip;, <em>n</em><sub>k</sub>.
+            </div>
+          </div>
+
+          <div class="panel">
+            <p class="panel-label">Gap Method</p>
+            <h3 class="example-title">Use when identical objects must not be adjacent.</h3>
+            <p class="working">Arrange the other objects first, identify the gaps around them, and place at most one restricted object in each selected gap.</p>
+          </div>
+        </div>
+
+        <div class="question-box" style="margin-top: 14px;">
+          <p><strong>Question:</strong> How many distinct arrangements of the letters in <strong>TALLAHASSEE</strong> have no two A's adjacent?</p>
+        </div>
+
+        <div class="solution-list" aria-label="Solution">
+          <div class="solution-row">
+            <div class="part-label">1.</div>
+            <div>
+              <p><strong>Count the letters:</strong> There are 11 letters: A occurs 3 times; E, L, and S occur twice each; H and T occur once each.</p>
+              <p class="working">Total distinct arrangements = 11!/(3!2!2!2!) = 831,600</p>
+            </div>
+          </div>
+
+          <div class="solution-row">
+            <div class="part-label">2.</div>
+            <div>
+              <p><strong>Arrange the 8 non-A letters:</strong> E, E, L, L, S, S, H, T.</p>
+              <p class="working">8!/(2!2!2!) = 5,040</p>
+            </div>
+          </div>
+
+          <div class="solution-row">
+            <div class="part-label">3.</div>
+            <div>
+              <p><strong>Choose gaps for the A's:</strong> Eight arranged letters create 9 gaps, including the two ends. Choose 3 different gaps so that no two A's are adjacent.</p>
+              <p class="working">C(9, 3) = 84</p>
+            </div>
+          </div>
+
+          <div class="solution-row">
+            <div class="part-label">&there4;</div>
+            <div>
+              <p>Apply the Product Rule.</p>
+              <p class="working">[8!/(2!2!2!)] &times; C(9, 3) = 5,040 &times; 84</p>
+            </div>
+            <div class="solution-answer">423,360</div>
+          </div>
+        </div>
+
+        <p class="note"><strong>Gap pattern:</strong> _ X _ X _ X _ X _ X _ X _ X _ X _. Placing at most one A in a chosen gap guarantees that the A's are non-adjacent.</p>
+      </section>
+
+      <section class="rule" id="binomial-coefficients">
+        <div class="section-heading">
+          <span class="section-number">12</span>
+          <h2>Binomial and Its Coefficients</h2>
+        </div>
+
+        <p class="definition">The Binomial Theorem expands a power of two terms and explains each coefficient as a count of selections.</p>
+
+        <div class="subtopic" style="margin-top: 0; padding-top: 0; border-top: 0;">
+          <h3>Derivation of the Binomial Expansion</h3>
+          <div class="derivation">
+            <p><span class="inline-math">(a + b)<sup>n</sup></span> is a product of <em>n</em> identical brackets:</p>
+            <div class="formula"><span>(a + b)(a + b)&middot;&middot;&middot;(a + b)</span></div>
+            <p>Every term in the expansion is formed by selecting either <em>a</em> or <em>b</em> from each bracket.</p>
+            <p>If <em>b</em> is selected from exactly <em>r</em> brackets, then <em>a</em> must be selected from the remaining <em>n &minus; r</em> brackets. The resulting term is <span class="inline-math">a<sup>n&minus;r</sup>b<sup>r</sup></span>.</p>
+            <p>The <em>r</em> brackets contributing <em>b</em> can be chosen in <span class="inline-math">C(n,r)</span> ways. Hence its coefficient is <span class="inline-math">C(n,r)</span>.</p>
+          </div>
+
+          <div class="formula-stack">
+            <div class="formula"><span>General term: C(n,r)a<sup>n&minus;r</sup>b<sup>r</sup></span></div>
+            <div class="formula"><span>(a + b)<sup>n</sup> = &Sigma;<sub>r=0</sub><sup>n</sup> C(n,r)a<sup>n&minus;r</sup>b<sup>r</sup></span></div>
+          </div>
+
+          <div class="condition">
+            <strong>Coefficient Symmetry</strong>
+            C(n,r) = C(n,n&minus;r), because choosing <em>r</em> brackets for <em>b</em> is equivalent to choosing the remaining <em>n&minus;r</em> brackets for <em>a</em>.
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Example: Expansion of (a + b)<sup>3</sup></h3>
+          <p>For the term <span class="inline-math">a<sup>2</sup>b</span>, choose one of the three brackets to contribute <em>b</em>. This can be done in <span class="inline-math">C(3,1) = 3</span> ways.</p>
+          <div class="formula-stack">
+            <div class="formula"><span>(a + b)<sup>3</sup> = C(3,0)a<sup>3</sup> + C(3,1)a<sup>2</sup>b + C(3,2)ab<sup>2</sup> + C(3,3)b<sup>3</sup></span></div>
+            <div class="formula"><span>(a + b)<sup>3</sup> = a<sup>3</sup> + 3a<sup>2</sup>b + 3ab<sup>2</sup> + b<sup>3</sup></span></div>
+          </div>
+          <p class="note"><strong>Main idea:</strong> C(n,r) counts the selections of brackets that produce <span class="inline-math">a<sup>n&minus;r</sup>b<sup>r</sup></span>.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>Important Binomial Identities</h3>
+
+          <div class="panel">
+            <p class="panel-label">Identity 1 &mdash; Sum of All Binomial Coefficients</p>
+            <p>From the Binomial Theorem,</p>
+            <div class="formula"><span>(1+x)<sup>n</sup> = &Sigma;<sub>k=0</sub><sup>n</sup> C(n,k)x<sup>k</sup></span></div>
+            <p class="working">= C(n,0)x<sup>0</sup> + C(n,1)x<sup>1</sup> + &middot;&middot;&middot; + C(n,n)x<sup>n</sup></p>
+            <p>Substitute <span class="inline-math">x=1</span>:</p>
+            <div class="formula"><span>2<sup>n</sup> = C(n,0) + C(n,1) + C(n,2) + &middot;&middot;&middot; + C(n,n)</span></div>
+            <p class="note"><strong>Result:</strong> The sum of all binomial coefficients in the <em>n</em>th row is <span class="inline-math">2<sup>n</sup></span>.</p>
+          </div>
+
+          <div class="panel" style="margin-top: 12px;">
+            <p class="panel-label">Identity 2 &mdash; Even and Odd Binomial Coefficients</p>
+            <p>Again, start with</p>
+            <div class="formula"><span>(1+x)<sup>n</sup> = &Sigma;<sub>k=0</sub><sup>n</sup> C(n,k)x<sup>k</sup></span></div>
+            <p>For <span class="inline-math">n &ge; 1</span>, substitute <span class="inline-math">x=&minus;1</span>:</p>
+            <div class="formula"><span>0 = C(n,0) &minus; C(n,1) + C(n,2) &minus; C(n,3) + &middot;&middot;&middot; + (&minus;1)<sup>n</sup>C(n,n)</span></div>
+            <p>Move the odd-indexed terms to the other side:</p>
+            <div class="formula"><span>C(n,0) + C(n,2) + C(n,4) + &middot;&middot;&middot; = C(n,1) + C(n,3) + C(n,5) + &middot;&middot;&middot;</span></div>
+            <p class="note"><strong>Result:</strong> The even-indexed and odd-indexed sums are equal. Since their combined sum is <span class="inline-math">2<sup>n</sup></span>, each sum equals <span class="inline-math">2<sup>n&minus;1</sup></span>.</p>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Q1. Coefficient in (x + y)<sup>25</sup></h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> Find the coefficient of <span class="inline-math">x<sup>12</sup>y<sup>13</sup></span> in <span class="inline-math">(x + y)<sup>25</sup></span>.</p>
+          </div>
+          <div class="solution-list" aria-label="Solution to question 1">
+            <div class="solution-row">
+              <div class="part-label">Sol.</div>
+              <div>
+                <p>The general term is <span class="inline-math">C(25,r)x<sup>25&minus;r</sup>y<sup>r</sup></span>. Set <em>r</em> = 13, giving the required powers 12 and 13.</p>
+                <p class="working">Coefficient = C(25,13) = C(25,12)</p>
+              </div>
+              <div class="solution-answer">5,200,300</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Q2. Coefficient in (2x &minus; 3y)<sup>25</sup></h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> Find the coefficient of <span class="inline-math">x<sup>12</sup>y<sup>13</sup></span> in <span class="inline-math">(2x &minus; 3y)<sup>25</sup></span>.</p>
+          </div>
+          <div class="solution-list" aria-label="Solution to question 2">
+            <div class="solution-row">
+              <div class="part-label">Sol.</div>
+              <div>
+                <p>Use <span class="inline-math">C(25,r)(2x)<sup>25&minus;r</sup>(&minus;3y)<sup>r</sup></span>. To obtain <span class="inline-math">x<sup>12</sup>y<sup>13</sup></span>, take <em>r</em> = 13.</p>
+                <p class="working">Required term = C(25,13)(2x)<sup>12</sup>(&minus;3y)<sup>13</sup></p>
+              </div>
+              <div class="solution-answer">&minus;C(25,12)2<sup>12</sup>3<sup>13</sup></div>
+            </div>
+          </div>
+          <p class="note"><strong>Sign:</strong> The coefficient is negative because the exponent of &minus;3 is odd.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>Q3. Coefficient of x<sup>4</sup> in a Product</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> Find the coefficient of <span class="inline-math">x<sup>4</sup></span> in <span class="inline-math">(x &minus; 1)<sup>3</sup>(x &minus; 2)<sup>3</sup></span>.</p>
+            <p>A. 33 &nbsp;&nbsp; B. &minus;3 &nbsp;&nbsp; C. 30 &nbsp;&nbsp; D. 21</p>
+          </div>
+          <div class="derivation">
+            <p class="inline-math">(x &minus; 1)<sup>3</sup> = x<sup>3</sup> &minus; 3x<sup>2</sup> + 3x &minus; 1</p>
+            <p class="inline-math">(x &minus; 2)<sup>3</sup> = x<sup>3</sup> &minus; 6x<sup>2</sup> + 12x &minus; 8</p>
+            <p>Only products whose powers add to 4 contribute:</p>
+            <p class="working">(x<sup>3</sup>)(12x) + (&minus;3x<sup>2</sup>)(&minus;6x<sup>2</sup>) + (3x)(x<sup>3</sup>)</p>
+            <p class="working">= 12x<sup>4</sup> + 18x<sup>4</sup> + 3x<sup>4</sup> = 33x<sup>4</sup></p>
+          </div>
+          <div class="solution-answer">33 &mdash; Option A</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Q4. Multinomial Coefficient</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> Determine the coefficient of <span class="inline-math">xyz<sup>2</sup></span> in <span class="inline-math">(x + y + z)<sup>4</sup></span>.</p>
+          </div>
+          <div class="derivation">
+            <p>For <span class="inline-math">x<sup>n<sub>1</sub></sup>y<sup>n<sub>2</sub></sup>z<sup>n<sub>3</sub></sup></span> in <span class="inline-math">(x+y+z)<sup>n</sup></span>, where <span class="inline-math">n<sub>1</sub>+n<sub>2</sub>+n<sub>3</sub>=n</span>, the coefficient is:</p>
+            <div class="formula"><span>n! / (n<sub>1</sub>!n<sub>2</sub>!n<sub>3</sub>!)</span></div>
+            <p>Here, <span class="inline-math">n=4</span> and the exponents are 1, 1, and 2.</p>
+            <p class="working">4!/(1!1!2!) = 24/2</p>
+          </div>
+          <div class="solution-answer">12</div>
+        </div>
+      </section>
+
+      <section class="rule" id="objects-boxes">
+        <div class="section-heading">
+          <span class="section-number">13</span>
+          <h2>Objects into Boxes</h2>
+        </div>
+
+        <p class="definition">Distribution problems are classified by whether the objects and boxes are <strong>different</strong> (distinguishable) or <strong>identical</strong> (indistinguishable).</p>
+
+        <div class="table-wrap">
+          <table class="comparison-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Objects</th>
+                <th>Boxes</th>
+                <th>Counting Method</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>DODB</strong></td>
+                <td>Different</td>
+                <td>Different</td>
+                <td>Each object chooses a box independently. With empty boxes allowed: <strong>k<sup>n</sup></strong>.</td>
+              </tr>
+              <tr>
+                <td><strong>IODB</strong></td>
+                <td>Identical</td>
+                <td>Different</td>
+                <td>Count the number placed in each labelled box using <strong>Stars and Bars</strong>.</td>
+              </tr>
+              <tr>
+                <td><strong>DOIB</strong></td>
+                <td>Different</td>
+                <td>Identical</td>
+                <td>Distributions differing only by swapping boxes are the same. Use <strong>set partitions</strong>.</td>
+              </tr>
+              <tr>
+                <td><strong>IOIB</strong></td>
+                <td>Identical</td>
+                <td>Identical</td>
+                <td>Only the group sizes matter. Use <strong>integer partitions</strong>.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="subtopic" id="dodb">
+          <h3>1. DODB &mdash; Different Objects, Different Boxes</h3>
+          <div class="panel">
+            <p>Each of the <em>n</em> distinct objects has <em>k</em> choices, one for each labelled box.</p>
+            <div class="formula"><span>Number of distributions = k<sup>n</sup></span></div>
+            <p class="note"><strong>Condition:</strong> This formula allows boxes to remain empty. If every box must be nonempty, use onto-function counting or inclusion&ndash;exclusion.</p>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>DODB with Exact Box Sizes</h3>
+          <p>Let <em>n</em> distinct objects be distributed among <em>r</em> distinct boxes, where box <span class="inline-math">B<sub>i</sub></span> must receive exactly <span class="inline-math">n<sub>i</sub></span> objects and</p>
+          <div class="formula"><span>n<sub>1</sub> + n<sub>2</sub> + &middot;&middot;&middot; + n<sub>r</sub> = n.</span></div>
+
+          <div class="derivation">
+            <p>Choose <span class="inline-math">n<sub>1</sub></span> objects for <span class="inline-math">B<sub>1</sub></span>: <span class="inline-math">C(n,n<sub>1</sub>)</span>.</p>
+            <p>Choose <span class="inline-math">n<sub>2</sub></span> of the remaining objects for <span class="inline-math">B<sub>2</sub></span>: <span class="inline-math">C(n&minus;n<sub>1</sub>,n<sub>2</sub>)</span>.</p>
+            <p>Continue similarly for every box. These are successive <strong>AND</strong> choices, so multiply:</p>
+            <p class="working">C(n,n<sub>1</sub>)C(n&minus;n<sub>1</sub>,n<sub>2</sub>)C(n&minus;n<sub>1</sub>&minus;n<sub>2</sub>,n<sub>3</sub>) &middot;&middot;&middot;</p>
+          </div>
+
+          <div class="formula"><span>Ways = n!/(n<sub>1</sub>!n<sub>2</sub>!&middot;&middot;&middot;n<sub>r</sub>!)</span></div>
+          <p class="note"><strong>Multinomial coefficient:</strong> Use this formula when both objects and boxes are distinct and each labelled box has a prescribed size.</p>
+
+          <div class="panel" style="margin-top: 12px;">
+            <p class="panel-label">Mini Example</p>
+            <p>Distribute 5 distinct students A, B, C, D, E among three distinct rooms with sizes 2, 2, and 1.</p>
+            <p class="working">C(5,2)C(3,2)C(1,1) = 5!/(2!2!1!) = 30</p>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>DODB Q1. Four Poker Hands of Five Cards</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many ways can hands of 5 cards be distributed to each of four distinct players from a standard 52-card deck?</p>
+          </div>
+          <div class="solution-list" aria-label="Solution to DODB question 1">
+            <div class="solution-row">
+              <div class="part-label">Sol.</div>
+              <div>
+                <p>Choose 5 cards successively for each player; 32 cards remain undealt.</p>
+                <p class="working">C(52,5)C(47,5)C(42,5)C(37,5)</p>
+                <p class="working">= [52!/(5!47!)] [47!/(5!42!)] [42!/(5!37!)] [37!/(5!32!)]</p>
+              </div>
+              <div class="solution-answer">52!/[(5!)<sup>4</sup>32!]</div>
+            </div>
+          </div>
+          <p class="note"><strong>Interpretation:</strong> Players are labelled, but the order of cards within each player's hand is irrelevant.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>DODB Q2. Prescribed Sizes 1, 2, 3, 4, 5</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many ways can 15 distinguishable objects be distributed into five distinguishable boxes so that the boxes contain 1, 2, 3, 4, and 5 objects, respectively?</p>
+          </div>
+          <div class="solution-list" aria-label="Solution to DODB question 2">
+            <div class="solution-row">
+              <div class="part-label">Sol.</div>
+              <div>
+                <p>Choose the required objects for each labelled box in sequence.</p>
+                <p class="working">C(15,1)C(14,2)C(12,3)C(9,4)C(5,5)</p>
+                <p class="working">= 15!/(1!2!3!4!5!)</p>
+              </div>
+              <div class="solution-answer">37,837,800</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>DODB Q3. Two Objects in Each Box</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many ways can 12 distinguishable objects be distributed into six distinguishable boxes with exactly 2 objects in each box?</p>
+          </div>
+          <div class="solution-list" aria-label="Solution to DODB question 3">
+            <div class="solution-row">
+              <div class="part-label">Sol.</div>
+              <div>
+                <p class="working">C(12,2)C(10,2)C(8,2)C(6,2)C(4,2)C(2,2)</p>
+                <p class="working">= 12!/(2!2!2!2!2!2!) = 12!/(2!)<sup>6</sup></p>
+              </div>
+              <div class="solution-answer">7,484,400</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>DODB Q4. Complete Deal with a Fixed Card</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> In how many ways can all 52 cards be dealt to four distinct people, 13 cards each, if the oldest player must receive the Queen of Spades?</p>
+          </div>
+          <div class="solution-list" aria-label="Solution to DODB question 4">
+            <div class="solution-row">
+              <div class="part-label">1.</div>
+              <div>
+                <p>Give the Queen of Spades to the oldest player. That player needs 12 more cards from the remaining 51.</p>
+                <p class="working">C(51,12)</p>
+              </div>
+            </div>
+            <div class="solution-row">
+              <div class="part-label">2.</div>
+              <div>
+                <p>Deal 13 cards to each of the other three players.</p>
+                <p class="working">C(39,13)C(26,13)C(13,13)</p>
+              </div>
+            </div>
+            <div class="solution-row">
+              <div class="part-label">&there4;</div>
+              <div>
+                <p class="working">C(51,12)C(39,13)C(26,13)C(13,13)</p>
+              </div>
+              <div class="solution-answer">51!/[12!(13!)<sup>3</sup>]</div>
+            </div>
+          </div>
+          <p class="note"><strong>Equivalent form:</strong> The Queen of Spades belongs to each player in one-fourth of all equal deals, so the answer is also <span class="inline-math">52!/[4(13!)<sup>4</sup>]</span>.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>DODB Q5. Every Box Must Be Nonempty</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many ways can 5 labelled balls be distributed into 3 labelled boxes if every box must contain at least one ball?</p>
+          </div>
+          <div class="solution-list" aria-label="Solution to DODB question 5">
+            <div class="solution-row">
+              <div class="part-label">Case 1</div>
+              <div>
+                <p><strong>Occupancy pattern (3,1,1):</strong> Choose the box receiving 3 balls, then distribute the labelled balls.</p>
+                <p class="working">C(3,1) &times; 5!/(3!1!1!) = 3 &times; 20</p>
+              </div>
+              <div class="solution-answer">60</div>
+            </div>
+            <div class="solution-row">
+              <div class="part-label">Case 2</div>
+              <div>
+                <p><strong>Occupancy pattern (2,2,1):</strong> Choose the box receiving 1 ball, then distribute the labelled balls.</p>
+                <p class="working">C(3,1) &times; 5!/(2!2!1!) = 3 &times; 30</p>
+              </div>
+              <div class="solution-answer">90</div>
+            </div>
+            <div class="solution-row">
+              <div class="part-label">Total</div>
+              <div>
+                <p>Add the two disjoint occupancy cases.</p>
+                <p class="working">60 + 90</p>
+              </div>
+              <div class="solution-answer">150 ways</div>
+            </div>
+          </div>
+          <p class="note"><strong>Check by inclusion&ndash;exclusion:</strong> <span class="inline-math">3<sup>5</sup> &minus; C(3,1)2<sup>5</sup> + C(3,2)1<sup>5</sup> = 150</span>.</p>
+        </div>
+
+        <div class="condition">
+          <strong>DODB Summary</strong>
+          Use <span class="inline-math">k<sup>n</sup></span> for unrestricted placement, the multinomial coefficient for prescribed box sizes, and inclusion&ndash;exclusion or occupancy cases when every labelled box must be nonempty.
+        </div>
+
+        <div class="subtopic" id="iodb">
+          <h3>2. IODB &mdash; Identical Objects, Different Boxes</h3>
+          <div class="panel">
+            <p>A distribution is determined by nonnegative integer solutions of <span class="inline-math">x<sub>1</sub> + x<sub>2</sub> + &middot;&middot;&middot; + x<sub>k</sub> = n</span>.</p>
+            <div class="memory-rule">
+              <div class="memory-item">Empty allowed: C(n+k&minus;1, k&minus;1)</div>
+              <div class="memory-item">All nonempty: C(n&minus;1, k&minus;1)</div>
+            </div>
+            <p class="note"><strong>Method:</strong> Represent the <em>n</em> objects by stars and separate the <em>k</em> labelled boxes using <em>k&minus;1</em> bars.</p>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Stars and Bars &mdash; Complete Logic</h3>
+          <p>First consider a string containing <em>n</em> identical stars and <em>m</em> identical bars. It has <span class="inline-math">n+m</span> positions. Choosing the <em>m</em> bar positions (or the <em>n</em> star positions) gives</p>
+          <div class="formula"><span>(n+m)!/(n!m!) = C(n+m,m) = C(n+m,n).</span></div>
+
+          <p class="definition" style="margin-top: 14px;"><strong>Stars and bars is the standard counting technique for IODB:</strong> indistinguishable objects placed into distinguishable boxes.</p>
+          <div class="derivation">
+            <p>Suppose <em>n</em> identical objects are placed in <em>r</em> distinct boxes. If <span class="inline-math">x<sub>i</sub></span> is the number in box <em>i</em>, then</p>
+            <p class="inline-math">x<sub>1</sub> + x<sub>2</sub> + &middot;&middot;&middot; + x<sub>r</sub> = n.</p>
+            <p>The <em>n</em> stars represent the objects. The <span class="inline-math">r&minus;1</span> bars are boundaries separating the stars into the <em>r</em> labelled boxes.</p>
+            <p class="inline-math">**|*|** &nbsp;&hArr;&nbsp; (B<sub>1</sub>,B<sub>2</sub>,B<sub>3</sub>) = (2,1,2)</p>
+            <p class="inline-math">|***|** &nbsp;&hArr;&nbsp; (B<sub>1</sub>,B<sub>2</sub>,B<sub>3</sub>) = (0,3,2)</p>
+            <p>Thus every stars-and-bars string corresponds to exactly one distribution, including distributions with empty boxes.</p>
+          </div>
+
+          <div class="memory-rule">
+            <div class="memory-item">Empty allowed: C(n+r&minus;1, r&minus;1) = C(n+r&minus;1,n)</div>
+            <div class="memory-item">Every box nonempty: C(n&minus;1, r&minus;1)</div>
+          </div>
+          <p class="note"><strong>Why the nonempty formula works:</strong> First place one object in each box. This uses <em>r</em> objects, leaving <span class="inline-math">n&minus;r</span> objects to distribute freely. Hence <span class="inline-math">C((n&minus;r)+r&minus;1,r&minus;1)=C(n&minus;1,r&minus;1)</span>. This requires <span class="inline-math">n &ge; r</span>.</p>
+          <p class="note"><strong>Connection:</strong> Stars = indistinguishable objects; bars = boundaries between distinguishable boxes. Therefore, <strong>IODB &hArr; stars and bars</strong>.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q1. Ten Balls into Eight Bins</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many ways are there to place 10 indistinguishable balls into eight distinguishable bins?</p>
+          </div>
+          <div class="solution-list">
+            <div class="solution-row">
+              <div class="part-label">Sol.</div>
+              <div>
+                <p>Use 10 stars and <span class="inline-math">8&minus;1=7</span> bars. Empty bins are allowed.</p>
+                <p class="working">C(10+8&minus;1,8&minus;1) = C(17,7) = C(17,10)</p>
+              </div>
+              <div class="solution-answer">C(17,7) ways</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q2. Comparing Two Distributions</h3>
+          <div class="question-box">
+            <p><strong>True or False?</strong> The number of ways to distribute 8 identical balls to 12 distinct urns is the same as the number of ways to distribute 11 identical biscuits to 9 dogs.</p>
+          </div>
+          <div class="derivation">
+            <p>Eight balls into 12 urns: <span class="inline-math">C(8+12&minus;1,12&minus;1)=C(19,11)</span>.</p>
+            <p>Eleven biscuits among 9 dogs: <span class="inline-math">C(11+9&minus;1,9&minus;1)=C(19,8)=C(19,11)</span>.</p>
+          </div>
+          <div class="solution-answer">True</div>
+          <p class="note">The counts are equal by the symmetry identity <span class="inline-math">C(n,k)=C(n,n&minus;k)</span>.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q3. At Least Five per Box</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many ways are there to distribute 30 identical objects into 3 distinct boxes if each box must have at least 5 items?</p>
+          </div>
+          <div class="derivation">
+            <p>Let the box occupancies be <span class="inline-math">a+b+c=30</span>, where <span class="inline-math">a,b,c &ge; 5</span>.</p>
+            <p>Set <span class="inline-math">a'=a&minus;5</span>, <span class="inline-math">b'=b&minus;5</span>, and <span class="inline-math">c'=c&minus;5</span>. Then <span class="inline-math">a',b',c' &ge; 0</span>.</p>
+            <p class="working">(a'+5)+(b'+5)+(c'+5)=30 &rArr; a'+b'+c'=15</p>
+            <p>Now arrange 15 stars and 2 bars: <span class="inline-math">C(15+2,2)=C(17,2)</span>.</p>
+          </div>
+          <div class="solution-answer">C(17,2) = 136</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q4. Chocolates and Gum</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many ways are there to distribute 20 identical chocolate bars and 15 identical sticks of gum to 5 children?</p>
+          </div>
+          <div class="solution-list">
+            <div class="solution-row">
+              <div class="part-label">1.</div>
+              <div>
+                <p>Distribute 20 identical chocolates among 5 distinct children.</p>
+                <p class="working">C(20+5&minus;1,5&minus;1)=C(24,4)</p>
+              </div>
+            </div>
+            <div class="solution-row">
+              <div class="part-label">2.</div>
+              <div>
+                <p>Independently distribute 15 identical sticks of gum among the same children.</p>
+                <p class="working">C(15+5&minus;1,5&minus;1)=C(19,4)</p>
+              </div>
+            </div>
+            <div class="solution-row">
+              <div class="part-label">Total</div>
+              <div><p>Both independent tasks must occur, so apply the product rule.</p></div>
+              <div class="solution-answer">C(24,4) &times; C(19,4)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q5. Dividing Three Types of Flowers</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> Two girls have picked 10 roses, 15 sunflowers, and 15 daffodils. In how many ways can they divide the flowers among themselves?</p>
+            <p>A. 1638 &nbsp;&nbsp; B. 2100 &nbsp;&nbsp; C. 2640 &nbsp;&nbsp; D. None of the above</p>
+          </div>
+          <div class="derivation">
+            <p>Each flower type is distributed independently between two distinct girls.</p>
+            <p>Roses: <span class="inline-math">C(10+2&minus;1,1)=11</span> ways.</p>
+            <p>Sunflowers: <span class="inline-math">C(15+2&minus;1,1)=16</span> ways.</p>
+            <p>Daffodils: <span class="inline-math">C(15+2&minus;1,1)=16</span> ways.</p>
+            <p class="working">11 &times; 16 &times; 16 = 2816</p>
+          </div>
+          <div class="solution-answer">2816 &mdash; Option D</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Five Problem Types Using the IODB Template</h3>
+          <div class="panel">
+            <ol>
+              <li><strong>Combination with repetition</strong></li>
+              <li><strong>Integer solutions of an equation</strong></li>
+              <li><strong>Multiset problems</strong></li>
+              <li><strong>Non-decreasing integer sequence problems</strong></li>
+              <li><strong>Integer composition problems</strong></li>
+            </ol>
+            <p class="note">All five can be translated into counting nonnegative or positive integer solutions, so the same stars-and-bars template applies after handling any bounds.</p>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Combination with Repetition</h3>
+          <p>Selecting <em>r</em> items from <em>n</em> types when repetition is allowed is equivalent to distributing <em>r</em> identical selections among <em>n</em> distinct types:</p>
+          <div class="formula"><span>x<sub>1</sub>+x<sub>2</sub>+&middot;&middot;&middot;+x<sub>n</sub>=r, &nbsp; x<sub>i</sub>&ge;0 &nbsp;&rArr;&nbsp; C(n+r&minus;1,r).</span></div>
+          <div class="panel" style="margin-top: 12px;">
+            <p class="panel-label">Example &mdash; Choose 4 from 6 Types</p>
+            <p>From the six types <em>a,b,c,d,e,f</em>, choose 4 elements with repetition allowed. Use 4 stars and 5 bars:</p>
+            <p class="working">x<sub>1</sub>+x<sub>2</sub>+x<sub>3</sub>+x<sub>4</sub>+x<sub>5</sub>+x<sub>6</sub>=4, &nbsp; x<sub>i</sub>&ge;0</p>
+            <div class="solution-answer">C(9,4) = C(9,5)</div>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q6. Selecting Fruit</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many ways are there to select four pieces of fruit from apples, oranges, and pears when order and the individual pieces do not matter and at least four pieces of every type are available?</p>
+          </div>
+          <div class="derivation">
+            <p>Let <em>x</em>, <em>y</em>, and <em>z</em> be the numbers of apples, oranges, and pears selected.</p>
+            <p class="inline-math">x+y+z=4, &nbsp; x,y,z&ge;0.</p>
+            <p class="working">C(4+3&minus;1,3&minus;1)=C(6,2)=15</p>
+          </div>
+          <div class="solution-answer">15 ways</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q7. Cookie Box with Minimum Requirements</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> A bakery sells exactly 5 kinds of cookies, including chocolate-chip and shortbread, and has at least 10 of each kind. How many boxes of 10 cookies contain at least 1 chocolate-chip cookie and at least 2 shortbread cookies?</p>
+          </div>
+          <div class="derivation">
+            <p>Reserve 1 chocolate-chip cookie and 2 shortbread cookies first. This satisfies the requirements and leaves <span class="inline-math">10&minus;3=7</span> cookies.</p>
+            <p>Distribute these 7 remaining identical selections freely among all 5 cookie types.</p>
+            <p class="working">C(7+5&minus;1,5&minus;1)=C(11,4)=C(11,7)</p>
+          </div>
+          <div class="solution-answer">C(11,4) = 330</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q8. Integer Solutions with Lower Bounds</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many integer solutions does <span class="inline-math">x+y+z=10</span> have if <span class="inline-math">x&ge;1</span>, <span class="inline-math">y&ge;&minus;2</span>, and <span class="inline-math">z&ge;0</span>?</p>
+          </div>
+          <div class="derivation">
+            <p>Set <span class="inline-math">x'=x&minus;1</span>, <span class="inline-math">y'=y+2</span>, and <span class="inline-math">z'=z</span>. Then all three new variables are nonnegative.</p>
+            <p class="working">(x'+1)+(y'&minus;2)+z'=10 &rArr; x'+y'+z'=11</p>
+            <p class="working">C(11+3&minus;1,3&minus;1)=C(13,2)=78</p>
+          </div>
+          <div class="solution-answer">78 solutions</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q9. Integer Solutions of an Inequality</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many solutions are there to <span class="inline-math">x<sub>1</sub>+x<sub>2</sub>+x<sub>3</sub>&le;11</span>, where <span class="inline-math">x<sub>1</sub>,x<sub>2</sub>,x<sub>3</sub></span> are nonnegative integers?</p>
+          </div>
+          <div class="derivation">
+            <p>Introduce the nonnegative slack variable <span class="inline-math">x<sub>4</sub>=11&minus;(x<sub>1</sub>+x<sub>2</sub>+x<sub>3</sub>)</span>.</p>
+            <p>The inequality becomes <span class="inline-math">x<sub>1</sub>+x<sub>2</sub>+x<sub>3</sub>+x<sub>4</sub>=11</span>.</p>
+            <p class="working">C(11+4&minus;1,4&minus;1)=C(14,3)=364</p>
+          </div>
+          <div class="solution-answer">364 solutions</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q10. Positive Solutions with an Upper Bound</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many solutions are there to <span class="inline-math">x<sub>1</sub>+x<sub>2</sub>+x<sub>3</sub>+x<sub>4</sub>+x<sub>5</sub>=20</span> if all variables are positive integers and <span class="inline-math">x<sub>3</sub>&le;3</span>?</p>
+          </div>
+          <div class="derivation">
+            <p>First give one unit to every variable. Let <span class="inline-math">y<sub>i</sub>=x<sub>i</sub>&minus;1</span>. Then <span class="inline-math">y<sub>1</sub>+&middot;&middot;&middot;+y<sub>5</sub>=15</span>, with all <span class="inline-math">y<sub>i</sub>&ge;0</span> and <span class="inline-math">y<sub>3</sub>&le;2</span>.</p>
+            <p>Without the upper bound there are <span class="inline-math">C(15+5&minus;1,4)=C(19,4)</span> solutions.</p>
+            <p>Invalid solutions have <span class="inline-math">y<sub>3</sub>&ge;3</span>. Give 3 additional units to <span class="inline-math">y<sub>3</sub></span>, leaving 12 units to distribute, which gives <span class="inline-math">C(12+5&minus;1,4)=C(16,4)</span> invalid solutions.</p>
+            <p class="working">C(19,4)&minus;C(16,4)=3876&minus;1820=2056</p>
+          </div>
+          <div class="solution-answer">2056 solutions</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q11. Multisets from a, b, and c</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> Using the elements <em>a</em>, <em>b</em>, and <em>c</em>, how many multisets of size 5 can be created?</p>
+          </div>
+          <p class="definition"><strong>Definition:</strong> A multiset is a collection in which an object may occur more than once, while the order of its elements does not matter. For example, {1, 1, 2, 5, 5, 7} is a multiset of size 6.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Element</th>
+                  <th>Number selected</th>
+                  <th>Condition</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><em>a</em></td>
+                  <td><em>x</em></td>
+                  <td><span class="inline-math">x &ge; 0</span></td>
+                </tr>
+                <tr>
+                  <td><em>b</em></td>
+                  <td><em>y</em></td>
+                  <td><span class="inline-math">y &ge; 0</span></td>
+                </tr>
+                <tr>
+                  <td><em>c</em></td>
+                  <td><em>z</em></td>
+                  <td><span class="inline-math">z &ge; 0</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="derivation">
+            <p>Only the number of copies of each element matters, so model the selection by</p>
+            <p class="inline-math">x+y+z=5, &nbsp; x,y,z&ge;0.</p>
+            <p>This is an IODB problem with 5 identical selections and 3 distinguishable element types, or equivalently 5 stars and 2 bars.</p>
+            <p class="working">C(5+3&minus;1,3&minus;1)=C(7,2)=C(7,5)=21</p>
+          </div>
+          <div class="solution-answer">21 multisets</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q12. Sets versus Multisets of Digits</h3>
+          <p class="definition">A set cannot repeat an element; a multiset can. In both cases, order does not matter.</p>
+          <div class="solution-list">
+            <div class="solution-row">
+              <div class="part-label">a.</div>
+              <div>
+                <p><strong>Question:</strong> How many sets of size 5 can be made using the 10 digits 0 through 9?</p>
+                <p>Each digit may be chosen at most once, so this is a combination without repetition.</p>
+                <p class="working">C(10,5)=252</p>
+              </div>
+              <div class="solution-answer">252 sets</div>
+            </div>
+            <div class="solution-row">
+              <div class="part-label">b.</div>
+              <div>
+                <p><strong>Question:</strong> How many multisets of size 5 can be made using the 10 digits 0 through 9?</p>
+                <p>Digits may repeat, so this is a combination with repetition: distribute 5 identical selections among 10 digit types.</p>
+                <p class="working">C(5+10&minus;1,5)=C(14,5)=2002</p>
+              </div>
+              <div class="solution-answer">2002 multisets</div>
+            </div>
+          </div>
+          <p class="note"><strong>Quick distinction:</strong> Without repetition use <span class="inline-math">C(n,r)</span>; with repetition use <span class="inline-math">C(n+r&minus;1,r)</span>.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q13. Non-Decreasing Sequences</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many non-decreasing sequences of length 4 can be formed from {1, 2, 3}?</p>
+          </div>
+          <div class="derivation">
+            <p>A non-decreasing sequence satisfies <span class="inline-math">a<sub>1</sub>&le;a<sub>2</sub>&le;a<sub>3</sub>&le;a<sub>4</sub></span>. Repetition is allowed, but entries cannot decrease from left to right.</p>
+            <p>Valid examples include <span class="inline-math">(1,1,2,3)</span>, <span class="inline-math">(1,1,1,2)</span>, <span class="inline-math">(1,1,1,1)</span>, <span class="inline-math">(2,2,2,2)</span>, <span class="inline-math">(1,2,2,3)</span>, <span class="inline-math">(2,3,3,3)</span>, and <span class="inline-math">(3,3,3,3)</span>.</p>
+            <p><span class="inline-math">(3,2,2,2)</span> is invalid because it decreases.</p>
+            <p>Although order normally matters for sequences, the non-decreasing condition fixes the order uniquely once the number of 1s, 2s, and 3s is known.</p>
+            <p>Let <em>x</em>, <em>y</em>, and <em>z</em> be the respective counts of 1s, 2s, and 3s. Then</p>
+            <p class="inline-math">x+y+z=4, &nbsp; x,y,z&ge;0.</p>
+            <p>This is the IODB template: 4 identical selections (stars) distributed among 3 distinct values (boxes), requiring 2 bars.</p>
+            <p class="working">C(4+3&minus;1,3&minus;1)=C(6,2)=C(6,4)=15</p>
+          </div>
+          <div class="solution-answer">15 sequences</div>
+          <p class="note"><strong>General rule:</strong> The number of non-decreasing sequences of length <em>r</em> formed from <em>n</em> distinct values is <span class="inline-math">C(n+r&minus;1,r)</span>.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q14. Three-Part Compositions of 5</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> What is the number of 3-part compositions of <span class="inline-math">n=5</span>?</p>
+          </div>
+          <div class="derivation">
+            <p>A 3-part composition of 5 is an <strong>ordered</strong> triple of positive integers satisfying</p>
+            <p class="inline-math">a+b+c=5, &nbsp; a,b,c&ge;1.</p>
+            <p>Remove the positivity requirement by setting <span class="inline-math">a'=a&minus;1</span>, <span class="inline-math">b'=b&minus;1</span>, and <span class="inline-math">c'=c&minus;1</span>. Then <span class="inline-math">a',b',c'&ge;0</span>.</p>
+            <p class="working">(a'+1)+(b'+1)+(c'+1)=5 &rArr; a'+b'+c'=2</p>
+            <p>Apply stars and bars to distribute 2 remaining units among 3 distinct positions:</p>
+            <p class="working">C(2+3&minus;1,3&minus;1)=C(4,2)=6</p>
+          </div>
+          <div class="solution-answer">6 compositions</div>
+          <p class="note"><strong>The six compositions:</strong> (1,1,3), (1,2,2), (1,3,1), (2,1,2), (2,2,1), and (3,1,1).</p>
+          <p class="note"><strong>General rule:</strong> The number of compositions of <em>n</em> into exactly <em>r</em> positive parts is <span class="inline-math">C(n&minus;1,r&minus;1)</span>, provided <span class="inline-math">n&ge;r</span>.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>IODB Q15. Total Number of Compositions of n</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many compositions does a positive integer <em>n</em> have?</p>
+          </div>
+          <div class="derivation">
+            <p>A composition of <em>n</em> may contain 1 part, 2 parts, &hellip;, or <em>n</em> parts.</p>
+            <p>The number of compositions of <em>n</em> into exactly <em>k</em> positive parts is <span class="inline-math">C(n&minus;1,k&minus;1)</span>.</p>
+            <p>These cases are mutually exclusive, so the Addition Rule gives</p>
+            <p class="working">&sum;<sub>k=1</sub><sup>n</sup> C(n&minus;1,k&minus;1)
+              = &sum;<sub>j=0</sub><sup>n&minus;1</sup> C(n&minus;1,j)
+              = 2<sup>n&minus;1</sup>.</p>
+            <p>The final equality follows from the binomial identity <span class="inline-math">&sum;<sub>j=0</sub><sup>m</sup> C(m,j)=2<sup>m</sup></span>.</p>
+          </div>
+          <div class="solution-answer">2<sup>n&minus;1</sup> compositions</div>
+          <p class="note"><strong>Result:</strong> Every positive integer <em>n</em> has exactly <span class="inline-math">2<sup>n&minus;1</sup></span> compositions.</p>
+        </div>
+
+        <div class="subtopic" id="doib">
+          <h3>3. DOIB &mdash; Different Objects, Identical Boxes</h3>
+          <div class="panel">
+            <p>Only the groups of objects matter; the boxes have no labels. For example, the distributions {<em>a</em>} | {<em>b,c,d</em>} and {<em>b,c,d</em>} | {<em>a</em>} are identical.</p>
+            <div class="formula"><span>Exactly k nonempty boxes: S(n,k)</span></div>
+            <p class="note"><strong>S(n,k)</strong> is a Stirling number of the second kind: the number of ways to partition <em>n</em> distinct objects into <em>k</em> nonempty, unlabeled groups. If empty boxes are allowed, count partitions into at most <em>k</em> groups.</p>
+          </div>
+
+          <div class="subtopic">
+            <h3>DOIB Counting Template</h3>
+            <div class="derivation">
+              <p>For any DOIB problem:</p>
+              <ol>
+                <li>Create separate cases for all possible occupancy distributions.</li>
+                <li>For each distribution, first count as in the DODB template and then divide for repeated group sizes.</li>
+              </ol>
+              <p>If the nonempty group sizes are <span class="inline-math">s<sub>1</sub>,s<sub>2</sub>,&hellip;,s<sub>r</sub></span>, and a size occurring repeatedly has multiplicity <em>m</em>, then groups of that size can be interchanged in <span class="inline-math">m!</span> ways without creating a new grouping.</p>
+              <p class="working">Number of groupings = n! / [&prod;<sub>i=1</sub><sup>r</sup>(s<sub>i</sub>!) &middot; &prod;<sub>t</sub>(m<sub>t</sub>!)]</p>
+            </div>
+            <p class="note"><strong>Applications:</strong> The DOIB template is used to find set partitions and equivalence relations on a set. These ideas are also studied in Set Theory.</p>
+          </div>
+
+          <div class="subtopic">
+            <h3>DOIB Q1. Eight Friends in Groups of 3, 3, and 2</h3>
+            <div class="question-box">
+              <p><strong>Question:</strong> In how many ways can 8 friends be divided into three unlabeled groups of sizes 3, 3, and 2?</p>
+            </div>
+            <div class="derivation">
+              <p>For labeled groups, the multinomial count is <span class="inline-math">8!/(3!3!2!)</span>. The two groups of size 3 are interchangeable, so divide by <span class="inline-math">2!</span>.</p>
+              <p class="working">8!/(3!3!2!2!) = 280</p>
+            </div>
+            <div class="solution-answer">280 ways</div>
+          </div>
+
+          <div class="subtopic">
+            <h3>DOIB Q2. Six Friends in Two Groups of 3</h3>
+            <div class="question-box">
+              <p><strong>Question:</strong> In how many ways can 6 friends be divided into two unlabeled groups of sizes 3 and 3?</p>
+            </div>
+            <div class="derivation">
+              <p>The two groups have the same size and are indistinguishable, so their interchange does not produce a new grouping.</p>
+              <p class="working">6!/(3!3!2!) = 10</p>
+            </div>
+            <div class="solution-answer">10 ways</div>
+          </div>
+
+          <div class="subtopic">
+            <h3>DOIB Q3. Four Employees in Three Indistinguishable Offices</h3>
+            <div class="question-box">
+              <p><strong>Question:</strong> How many ways are there to put 4 different employees into 3 indistinguishable offices if each office may contain any number of employees?</p>
+            </div>
+            <div class="derivation">
+              <p>Empty offices are allowed, so partition 4 into at most 3 positive parts.</p>
+              <p><strong>Case 1 &mdash; one office used, (4,0,0):</strong> <span class="inline-math">1</span> way.</p>
+              <p><strong>Case 2 &mdash; two offices used:</strong></p>
+              <p class="working">(3,1,0): 4!/(3!1!)=4</p>
+              <p class="working">(2,2,0): 4!/(2!2!2!)=3</p>
+              <p>Thus, the two-office case contributes <span class="inline-math">4+3=7</span> ways.</p>
+              <p><strong>Case 3 &mdash; three offices used, (2,1,1):</strong> the two singleton offices have equal size, so divide by <span class="inline-math">2!</span>.</p>
+              <p class="working">4!/(2!1!1!2!)=6</p>
+              <p class="working">Total = 1+7+6=14</p>
+            </div>
+            <div class="solution-answer">14 ways</div>
+          </div>
+
+          <div class="subtopic">
+            <h3>DOIB Q4. Six Objects in Four Nonempty Indistinguishable Boxes</h3>
+            <div class="question-box">
+              <p><strong>Question:</strong> How many ways are there to distribute 6 distinguishable objects into 4 indistinguishable boxes so that every box is nonempty?</p>
+            </div>
+            <div class="derivation">
+              <p>The only partitions of 6 into exactly 4 positive parts are <span class="inline-math">3+1+1+1</span> and <span class="inline-math">2+2+1+1</span>.</p>
+              <p><strong>Case 1 &mdash; (3,1,1,1):</strong> divide by <span class="inline-math">3!</span> because three groups have size 1.</p>
+              <p class="working">6!/(3!1!1!1!3!)=20</p>
+              <p><strong>Case 2 &mdash; (2,2,1,1):</strong> divide by one <span class="inline-math">2!</span> for the two size-2 groups and another <span class="inline-math">2!</span> for the two singleton groups.</p>
+              <p class="working">6!/(2!2!1!1!2!2!)=45</p>
+              <p class="working">Total = 20+45=65</p>
+            </div>
+            <div class="solution-answer">65 ways</div>
+            <p class="note"><strong>Check:</strong> This is also <span class="inline-math">S(6,4)=65</span>.</p>
+          </div>
+
+          <div class="subtopic">
+            <h3>DOIB Q5. Equivalence Relations on a Four-Element Set</h3>
+            <div class="question-box">
+              <p><strong>Question:</strong> How many equivalence relations are possible on the set {1, 2, 3, 4}?</p>
+            </div>
+            <div class="derivation">
+              <p>Every equivalence relation corresponds uniquely to a partition of the set into equivalence classes. With 4 elements, the possible numbers of nonempty classes are 1, 2, 3, and 4.</p>
+              <p class="working">B<sub>4</sub> = S(4,1)+S(4,2)+S(4,3)+S(4,4)</p>
+              <p class="working">= 1+7+6+1 = 15</p>
+            </div>
+            <div class="solution-answer">15 equivalence relations</div>
+            <p class="note"><strong>General rule:</strong> The number of equivalence relations on an <em>n</em>-element set is the Bell number <span class="inline-math">B<sub>n</sub></span>.</p>
+          </div>
+        </div>
+
+        <div class="subtopic" id="ioib">
+          <h3>4. IOIB &mdash; Identical Objects, Identical Boxes</h3>
+          <div class="panel">
+            <p>Both objects and boxes are indistinguishable, so only the multiset of box sizes matters.</p>
+            <div class="formula"><span>Use integer partitions of n</span></div>
+            <p class="note"><strong>Interpretation:</strong> Exactly <em>k</em> nonempty boxes correspond to partitions of <em>n</em> into exactly <em>k</em> positive parts. If empty boxes are allowed, use partitions into at most <em>k</em> parts.</p>
+          </div>
+
+          <div class="subtopic">
+            <h3>IOIB Q1. Six Identical Books in Four Identical Boxes</h3>
+            <div class="question-box">
+              <p><strong>Question:</strong> How many ways are there to pack 6 copies of the same book into 4 identical boxes, where a box can contain as many as 6 books?</p>
+            </div>
+            <div class="derivation">
+              <p>Empty boxes are allowed, so count the partitions of 6 into at most 4 positive parts.</p>
+              <p><strong>1 box used:</strong> 6 &mdash; 1 way.</p>
+              <p><strong>2 boxes used:</strong> 5+1, 4+2, 3+3 &mdash; 3 ways.</p>
+              <p><strong>3 boxes used:</strong> 4+1+1, 3+2+1, 2+2+2 &mdash; 3 ways.</p>
+              <p><strong>4 boxes used:</strong> 3+1+1+1, 2+2+1+1 &mdash; 2 ways.</p>
+              <p class="working">Total = 1+3+3+2=9</p>
+            </div>
+            <div class="solution-answer">9 ways</div>
+          </div>
+
+          <div class="subtopic">
+            <h3>IOIB Q2. Seven Identical Balls in Seven Identical Bins</h3>
+            <div class="question-box">
+              <p><strong>Question:</strong> How many ways are there to put 7 identical balls into 7 identical bins?</p>
+            </div>
+            <div class="derivation">
+              <p>Because up to 7 bins may be used, every integer partition of 7 is permitted.</p>
+              <p><strong>1 part:</strong> 7.</p>
+              <p><strong>2 parts:</strong> 6+1, 5+2, 4+3.</p>
+              <p><strong>3 parts:</strong> 5+1+1, 4+2+1, 3+3+1, 3+2+2.</p>
+              <p><strong>4 parts:</strong> 4+1+1+1, 3+2+1+1, 2+2+2+1.</p>
+              <p><strong>5 parts:</strong> 3+1+1+1+1, 2+2+1+1+1.</p>
+              <p><strong>6 parts:</strong> 2+1+1+1+1+1.</p>
+              <p><strong>7 parts:</strong> 1+1+1+1+1+1+1.</p>
+              <p class="working">p(7)=1+3+4+3+2+1+1=15</p>
+            </div>
+            <div class="solution-answer">15 ways</div>
+          </div>
+
+          <div class="subtopic">
+            <h3>IOIB Q3. Integer Partitions of 6</h3>
+            <div class="question-box">
+              <p><strong>Question:</strong> List all ways to write 6 as a sum of positive integers, where order does not matter.</p>
+            </div>
+            <div class="derivation">
+              <p><strong>1 part:</strong> 6.</p>
+              <p><strong>2 parts:</strong> 5+1, 4+2, 3+3.</p>
+              <p><strong>3 parts:</strong> 4+1+1, 3+2+1, 2+2+2.</p>
+              <p><strong>4 parts:</strong> 3+1+1+1, 2+2+1+1.</p>
+              <p><strong>5 parts:</strong> 2+1+1+1+1.</p>
+              <p><strong>6 parts:</strong> 1+1+1+1+1+1.</p>
+              <p class="working">p(6)=1+3+3+2+1+1=11</p>
+            </div>
+            <div class="solution-answer">11 partitions</div>
+          </div>
+        </div>
+
+        <p class="note"><strong>Before counting:</strong> Identify whether objects and boxes are distinguishable, whether empty boxes are allowed, and whether every object must be assigned.</p>
+      </section>
+
+      <section class="rule" id="inclusion-exclusion">
+        <div class="section-heading">
+          <span class="section-number">18</span>
+          <h2>Inclusion&ndash;Exclusion Principle (IEP)</h2>
+        </div>
+
+        <p class="definition">The Inclusion&ndash;Exclusion Principle is a counting tool used to find the number of elements in the union of a finite collection of sets. It adds individual set sizes and then corrects the overcounting by alternately subtracting and adding intersections.</p>
+
+        <div class="subtopic">
+          <h3>Union of Two and Three Sets</h3>
+          <div class="derivation">
+            <p>For two finite sets, elements in the intersection are counted twice by <span class="inline-math">|A|+|B|</span>, so subtract the intersection once:</p>
+            <p class="equation">|A &cup; B| = |A|+|B|&minus;|A &cap; B|</p>
+            <p>For three finite sets, first add the individual sizes, subtract every pairwise intersection, and then add the triple intersection back:</p>
+            <p class="equation">|A &cup; B &cup; C| = |A|+|B|+|C|<br>
+              &minus;|A &cap; B|&minus;|A &cap; C|&minus;|B &cap; C|<br>
+              +|A &cap; B &cap; C|</p>
+          </div>
+          <p class="note"><strong>Why is the triple intersection added?</strong> An element belonging to all three sets is added three times and removed three times by the pair corrections, leaving it counted zero times. Adding the triple intersection counts it exactly once.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>General Inclusion&ndash;Exclusion Formula</h3>
+          <div class="derivation">
+            <p>For finite sets <span class="inline-math">A<sub>1</sub>,A<sub>2</sub>,&hellip;,A<sub>n</sub></span>:</p>
+            <p class="equation">|&bigcup;<sub>i=1</sub><sup>n</sup>A<sub>i</sub>| =
+              &sum;|A<sub>i</sub>|
+              &minus;&sum;|A<sub>i</sub>&cap;A<sub>j</sub>|
+              +&sum;|A<sub>i</sub>&cap;A<sub>j</sub>&cap;A<sub>k</sub>|
+              &minus;&middot;&middot;&middot;
+              +(&minus;1)<sup>n+1</sup>|A<sub>1</sub>&cap;&middot;&middot;&middot;&cap;A<sub>n</sub>|</p>
+            <p class="equation">= &sum;<sub>k=1</sub><sup>n</sup> (&minus;1)<sup>k+1</sup>
+              &sum;<sub>1&le;i&#8321;&lt;&middot;&middot;&middot;&lt;i&#8342;&le;n</sub>
+              |A<sub>i&#8321;</sub>&cap;&middot;&middot;&middot;&cap;A<sub>i&#8342;</sub>|</p>
+            <p class="equation"><strong>Singles &minus; pairs + triples &minus; four-way intersections + &middot;&middot;&middot;</strong></p>
+            <p>A <em>k</em>-set intersection has sign <span class="inline-math">(&minus;1)<sup>k+1</sup></span>. Thus the signs are positive for odd <em>k</em> and negative for even <em>k</em>.</p>
+            <p>The number of <em>k</em>-set intersection terms is <span class="inline-math">C(n,k)</span>, because we choose which <em>k</em> sets participate. The numbers of terms at successive stages are therefore</p>
+            <p class="equation">C(n,1), C(n,2), C(n,3), &hellip;, C(n,n).</p>
+            <p>For 10 sets, the groups of terms have sizes <span class="inline-math">C(10,1), C(10,2), C(10,3),&hellip;,C(10,10)</span>, with alternating signs.</p>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Four-Set Expansion</h3>
+          <div class="derivation">
+            <p class="inline-math">|A &cup; B &cup; C &cup; D|</p>
+            <p class="inline-math">= (|A|+|B|+|C|+|D|)</p>
+            <p class="inline-math">&minus; (|A&cap;B|+|A&cap;C|+|A&cap;D|+|B&cap;C|+|B&cap;D|+|C&cap;D|)</p>
+            <p class="inline-math">+ (|A&cap;B&cap;C|+|A&cap;B&cap;D|+|A&cap;C&cap;D|+|B&cap;C&cap;D|)</p>
+            <p class="inline-math">&minus; |A&cap;B&cap;C&cap;D|.</p>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Symmetric IEP Problems</h3>
+          <div class="derivation">
+            <p>In exam problems, do not expand a large number of sets blindly. Look for symmetry.</p>
+            <p>If every set has size <em>a</em>, every pairwise intersection has size <em>b</em>, every triple intersection has size <em>c</em>, and so on, then</p>
+            <p class="equation">|A<sub>1</sub>&cup;&middot;&middot;&middot;&cup;A<sub>n</sub>| = C(n,1)a&minus;C(n,2)b+C(n,3)c&minus;&middot;&middot;&middot;</p>
+          </div>
+          <p class="note"><strong>Exam shortcut:</strong> Group equal-sized intersections and multiply their common size by the appropriate binomial coefficient.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>Counting Multiples in an Interval</h3>
+          <div class="derivation">
+            <p>The number of integers in the inclusive interval <span class="inline-math">[a,b]</span> divisible by a positive integer <em>n</em> is</p>
+            <p class="equation">&lfloor;b/n&rfloor;&minus;&lfloor;(a&minus;1)/n&rfloor;.</p>
+            <p>The number of integers from 1 through <em>b</em> divisible by <strong>both</strong> <em>m</em> and <em>n</em> is</p>
+            <p class="equation">&lfloor;b/Lcm(m,n)&rfloor;.</p>
+            <p>More generally, an intersection of divisibility sets is counted using the least common multiple of all the corresponding divisors.</p>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>IEP Q1. Multiples of 2 or 3</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many integers from 1 to 100 are multiples of 2 or 3?</p>
+          </div>
+          <div class="derivation">
+            <p>Let <span class="inline-math">D<sub>2</sub></span> and <span class="inline-math">D<sub>3</sub></span> be the sets of multiples of 2 and 3.</p>
+            <p class="working">|D<sub>2</sub>|=&lfloor;100/2&rfloor;=50, &nbsp; |D<sub>3</sub>|=&lfloor;100/3&rfloor;=33</p>
+            <p>The intersection contains multiples of <span class="inline-math">Lcm(2,3)=6</span>.</p>
+            <p class="working">|D<sub>2</sub>&cap;D<sub>3</sub>|=|D<sub>6</sub>|=&lfloor;100/6&rfloor;=16</p>
+            <p class="working">|D<sub>2</sub>&cup;D<sub>3</sub>|=50+33&minus;16=67</p>
+          </div>
+          <div class="solution-answer">67 integers</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>IEP Q2. Neither a Multiple of 2 nor 9</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many integers from 1 through 100 are neither multiples of 2 nor multiples of 9?</p>
+          </div>
+          <div class="derivation">
+            <p>By De Morgan's law, <span class="inline-math">D<sub>2</sub><sup>c</sup>&cap;D<sub>9</sub><sup>c</sup>=(D<sub>2</sub>&cup;D<sub>9</sub>)<sup>c</sup></span>. Therefore, subtract the union from the 100 available integers.</p>
+            <p class="working">|D<sub>2</sub>&cup;D<sub>9</sub>|=&lfloor;100/2&rfloor;+&lfloor;100/9&rfloor;&minus;&lfloor;100/Lcm(2,9)&rfloor;</p>
+            <p class="working">=50+11&minus;&lfloor;100/18&rfloor;=50+11&minus;5=56</p>
+            <p class="working">Neither = 100&minus;56=44</p>
+          </div>
+          <div class="solution-answer">44 integers</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>IEP Q3. Not Divisible by 2, 3, or 5</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> Find the cardinality of <span class="inline-math">X={n | 1&le;n&le;123, n</span> is not divisible by 2, 3, or 5<span class="inline-math">}</span>.</p>
+            <p><strong>Options:</strong> A. 28 &nbsp; B. 33 &nbsp; C. 37 &nbsp; D. 44</p>
+          </div>
+          <div class="derivation">
+            <p>First count the integers divisible by at least one of 2, 3, and 5.</p>
+            <p class="working">Singles: &lfloor;123/2&rfloor;=61, &nbsp; &lfloor;123/3&rfloor;=41, &nbsp; &lfloor;123/5&rfloor;=24</p>
+            <p class="working">Pairs: &lfloor;123/6&rfloor;=20, &nbsp; &lfloor;123/10&rfloor;=12, &nbsp; &lfloor;123/15&rfloor;=8</p>
+            <p class="working">Triple: &lfloor;123/30&rfloor;=4</p>
+            <p class="working">Divisible by 2, 3, or 5 = (61+41+24)&minus;(20+12+8)+4=90</p>
+            <p class="working">|X|=123&minus;90=33</p>
+          </div>
+          <div class="solution-answer">33 &mdash; Option B</div>
+        </div>
+      </section>
+
+      <section class="rule" id="derangements">
+        <div class="section-heading">
+          <span class="section-number">19</span>
+          <h2>Derangements</h2>
+        </div>
+
+        <p class="definition">A <strong>derangement</strong> is a permutation in which no element remains in its original position. Equivalently, a derangement is a permutation with no fixed points. The number of derangements of <em>n</em> distinct objects is denoted by <span class="inline-math">D<sub>n</sub></span> (also written <span class="inline-math">!n</span>).</p>
+
+        <div class="subtopic">
+          <h3>Example: Derangements of Three Letters</h3>
+          <div class="derivation">
+            <p>Start with the original arrangement <span class="inline-math">abc</span>, where <em>a</em>, <em>b</em>, and <em>c</em> occupy positions 1, 2, and 3. There are <span class="inline-math">3!=6</span> permutations.</p>
+          </div>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Permutation</th>
+                  <th>Letters in original positions</th>
+                  <th>Derangement?</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>abc</td><td>a, b, c</td><td>No</td></tr>
+                <tr><td>acb</td><td>a</td><td>No</td></tr>
+                <tr><td>bac</td><td>c</td><td>No</td></tr>
+                <tr><td>bca</td><td>None</td><td>Yes</td></tr>
+                <tr><td>cab</td><td>None</td><td>Yes</td></tr>
+                <tr><td>cba</td><td>b</td><td>No</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="equation">D<sub>3</sub>=2: &nbsp; bca, cab</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>Complete Derivation of D<sub>4</sub> Using Inclusion&ndash;Exclusion</h3>
+          <div class="derivation">
+            <p>Consider the original arrangement <span class="inline-math">ABCD</span>. A derangement must satisfy</p>
+            <p class="equation">A&ne;position 1, &nbsp; B&ne;position 2, &nbsp; C&ne;position 3, &nbsp; D&ne;position 4.</p>
+            <p>Begin with all <span class="inline-math">4!=24</span> permutations. Define <span class="inline-math">E<sub>A</sub></span> as the event that <em>A</em> is fixed in its original position, and define <span class="inline-math">E<sub>B</sub>,E<sub>C</sub>,E<sub>D</sub></span> similarly. We want permutations belonging to none of these events.</p>
+
+            <p><strong>Step 1 &mdash; subtract permutations with one specified element fixed.</strong></p>
+            <p>If <em>A</em> is fixed, the remaining three letters can be permuted in <span class="inline-math">3!=6</span> ways. The same is true for each of the four letters.</p>
+            <p class="working">C(4,1)3!=4&middot;6=24</p>
+
+            <p><strong>Step 2 &mdash; add permutations with two specified elements fixed.</strong></p>
+            <p>Choose the two fixed letters in <span class="inline-math">C(4,2)</span> ways and permute the other two in <span class="inline-math">2!</span> ways. These permutations were subtracted twice, so add them back.</p>
+            <p class="working">C(4,2)2!=6&middot;2=12</p>
+
+            <p><strong>Step 3 &mdash; subtract permutations with three specified elements fixed.</strong></p>
+            <p>Choose the three fixed letters in <span class="inline-math">C(4,3)</span> ways. Once three are fixed, the last letter is forced into its original position, giving <span class="inline-math">1!=1</span> arrangement for each choice.</p>
+            <p class="working">C(4,3)1!=4</p>
+
+            <p><strong>Step 4 &mdash; add the permutation with all four elements fixed.</strong></p>
+            <p class="working">C(4,4)0!=1</p>
+
+            <p>Applying the alternating inclusion&ndash;exclusion signs:</p>
+            <p class="equation">D<sub>4</sub>=4!&minus;C(4,1)3!+C(4,2)2!&minus;C(4,3)1!+C(4,4)0!</p>
+            <p class="equation">D<sub>4</sub>=24&minus;24+12&minus;4+1=9</p>
+          </div>
+          <div class="solution-answer">D<sub>4</sub> = 9</div>
+          <p class="note"><strong>The nine derangements:</strong> BADC, BCDA, BDAC, CADB, CDAB, CDBA, DABC, DCAB, and DCBA.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>General Derangement Formula</h3>
+          <div class="derivation">
+            <p>For <em>n</em> objects, choose which <em>k</em> objects are fixed and permute the remaining <span class="inline-math">n&minus;k</span> objects. Inclusion&ndash;exclusion gives</p>
+            <p class="equation">D<sub>n</sub>=n!&minus;C(n,1)(n&minus;1)!+C(n,2)(n&minus;2)!&minus;&middot;&middot;&middot;+(&minus;1)<sup>n</sup>C(n,n)0!</p>
+            <p>Since <span class="inline-math">C(n,k)(n&minus;k)!=n!/k!</span>, this simplifies to</p>
+            <p class="equation">D<sub>n</sub>=n! [1&minus;1/1!+1/2!&minus;1/3!+&middot;&middot;&middot;+(&minus;1)<sup>n</sup>/n!]</p>
+          </div>
+          <p class="note"><strong>Main idea:</strong> Derangements are a direct application of inclusion&ndash;exclusion to the events &ldquo;element <em>i</em> stays in its original position.&rdquo;</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>Example: Calculating D<sub>5</sub></h3>
+          <div class="derivation">
+            <p>There are <span class="inline-math">5!=120</span> total permutations.</p>
+            <p class="working">Fix 1: C(5,1)4!=5&middot;24=120</p>
+            <p class="working">Fix 2: C(5,2)3!=10&middot;6=60</p>
+            <p class="working">Fix 3: C(5,3)2!=10&middot;2=20</p>
+            <p class="working">Fix 4: C(5,4)1!=5</p>
+            <p class="working">Fix 5: C(5,5)0!=1</p>
+            <p>The number having at least one fixed point is</p>
+            <p class="working">120&minus;60+20&minus;5+1=76.</p>
+            <p>Subtract this from all permutations:</p>
+            <p class="equation">D<sub>5</sub>=120&minus;76=44</p>
+            <p>Equivalently, apply the derangement formula directly:</p>
+            <p class="working">D<sub>5</sub>=120&minus;120+60&minus;20+5&minus;1=44.</p>
+          </div>
+          <div class="solution-answer">D<sub>5</sub> = 44</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Initial Derangement Values</h3>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>n</th>
+                  <th>0</th>
+                  <th>1</th>
+                  <th>2</th>
+                  <th>3</th>
+                  <th>4</th>
+                  <th>5</th>
+                  <th>6</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th>D<sub>n</sub></th>
+                  <td>1</td>
+                  <td>0</td>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>9</td>
+                  <td>44</td>
+                  <td>265</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note"><strong>Convention:</strong> <span class="inline-math">D<sub>0</sub>=1</span>. In particular, <span class="inline-math">D<sub>1</sub>=0</span>, <span class="inline-math">D<sub>2</sub>=1</span>, and <span class="inline-math">D<sub>3</sub>=2</span>.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>Derangement Q1. Balls and Cells</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many ways can 5 distinct balls <span class="inline-math">B<sub>1</sub>,B<sub>2</sub>,&hellip;,B<sub>5</sub></span> be distributed into 5 distinct cells <span class="inline-math">C<sub>1</sub>,C<sub>2</sub>,&hellip;,C<sub>5</sub></span> so that <span class="inline-math">B<sub>i</sub></span> is not placed in <span class="inline-math">C<sub>i</sub></span> and every cell contains exactly one ball?</p>
+            <p><strong>Options:</strong> A. 44 &nbsp; B. 96 &nbsp; C. 120 &nbsp; D. 3125</p>
+          </div>
+          <div class="derivation">
+            <p>Every valid distribution is a permutation of the 5 balls with no ball in its corresponding cell. Hence the required count is <span class="inline-math">D<sub>5</sub></span>.</p>
+            <p class="working">D<sub>5</sub>=44</p>
+          </div>
+          <div class="solution-answer">44 &mdash; Option A</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Derangement Q2. Professor Nameplates</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> Five professors have their nameplates switched. In how many ways can the nameplates be placed so that every nameplate ends up on the wrong door?</p>
+          </div>
+          <div class="derivation">
+            <p>The five nameplates are permuted, and none may remain on its matching door. This is a derangement of 5 objects.</p>
+            <p class="working">D<sub>5</sub>=44</p>
+          </div>
+          <div class="solution-answer">44 ways</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Derangement Q3. Hat-Check Problem</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> Five gentlemen leave their hats at a party. In how many ways can they each take one hat so that nobody leaves with his own hat?</p>
+          </div>
+          <div class="derivation">
+            <p>Assigning the five hats to the five gentlemen with no correct owner is again a derangement of 5 objects.</p>
+            <p class="working">D<sub>5</sub>=44</p>
+          </div>
+          <div class="solution-answer">44 ways</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Derangement Q4. Letter Derangements of LILAC</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many distinct rearrangements of <span class="inline-math">LILAC</span> place no letter in a position originally occupied by that same letter?</p>
+          </div>
+          <div class="derivation">
+            <p>The original positions are <span class="inline-math">L<sub>1</sub>, I<sub>2</sub>, L<sub>3</sub>, A<sub>4</sub>, C<sub>5</sub></span>. Since the two Ls are identical, neither may occupy position 1 or position 3. Therefore, the Ls must occupy two positions chosen from <span class="inline-math">{2,4,5}</span>.</p>
+            <p class="working">Possible L-position pairs: (2,4), (2,5), (4,5)</p>
+
+            <p><strong>Case 1 &mdash; Ls in positions (2,4):</strong></p>
+            <p class="equation">_ &nbsp; L &nbsp; _ &nbsp; L &nbsp; _</p>
+            <p>The remaining letters <span class="inline-math">I,A,C</span> fill positions <span class="inline-math">1,3,5</span>. The original positions of <em>I</em> and <em>A</em> are already occupied by Ls, so only <span class="inline-math">C&ne;5</span> remains. Of the <span class="inline-math">3!</span> arrangements, <span class="inline-math">2!</span> have C fixed.</p>
+            <p class="working">3!&minus;2!=6&minus;2=4</p>
+
+            <p><strong>Case 2 &mdash; Ls in positions (2,5):</strong></p>
+            <p class="equation">_ &nbsp; L &nbsp; _ &nbsp; _ &nbsp; L</p>
+            <p>The remaining letters fill positions <span class="inline-math">1,3,4</span>. The original positions of <em>I</em> and <em>C</em> are occupied by Ls, so only <span class="inline-math">A&ne;4</span> remains.</p>
+            <p class="working">3!&minus;2!=4</p>
+
+            <p><strong>Case 3 &mdash; Ls in positions (4,5):</strong></p>
+            <p class="equation">_ &nbsp; _ &nbsp; _ &nbsp; L &nbsp; L</p>
+            <p>The remaining letters fill positions <span class="inline-math">1,2,3</span>. The original positions of <em>A</em> and <em>C</em> are occupied by Ls, so only <span class="inline-math">I&ne;2</span> remains.</p>
+            <p class="working">3!&minus;2!=4</p>
+
+            <p class="equation">Total = 4+4+4=12</p>
+          </div>
+          <div class="solution-answer">12 arrangements</div>
+          <p class="note"><strong>Symmetry:</strong> The three L-position cases <span class="inline-math">(2,4), (2,5), (4,5)</span> each contribute 4 arrangements.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>Derangement Q5. Letter Derangements of PURPLE</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many distinct rearrangements of <span class="inline-math">PURPLE</span> place no letter in a position originally occupied by that same letter?</p>
+          </div>
+          <div class="derivation">
+            <p>The original word is <span class="inline-math">P<sub>1</sub>U<sub>2</sub>R<sub>3</sub>P<sub>4</sub>L<sub>5</sub>E<sub>6</sub></span>. Neither of the two identical Ps may occupy position 1 or position 4, so choose their two positions from <span class="inline-math">{2,3,5,6}</span>.</p>
+            <p class="working">Number of P-position choices = C(4,2)=6</p>
+            <p>For any one choice, two of the original positions belonging to <span class="inline-math">U,R,L,E</span> are already occupied by Ps. Thus only two fixed-position restrictions remain for the four distinct letters.</p>
+            <p>For example, if the Ps occupy positions 2 and 3, only <span class="inline-math">L&ne;5</span> and <span class="inline-math">E&ne;6</span> remain. Inclusion&ndash;exclusion gives</p>
+            <p class="working">4!&minus;|L<sub>5</sub>|&minus;|E<sub>6</sub>|+|L<sub>5</sub>&cap;E<sub>6</sub>|</p>
+            <p class="working">=24&minus;3!&minus;3!+2!=24&minus;6&minus;6+2=14</p>
+            <p>All six choices of P positions are symmetric, and the Ps are identical, so no additional <span class="inline-math">2!</span> factor is used.</p>
+            <p class="equation">C(4,2)&middot;14=6&middot;14=84</p>
+          </div>
+          <div class="solution-answer">84 arrangements</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Related IEP Application Q6. Onto Functions from Six Elements to Three</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many onto functions are there from <span class="inline-math">X={1,2,3,4,5,6}</span> to <span class="inline-math">Y={a,b,c}</span>?</p>
+          </div>
+          <div class="derivation">
+            <p>An onto (surjective) function must use every element of the codomain. Without this restriction, each of the 6 domain elements has 3 choices.</p>
+            <p class="working">Total functions = 3<sup>6</sup>=729</p>
+            <p>If one specified codomain value is missing, every domain element has only 2 choices. Choose the missing value in <span class="inline-math">C(3,1)</span> ways.</p>
+            <p class="working">C(3,1)2<sup>6</sup>=3&middot;64=192</p>
+            <p>If two specified values are missing, all domain elements map to the one remaining value. Inclusion&ndash;exclusion adds these functions back.</p>
+            <p class="working">C(3,2)1<sup>6</sup>=3</p>
+            <p class="equation">3<sup>6</sup>&minus;C(3,1)2<sup>6</sup>+C(3,2)1<sup>6</sup>=729&minus;192+3=540</p>
+          </div>
+          <div class="solution-answer">540 onto functions</div>
+          <p class="note"><strong>Equivalent interpretation:</strong> Distribute 6 distinct objects into 3 distinct boxes with every box nonempty.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>Related IEP Application Q7. Onto Functions to a Two-Element Set</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> How many onto functions are there from an <em>n</em>-element set, where <span class="inline-math">n&ge;2</span>, to a 2-element set?</p>
+            <p><strong>Options:</strong> A. 2<sup>n</sup> &nbsp; B. 2<sup>n&minus;1</sup> &nbsp; C. 2<sup>n&minus;2</sup> &nbsp; D. 2(2<sup>n&minus;2</sup>)</p>
+          </div>
+          <div class="derivation">
+            <p>There are <span class="inline-math">2<sup>n</sup></span> total functions. A function fails to be onto only when every domain element maps to the first codomain value or every element maps to the second. These are the two constant functions.</p>
+            <p class="equation">Number of onto functions = 2<sup>n</sup>&minus;2</p>
+          </div>
+          <div class="solution-answer">2<sup>n</sup> &minus; 2</div>
+          <p class="note"><strong>Option check:</strong> None of the supplied options equals <span class="inline-math">2<sup>n</sup>&minus;2</span> for general <em>n</em>. Therefore, a marking that selects Option C is mathematically incorrect.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>Recurrence Relations</h3>
+          <div class="derivation">
+            <p>The derangement sequence satisfies</p>
+            <p class="equation">D<sub>n</sub>=(n&minus;1)(D<sub>n&minus;1</sub>+D<sub>n&minus;2</sub>), &nbsp; n&ge;2</p>
+            <p class="equation">D<sub>n</sub>=nD<sub>n&minus;1</sub>+(&minus;1)<sup>n</sup>, &nbsp; n&ge;1</p>
+            <p>with initial values <span class="inline-math">D<sub>0</sub>=1</span> and <span class="inline-math">D<sub>1</sub>=0</span>.</p>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Parity of Derangements</h3>
+          <div class="derivation">
+            <p>For <span class="inline-math">n&ge;1</span>, the number of derangements is odd if and only if the number of objects is even:</p>
+            <p class="equation">n even &rArr; D<sub>n</sub> odd, &nbsp;&nbsp; n odd &rArr; D<sub>n</sub> even.</p>
+            <p>This follows from <span class="inline-math">D<sub>n</sub>=nD<sub>n&minus;1</sub>+(&minus;1)<sup>n</sup></span> by considering the expression modulo 2.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="rule" id="pigeonhole-principle">
+        <div class="section-heading">
+          <span class="section-number">20</span>
+          <h2>Pigeonhole Principle</h2>
+        </div>
+
+        <p class="definition">If there are more pigeons than holes, then at least two pigeons must share a hole. Formally, if <em>m</em> pigeons occupy <em>n</em> pigeonholes and <span class="inline-math">m&gt;n</span>, then at least one pigeonhole contains two or more pigeons.</p>
+
+        <div class="subtopic">
+          <h3>Basic and Generalized Principles</h3>
+          <div class="derivation">
+            <p><strong>Basic Pigeonhole Principle:</strong></p>
+            <p class="equation">m&gt;n &rArr; some hole contains at least 2 pigeons.</p>
+            <p><strong>Generalized Pigeonhole Principle:</strong> For any distribution of <em>m</em> pigeons among <em>n</em> holes,</p>
+            <p class="equation">some hole contains at least &lceil;m/n&rceil; pigeons.</p>
+            <p>The corresponding lower-load statement is</p>
+            <p class="equation">some hole contains at most &lfloor;m/n&rfloor; pigeons.</p>
+          </div>
+          <p class="note"><strong>Key word:</strong> The principle gives a <em>guarantee</em> that holds for every possible distribution. One example is not enough to establish a guarantee, while one counterexample is enough to disprove it.</p>
+        </div>
+
+        <div class="subtopic">
+          <h3>Negating Counting Statements</h3>
+          <p class="definition">Contradiction proofs for pigeonhole problems usually begin by negating the claimed occupancy condition.</p>
+          <div class="table-wrap">
+            <table class="comparison-table logic-table">
+              <thead>
+                <tr>
+                  <th>Statement</th>
+                  <th>Symbol</th>
+                  <th>Negation</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>At least <em>k</em></td>
+                  <td>&ge;k</td>
+                  <td>&lt;k, equivalently &le;k&minus;1</td>
+                </tr>
+                <tr>
+                  <td>At most <em>k</em></td>
+                  <td>&le;k</td>
+                  <td>&gt;k, equivalently &ge;k+1</td>
+                </tr>
+                <tr>
+                  <td>Exactly <em>k</em></td>
+                  <td>=k</td>
+                  <td>&ne;k, equivalently &lt;k or &gt;k</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="derivation">
+            <p>The quantifier must also change from <strong>some</strong> to <strong>every</strong>:</p>
+            <p class="equation">&not;(&ldquo;some hole has &ge;k&rdquo;) &nbsp; &hArr; &nbsp; &ldquo;every hole has &le;k&minus;1&rdquo;</p>
+            <p class="equation">&not;(&ldquo;some hole has &le;k&rdquo;) &nbsp; &hArr; &nbsp; &ldquo;every hole has &ge;k+1&rdquo;</p>
+            <p class="equation">&not;(&ldquo;some hole has exactly k&rdquo;) &nbsp; &hArr; &nbsp; &ldquo;every hole has &ne;k&rdquo;</p>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Understanding Two Common Claims</h3>
+          <div class="derivation">
+            <p><strong>Claim:</strong> At least two pigeons go into the same hole.</p>
+            <p><strong>Meaning:</strong> There exists at least one hole containing two or more pigeons.</p>
+            <p><strong>Negation:</strong> No two pigeons share a hole; equivalently, every hole contains at most one pigeon.</p>
+          </div>
+          <div class="derivation">
+            <p><strong>Claim:</strong> There is some hole containing at most 7 pigeons.</p>
+            <p><strong>Meaning:</strong> There exists at least one hole containing 7 or fewer pigeons.</p>
+            <p><strong>Negation:</strong> No hole contains 7 or fewer pigeons; equivalently, every hole contains at least 8 pigeons.</p>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>PHP Q1. Four Pigeons and Five Holes</h3>
+          <div class="question-box">
+            <p><strong>Claim:</strong> At least two pigeons must go into the same hole.</p>
+          </div>
+          <div class="derivation">
+            <p>The negation says that every hole contains at most one pigeon. This is possible because the pigeons may occupy four different holes.</p>
+            <p class="equation">Occupancies: (1,1,1,1,0)</p>
+            <p>This counterexample has no shared hole.</p>
+          </div>
+          <div class="solution-answer">Claim is false</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>PHP Q2. Four Pigeons and Four Holes</h3>
+          <div class="question-box">
+            <p><strong>Claim:</strong> At least two pigeons must go into the same hole.</p>
+          </div>
+          <div class="derivation">
+            <p>Again, the negation is possible: place exactly one pigeon in each hole.</p>
+            <p class="equation">Occupancies: (1,1,1,1)</p>
+            <p>Therefore, sharing may occur, but it is not guaranteed.</p>
+          </div>
+          <div class="solution-answer">Claim is false</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>PHP Q3. Four Pigeons and Three Holes</h3>
+          <div class="question-box">
+            <p><strong>Claim:</strong> At least two pigeons must go into the same hole.</p>
+          </div>
+          <div class="derivation">
+            <p>The negation would require every hole to contain at most one pigeon. Three holes could then hold at most 3 pigeons, which cannot accommodate all 4 pigeons.</p>
+            <p class="equation">4&gt;3 &rArr; some hole has at least 2 pigeons.</p>
+          </div>
+          <div class="solution-answer">Claim is guaranteed</div>
+        </div>
+
+        <div class="subtopic">
+          <h3>PHP Q4. Six Pigeons and Four Holes</h3>
+          <div class="question-box">
+            <p><strong>Question:</strong> Which of the following claims are guaranteed for every distribution of 6 pigeons among 4 holes?</p>
+          </div>
+          <div class="table-wrap">
+            <table class="comparison-table logic-table">
+              <thead>
+                <tr>
+                  <th>Claim</th>
+                  <th>Guaranteed?</th>
+                  <th>Reason or counterexample</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>A.</strong> At least 2 pigeons share a hole</td>
+                  <td>Yes</td>
+                  <td>Since <span class="inline-math">6&gt;4</span>, the basic principle guarantees repetition.</td>
+                </tr>
+                <tr>
+                  <td><strong>B.</strong> Some hole has at most 2 pigeons</td>
+                  <td>Yes</td>
+                  <td>If every hole had at least 3, at least <span class="inline-math">4&middot;3=12</span> pigeons would be needed.</td>
+                </tr>
+                <tr>
+                  <td><strong>C.</strong> Some hole has exactly 2 pigeons</td>
+                  <td>No</td>
+                  <td>Counterexample: <span class="inline-math">(6,0,0,0)</span>.</td>
+                </tr>
+                <tr>
+                  <td><strong>D.</strong> At least 3 pigeons share a hole</td>
+                  <td>No</td>
+                  <td>Counterexample: <span class="inline-math">(2,2,1,1)</span>.</td>
+                </tr>
+                <tr>
+                  <td><strong>E.</strong> Some hole has at most 1 pigeon</td>
+                  <td>Yes</td>
+                  <td>If every hole had at least 2, at least <span class="inline-math">4&middot;2=8</span> pigeons would be needed.</td>
+                </tr>
+                <tr>
+                  <td><strong>F.</strong> Some hole is empty</td>
+                  <td>No</td>
+                  <td>Counterexample: <span class="inline-math">(3,1,1,1)</span>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="equation"><strong>A, B, and E are guaranteed true.</strong></p>
+        </div>
+
+        <div class="subtopic">
+          <h3>Fast Contradiction Method</h3>
+          <div class="derivation">
+            <p>To test whether a claim is guaranteed:</p>
+            <ol>
+              <li>Negate both the occupancy condition and its quantifier.</li>
+              <li>Assume that the negation holds in every hole.</li>
+              <li>Calculate the largest or smallest possible total under that assumption.</li>
+              <li>If this conflicts with the given number of pigeons, the original claim is guaranteed. Otherwise, construct a counterexample.</li>
+            </ol>
+            <p class="equation">&not;(some &ge;k) &nbsp; &hArr; &nbsp; all &le;k&minus;1</p>
+            <p class="equation">&not;(some &le;k) &nbsp; &hArr; &nbsp; all &ge;k+1</p>
+            <p class="equation">&not;(some =k) &nbsp; &hArr; &nbsp; all (&lt;k or &gt;k)</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
