@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GATE Operating Systems notes: processes, system calls, CPU scheduling, synchronisation, memory management, and deadlock.">
+  <title>Operating Systems Notes</title>
+  <style>
+    :root {
+      --ink: #111;
+      --muted: #555;
+      --line: #d9dce1;
+      --soft: #f5f6f8;
+      --paper: #fff;
+      --page: #f1f2f4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--page);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.68;
+    }
+    a { color: inherit; }
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 58px;
+      padding: 10px 24px;
+      color: #fff;
+      background: #111;
+      border-bottom: 1px solid #000;
+    }
+    .brand { font-size: 15px; font-weight: 750; letter-spacing: -0.2px; }
+    .topbar-meta { display: flex; align-items: center; gap: 12px; }
+    .author-credit { color: #bbb; font-size: 12px; }
+    .author-credit strong { color: #fff; }
+    .course-tag {
+      padding: 3px 9px;
+      border: 1px solid #666;
+      border-radius: 999px;
+      color: #ddd;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+    main {
+      width: min(1000px, calc(100% - 40px));
+      margin: 24px auto;
+      padding: clamp(24px, 4vw, 46px);
+      background: var(--paper);
+      border-radius: 3px;
+      box-shadow: 0 3px 14px rgb(0 0 0 / 4%);
+    }
+    .back-link { color: var(--muted); font-size: 13px; text-underline-offset: 4px; }
+    .page-heading { margin: 26px 0 30px; }
+    .eyebrow { margin: 0 0 4px; color: var(--muted); font-size: 12px; font-weight: 750; letter-spacing: 0.12em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(28px, 4vw, 38px); line-height: 1.12; letter-spacing: -1.4px; }
+    .subtitle { margin: 12px 0 0; color: var(--muted); }
+    h2 { margin: 0; font-size: 20px; letter-spacing: -0.4px; }
+    .index-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-bottom: 14px; border-bottom: 2px solid var(--ink); }
+    .index-count { color: var(--muted); font: 600 12px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace; white-space: nowrap; }
+    .topic-list { margin: 0; padding: 0; list-style: none; }
+    .topic-link {
+      display: grid;
+      grid-template-columns: 36px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 18px;
+      padding: 24px 12px;
+      border-bottom: 1px solid var(--line);
+      text-decoration: none;
+    }
+    .topic-link:hover { background: var(--soft); }
+    a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    .topic-number { align-self: start; padding-top: 4px; color: var(--muted); font: 700 13px/1.6 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .topic-title { display: block; font-size: 18px; font-weight: 750; line-height: 1.4; letter-spacing: -0.3px; }
+    .topic-description { display: block; margin-top: 6px; color: var(--muted); font-size: 13px; }
+    .topic-status { display: inline-block; margin-top: 10px; padding: 2px 8px; border: 1px solid var(--line); border-radius: 3px; color: var(--muted); font-size: 11px; font-weight: 650; }
+    .topic-arrow { font-size: 23px; }
+    footer { margin-top: 26px; color: var(--muted); font-size: 12px; }
+    @media (max-width: 600px) {
+      .topbar { padding: 10px 16px; }
+      .author-credit { display: none; }
+      main { width: calc(100% - 24px); margin: 12px auto; padding: 24px 18px; }
+      .topic-link { grid-template-columns: 25px minmax(0, 1fr) 20px; gap: 10px; padding: 20px 4px; }
+      .topic-title { font-size: 16px; }
+      .index-heading { align-items: center; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Operating Systems</div>
+    <div class="topbar-meta">
+      <span class="author-credit">By <strong>ProFonCoDe</strong></span>
+      <span class="course-tag">GATE &middot; OS</span>
+    </div>
+  </header>
+  <main>
+    <a class="back-link" href="../index.html">&larr; All subjects</a>
+    <header class="page-heading">
+      <p class="eyebrow">GATE Study Notes</p>
+      <h1>Operating Systems</h1>
+      <p class="subtitle">Choose a topic to open its concepts, explanations, and worked questions.</p>
+    </header>
+    <nav aria-labelledby="topics-heading">
+      <div class="index-heading">
+        <h2 id="topics-heading">Topic Index</h2>
+        <span class="index-count">05 topics</span>
+      </div>
+      <ol class="topic-list">
+        <li>
+          <a class="topic-link" href="Process_system_calls_cpu_scheduling.html">
+            <span class="topic-number" aria-hidden="true">01</span>
+            <span>
+              <span class="topic-title">Processes, System Calls &amp; CPU Scheduling</span>
+              <span class="topic-description">Process concepts, system calls, and CPU scheduling notes.</span>
+              <span class="topic-status">Notes available</span>
+            </span>
+            <span class="topic-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+        </li>
+        <li>
+          <a class="topic-link" href="Synchronisation.html">
+            <span class="topic-number" aria-hidden="true">02</span>
+            <span>
+              <span class="topic-title">Process Synchronisation</span>
+              <span class="topic-description">Coordinating processes, critical sections, and synchronisation problems.</span>
+              <span class="topic-status">Notes available</span>
+            </span>
+            <span class="topic-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+        </li>
+        <li>
+          <a class="topic-link" href="Memory_Management.html">
+            <span class="topic-number" aria-hidden="true">03</span>
+            <span>
+              <span class="topic-title">Memory Management</span>
+              <span class="topic-description">Address translation, paging, page faults, and page replacement algorithms.</span>
+              <span class="topic-status">Notes available</span>
+            </span>
+            <span class="topic-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+        </li>
+        <li>
+          <a class="topic-link" href="Deadlock.html">
+            <span class="topic-number" aria-hidden="true">04</span>
+            <span>
+              <span class="topic-title">Deadlock</span>
+              <span class="topic-description">Introduction to deadlock through the dining philosophers problem.</span>
+              <span class="topic-status">Notes available</span>
+            </span>
+            <span class="topic-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+        </li>
+        <li>
+          <a class="topic-link" href="File_Systems.html">
+            <span class="topic-number" aria-hidden="true">05</span>
+            <span>
+              <span class="topic-title">File Systems</span>
+              <span class="topic-description">Storing and naming files, file metadata, and file system organisation.</span>
+              <span class="topic-status">Notes available</span>
+            </span>
+            <span class="topic-arrow" aria-hidden="true">&rarr;</span>
+          </a>
+        </li>
+      </ol>
+    </nav>
+    <footer>Operating Systems &middot; Topic-wise notes for GATE revision.</footer>
+  </main>
+</body>
+</html>

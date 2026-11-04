@@ -1,0 +1,1046 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GATE Operating Systems notes on file systems: storing files, naming files, and managing file metadata.">
+  <title>File Systems Notes</title>
+  <style>
+    :root {
+      --ink: #111;
+      --muted: #555;
+      --line: #d9dce1;
+      --soft: #f5f6f8;
+      --paper: #fff;
+      --page: #f1f2f4;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--page);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.68;
+    }
+
+    a { color: inherit; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 58px;
+      padding: 0 24px;
+      color: #fff;
+      background: #111;
+      border-bottom: 1px solid #000;
+    }
+
+    .brand {
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: -0.2px;
+    }
+
+    .topbar-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .author-credit { color: #bbb; font-size: 12px; }
+    .author-credit strong { color: #fff; }
+
+    .course-tag {
+      padding: 3px 9px;
+      border: 1px solid #666;
+      border-radius: 999px;
+      color: #ddd;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 232px minmax(0, 1fr);
+      gap: 24px;
+      width: min(1280px, calc(100% - 40px));
+      margin: 24px auto;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 74px;
+      align-self: start;
+      max-height: calc(100dvh - 90px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 4px 14px 12px 0;
+      border-right: 1px solid var(--line);
+      scrollbar-color: #9a9a9a transparent;
+    }
+
+    .sidebar-title {
+      margin: 0 0 10px 10px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .sidebar nav { display: grid; gap: 2px; }
+
+    .sidebar a {
+      display: block;
+      padding: 8px 10px;
+      border-left: 3px solid transparent;
+      color: #333;
+      font-size: 13.5px;
+      font-weight: 650;
+      line-height: 1.4;
+      text-decoration: none;
+    }
+
+    .sidebar a:hover,
+    .sidebar a:focus-visible {
+      color: #000;
+      background: var(--paper);
+      border-left-color: var(--ink);
+      outline: none;
+    }
+
+    .sidebar a.sub-link {
+      padding-top: 6px;
+      padding-bottom: 6px;
+      padding-left: 25px;
+      color: var(--muted);
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    .sidebar a.question-link { padding-left: 36px; font-size: 12px; }
+    main [id] { scroll-margin-top: 130px; }
+
+    main {
+      min-width: 0;
+      padding: clamp(24px, 4vw, 46px);
+      background: var(--paper);
+      border-radius: 3px;
+      box-shadow: 0 3px 14px rgb(0 0 0 / 4%);
+    }
+
+    .eyebrow {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 3.4vw, 38px);
+      line-height: 1.12;
+      letter-spacing: -1.4px;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .rule {
+      margin-top: 28px;
+      padding-top: 25px;
+      border-top: 2px solid var(--ink);
+      scroll-margin-top: 82px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-number {
+      color: var(--muted);
+      font: 700 13px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 23px;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+    }
+
+    .definition {
+      max-width: 900px;
+      margin: 0 0 16px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 16px;
+    }
+
+    .study-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .requirements-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 16px 0;
+      align-items: stretch;
+    }
+
+    .panel {
+      padding: 16px;
+      border-top: 2px solid var(--ink);
+      background: #fafafa;
+    }
+
+    .panel-label {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .panel p:last-child,
+    .panel ul:last-child { margin-bottom: 0; }
+
+    .equation {
+      margin: 12px 0;
+      padding: 12px 14px;
+      overflow-x: auto;
+      background: var(--soft);
+      font-family: "Cambria Math", Cambria, Georgia, serif;
+      font-size: 16px;
+      line-height: 1.65;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 7px;
+      margin: 14px 0;
+      overflow-x: auto;
+      padding-bottom: 3px;
+    }
+
+    .flow-step {
+      display: grid;
+      min-width: 135px;
+      min-height: 64px;
+      place-items: center;
+      padding: 10px 12px;
+      background: var(--soft);
+      border-top: 2px solid var(--ink);
+      font-weight: 750;
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .flow-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .subtopic {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      scroll-margin-top: 82px;
+    }
+
+    .subtopic h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+      line-height: 1.3;
+    }
+
+    .subtopic h4 {
+      margin: 20px 0 10px;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .practice-question {
+      margin-top: 24px;
+      padding: clamp(16px, 3vw, 24px);
+      border: 0;
+      border-radius: 8px;
+      background: #edf3fa;
+    }
+
+    .practice-question > :first-child { margin-top: 0; }
+    .practice-question > :last-child { margin-bottom: 0; }
+    .practice-question .equation,
+    .practice-question .note,
+    .practice-question .panel,
+    .practice-question .comparison-table th { background: #f8fafd; }
+    .practice-question .comparison-table td { background: #fff; }
+
+    .note {
+      margin: 12px 0 0;
+      padding: 11px 13px;
+      background: var(--soft);
+      font-size: 13px;
+    }
+
+    .table-wrap {
+      margin: 14px 0;
+      overflow-x: auto;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .comparison-table th {
+      background: var(--soft);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .code-sample {
+      margin: 12px 0;
+      padding: 12px 14px;
+      overflow-x: auto;
+      background: var(--soft);
+      font: 14px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    code {
+      padding: 2px 5px;
+      background: var(--soft);
+      font: 0.92em/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .code-sample code { padding: 0; }
+    ul { margin-top: 8px; padding-left: 22px; }
+    li + li { margin-top: 5px; }
+
+    .interleaving {
+      display: grid;
+      grid-template-columns: 70px minmax(170px, 1fr) minmax(170px, 1fr) 110px;
+      min-width: 650px;
+      border: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .interleaving > div {
+      padding: 9px 11px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .interleaving > div:nth-child(4n) { border-right: 0; }
+    .interleaving > div:nth-last-child(-n + 4) { border-bottom: 0; }
+    .interleaving .head {
+      background: var(--soft);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .interleaving .active { font-weight: 700; }
+    .interleaving .empty { color: #aaa; }
+
+    @media (max-width: 760px) {
+      .topbar { padding: 0 16px; }
+      .author-credit { display: none; }
+      .layout {
+        display: block;
+        width: min(100% - 20px, 720px);
+        margin: 10px auto;
+      }
+      .sidebar {
+        position: sticky;
+        top: 58px;
+        z-index: 9;
+        max-height: none;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 7px 0;
+        background: var(--page);
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .sidebar-title { display: none; }
+      .sidebar nav { display: flex; gap: 3px; width: max-content; }
+      .sidebar a {
+        padding: 7px 9px;
+        border-left: 0;
+        border-bottom: 2px solid transparent;
+        white-space: nowrap;
+      }
+      .sidebar a:hover,
+      .sidebar a:focus-visible { border-bottom-color: var(--ink); }
+      main { padding: 22px 18px; }
+      .study-grid,
+      .requirements-grid { grid-template-columns: 1fr; }
+      .comparison-table { min-width: 620px; }
+    }
+
+    @media (max-width: 430px) {
+      .brand { max-width: 235px; line-height: 1.25; }
+      .course-tag { flex: 0 0 auto; }
+    }
+    .address-diagram { margin: 20px 0 26px; }
+    .diagram-scroll { overflow-x: auto; border: 1px solid var(--line); background: #fafafa; }
+    .address-diagram svg { display: block; width: 100%; min-width: 760px; height: auto; }
+    .address-diagram figcaption { margin-top: 8px; color: var(--muted); font-size: 12px; }
+    .binding-flow { display: flex; align-items: center; gap: 10px; overflow-x: auto; padding: 14px 0; }
+    .binding-flow span { flex: 0 0 auto; padding: 10px 12px; border: 1px solid var(--line); background: var(--soft); font-weight: 650; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">File Systems</div>
+    <div class="topbar-meta">
+      <span class="author-credit">By <strong>ProFonCoDe</strong></span>
+      <span class="course-tag">GATE &middot; OS</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Table of contents">
+      <p class="sidebar-title">Contents</p>
+      <nav aria-label="File system topics">
+        <a href="OS.html">&larr; Operating Systems index</a>
+        <a href="#introduction-to-file-system">01&nbsp;&nbsp;Introduction to File System</a>
+        <a class="sub-link" href="#storing-files">Storing files</a>
+        <a class="sub-link" href="#naming-files">Naming files</a>
+        <a class="sub-link" href="#file-metadata">File metadata</a>
+        <a href="#disk-sectors-and-blocks">02&nbsp;&nbsp;Disk Sectors and Blocks</a>
+        <a class="sub-link" href="#disk-metadata-and-data">Diagram &middot; Metadata and file data</a>
+        <a href="#file-system-layout">03&nbsp;&nbsp;File System Layout</a>
+        <a class="sub-link" href="#boot-block">Boot block</a>
+        <a class="sub-link" href="#superblock">Superblock</a>
+        <a class="sub-link" href="#inode-list">Inode list</a>
+        <a class="sub-link" href="#data-blocks">Data blocks</a>
+        <a class="sub-link" href="#file-layout-example">Example &middot; notes.txt</a>
+        <a href="#contiguous-allocation">04&nbsp;&nbsp;Contiguous Allocation</a>
+        <a class="sub-link" href="#contiguous-allocation-example">Example &middot; A.txt</a>
+        <a class="sub-link" href="#contiguous-block-address">Locating file blocks</a>
+        <a class="sub-link" href="#contiguous-pros-cons">Advantages and limitations</a>
+        <a class="sub-link" href="#extent-based-allocation">Extent-Based Allocation</a>
+        <a class="sub-link question-link" href="#extent-total-blocks-question">Question &middot; Total blocks</a>
+        <a class="sub-link question-link" href="#extent-definition-question">Question &middot; What is an extent?</a>
+        <a href="#linked-allocation">05&nbsp;&nbsp;Linked Allocation</a>
+        <a class="sub-link" href="#linked-allocation-example">Example &middot; Block chain</a>
+        <a class="sub-link question-link" href="#linked-pointer-overhead-question">Question &middot; Pointer overhead</a>
+        <a class="sub-link" href="#fat-allocation">FAT &middot; File Allocation Table</a>
+        <a class="sub-link question-link" href="#fat-directory-example">Example &middot; Two files</a>
+        <a class="sub-link question-link" href="#fat-disk-accesses">Disk-access comparison</a>
+        <a class="sub-link question-link" href="#fat-entry-size">FAT entry size</a>
+        <a class="sub-link question-link" href="#fat-chain-question">Question &middot; Trace File A</a>
+        <a class="sub-link question-link" href="#fat-file-b-block-count">Question &middot; File B block count</a>
+        <a class="sub-link question-link" href="#gate-cse-1996-question-23">GATE 1996 &middot; Directory and file limits</a>
+        <a class="sub-link question-link" href="#fat-partition-capacity-question">Question &middot; Maximum partition size</a>
+        <a class="sub-link" href="#allocation-method-comparison">Contiguous vs. linked</a>
+        <a href="#indexed-allocation">06&nbsp;&nbsp;Indexed Allocation</a>
+        <a class="sub-link" href="#indexed-allocation-example">Example &middot; Index entries</a>
+        <a class="sub-link" href="#indexed-allocation-limits">Benefits and index capacity</a>
+        <a class="sub-link" href="#three-allocation-methods">Compare all three methods</a>
+      </nav>
+    </aside>
+    <main>
+      <header>
+        <p class="eyebrow">Operating Systems</p>
+        <h1>File Systems</h1>
+        <p class="subtitle">Core concepts, illustrations, and explanations for GATE revision.</p>
+      </header>
+      <section class="rule" id="introduction-to-file-system">
+        <div class="section-heading">
+          <span class="section-number">01</span>
+          <h2>Introduction to File System</h2>
+        </div>
+        <p class="definition">A <strong>file system</strong> provides the rules and data structures used to organise, store, name, and retrieve files on a storage device. It connects the files users see with their stored data and descriptive information.</p>
+        <p>The slide highlights three basic responsibilities: <strong>storing file contents, naming files, and storing file metadata</strong>.</p>
+        <article class="subtopic" id="storing-files">
+          <h3>1. Provides a Way to Store Files</h3>
+          <p>A file system organises storage space, allocates space to files, and tracks where their contents are stored. A file's data may occupy multiple storage blocks; those blocks need not be adjacent.</p>
+          <p><strong>Example:</strong> For files f1, f2, &hellip;, f100, the system must track which storage locations belong to each file so it can read or update the correct contents.</p>
+        </article>
+        <article class="subtopic" id="naming-files">
+          <h3>2. Provides a Way to Name Files</h3>
+          <p>Names and directories let users identify files without knowing their physical storage locations. The file system resolves a name or path to the corresponding file information.</p>
+          <p><strong>Example:</strong> A path such as <code>/notes/os.txt</code> identifies a file in a directory. The user can open it by name rather than specifying its storage blocks.</p>
+        </article>
+        <article class="subtopic" id="file-metadata">
+          <h3>3. Provides a Way to Store File Metadata</h3>
+          <p><strong>Metadata is information about a file</strong>, rather than the file's contents. The exact attributes and their storage depend on the file system.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Metadata example</th><th scope="col">Purpose</th></tr></thead>
+              <tbody>
+                <tr><td>File size</td><td>Records the length of the file.</td></tr>
+                <tr><td>Owner and permissions</td><td>Identify ownership and control access.</td></tr>
+                <tr><td>Timestamps</td><td>Record events such as modification or access.</td></tr>
+                <tr><td>Storage-location information</td><td>Helps locate the blocks containing the file's data.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note"><strong>Data vs. metadata:</strong> The text inside <code>os.txt</code> is file data. Its size, permissions, and modification time are metadata. Names are also descriptive information, but may be stored in directory entries rather than in the file's own metadata record.</p>
+        </article>
+        <figure class="address-diagram">
+          <div class="diagram-scroll">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 250" role="img" aria-labelledby="fs-intro-title fs-intro-desc">
+              <title id="fs-intro-title">A file system connects names, metadata, and stored file contents</title>
+              <desc id="fs-intro-desc">A user opens the path /notes/os.txt. Directory lookup finds its file record, containing size, permissions, timestamps, and storage-location information. That record locates the storage blocks holding the file contents. The diagram is conceptual and does not prescribe a particular file system layout.</desc>
+              <defs><marker id="fs-intro-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569"/></marker></defs>
+              <g font-family="Inter, Segoe UI, sans-serif" fill="#172033" text-anchor="middle">
+                <text x="510" y="31" font-size="19" font-weight="700">From a file name to stored contents</text>
+                <rect x="30" y="72" width="245" height="115" rx="5" fill="#e0eafa" stroke="#94a3b8"/>
+                <rect x="365" y="72" width="285" height="115" rx="5" fill="#f5e8cf" stroke="#94a3b8"/>
+                <rect x="740" y="72" width="250" height="115" rx="5" fill="#dceee5" stroke="#94a3b8"/>
+                <text x="152" y="104" font-size="16" font-weight="700">Name / path</text><text x="152" y="140" font-size="15">/notes/os.txt</text><text x="152" y="168" font-size="12">Directory lookup</text>
+                <text x="507" y="104" font-size="16" font-weight="700">File information</text><text x="507" y="136" font-size="13">Size, permissions, timestamps</text><text x="507" y="164" font-size="13">Locations of file data</text>
+                <text x="865" y="104" font-size="16" font-weight="700">File contents</text><text x="865" y="140" font-size="14">Data stored in blocks</text><text x="865" y="168" font-size="12">On the storage device</text>
+                <g stroke="#475569" stroke-width="2" fill="none" marker-end="url(#fs-intro-arrow)"><path d="M277 130 H355"/><path d="M652 130 H730"/></g>
+                <text x="510" y="226" font-size="13" fill="#64748b">Conceptual relationship; the exact on-disk layout depends on the file system.</text>
+              </g>
+            </svg>
+          </div>
+          <figcaption>The file system manages both file contents and the information needed to identify, locate, and access them.</figcaption>
+        </figure>
+      </section>
+      <section class="rule" id="disk-sectors-and-blocks">
+        <div class="section-heading">
+          <span class="section-number">02</span>
+          <h2>Disk Sectors and Blocks</h2>
+        </div>
+        <p>A disk is divided into fixed-size <strong>sectors</strong>, numbered 0, 1, 2, &hellip;. A sector is a device-level storage unit; a <strong>file-system block</strong> is generally the unit managed by the file system and may contain one or more sectors.</p>
+        <p><strong>Example:</strong> Using the question's binary convention, a 1 MB disk means 2<sup>20</sup> bytes (1 MiB). With 512-byte sectors:</p>
+        <p class="equation">Number of sectors = 2<sup>20</sup> / 512 = <strong>2048</strong> &nbsp; (numbered 0&ndash;2047)</p>
+        <p><strong>Disk I/O is block-oriented:</strong> when an uncached read needs one byte from a 512-byte sector, the device transfers at least that sector into memory. The CPU can then access the required byte. Similarly, a 4 KiB block-level read transfers a whole block even if only a few bytes are needed.</p>
+        <p><strong>Example:</strong> With 512-byte sectors and 4096-byte (4 KiB) file-system blocks, each block contains <strong>8 sectors</strong>. If one byte in sector 3 of block 0 is needed and is not cached, a typical file-system read brings the entire block (sectors 0&ndash;7) into RAM. The CPU then accesses that byte.</p>
+        <p><strong>Hardware vs. file system:</strong> the device addresses logical sectors, while file systems commonly read and cache data in blocks. A 4 KiB block request can transfer eight 512-byte sectors; reading the whole file-system block is typical behaviour, not a hardware requirement. The OS may instead request an individual logical sector.</p>
+        <p class="note"><strong>Transfer unit vs. atomicity:</strong> treating a sector or block as a complete transfer unit does not guarantee that a write is indivisible during a power failure. Write atomicity is a separate property. Disk I/O is block-oriented, while main memory is byte-addressable.</p>
+        <article class="subtopic" id="disk-metadata-and-data">
+          <h3>Disk Layout: Metadata and File Data</h3>
+          <figure class="address-diagram">
+            <div class="diagram-scroll">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 250" role="img" aria-labelledby="disk-layout-title disk-layout-desc">
+                <title id="disk-layout-title">Illustrative sectors containing metadata and file data</title>
+                <desc id="disk-layout-desc">A row of sectors numbered 0 through 6, followed by more sectors. Sectors 0 and 1 are highlighted as metadata, and sectors 2 onward as file data. This is a simplified example, not a required layout.</desc>
+                <g font-family="Inter, Segoe UI, sans-serif" fill="#172033" text-anchor="middle">
+                  <text x="510" y="30" font-size="19" font-weight="700">Storage holds both metadata and file contents</text>
+                  <g stroke="#475569" stroke-width="1.5">
+                    <g fill="#f5e8cf"><rect x="62" y="82" width="112" height="74"/><rect x="174" y="82" width="112" height="74"/></g>
+                    <g fill="#dceee5"><rect x="286" y="82" width="112" height="74"/><rect x="398" y="82" width="112" height="74"/><rect x="510" y="82" width="112" height="74"/><rect x="622" y="82" width="112" height="74"/><rect x="734" y="82" width="112" height="74"/><rect x="846" y="82" width="112" height="74"/></g>
+                  </g>
+                  <g font-size="13"><text x="118" y="179">Sector 0</text><text x="230" y="179">Sector 1</text><text x="342" y="179">Sector 2</text><text x="454" y="179">Sector 3</text><text x="566" y="179">Sector 4</text><text x="678" y="179">Sector 5</text><text x="790" y="179">Sector 6</text><text x="902" y="179">More sectors</text></g>
+                  <text x="174" y="65" font-size="15" font-weight="700">Metadata</text><text x="622" y="65" font-size="15" font-weight="700">File data</text>
+                  <text x="902" y="128" font-size="28">&#8230;</text>
+                  <text x="174" y="215" font-size="13">Information about files</text><text x="622" y="215" font-size="13">Actual file contents</text>
+                </g>
+              </svg>
+            </div>
+            <figcaption>Simplified layout from the slide: sectors 0&ndash;1 represent metadata, while later sectors represent file data.</figcaption>
+          </figure>
+          <p><strong>Metadata</strong> describes files, including their sizes, permissions, and data locations. <strong>File data</strong> is their actual content, such as text, images, or program bytes.</p>
+          <p class="note">The positions shown are illustrative. Real file systems may distribute metadata and file data across the device; metadata is not always confined to the first two sectors.</p>
+        </article>
+      </section>
+      <section class="rule" id="file-system-layout">
+        <div class="section-heading">
+          <span class="section-number">03</span>
+          <h2>File System Layout</h2>
+        </div>
+        <p class="definition">A file system must organise both <strong>file contents</strong> and the <strong>information needed to manage them</strong>. A simplified traditional Unix-style layout has four regions: a boot block, a superblock, an inode list, and data blocks.</p>
+        <figure class="address-diagram">
+          <div class="diagram-scroll">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 205" role="img" aria-labelledby="fs-regions-title fs-regions-desc">
+              <title id="fs-regions-title">Four regions of a simplified Unix-style file system</title>
+              <desc id="fs-regions-desc">From left to right: boot block for bootstrap code, superblock for file-system-wide metadata, inode list for individual file records, and data blocks for file and directory contents. Region widths are illustrative, not to scale.</desc>
+              <g font-family="Inter, Segoe UI, sans-serif" fill="#172033" text-anchor="middle">
+                <text x="510" y="30" font-size="19" font-weight="700">A simplified layout on storage</text>
+                <g stroke="#94a3b8" stroke-width="1.5"><rect x="30" y="65" width="170" height="88" fill="#e0eafa"/><rect x="200" y="65" width="200" height="88" fill="#f5e8cf"/><rect x="400" y="65" width="230" height="88" fill="#e9e2fa"/><rect x="630" y="65" width="360" height="88" fill="#dceee5"/></g>
+                <g font-size="16" font-weight="700"><text x="115" y="100">Boot block</text><text x="300" y="100">Superblock</text><text x="515" y="100">Inode list</text><text x="810" y="100">Data blocks</text></g>
+                <g font-size="12"><text x="115" y="130">Bootstrap code</text><text x="300" y="130">File-system information</text><text x="515" y="130">File metadata records</text><text x="810" y="130">File and directory contents</text></g>
+                <text x="510" y="185" font-size="12" fill="#64748b">Conceptual layout, not to scale. Actual organisation depends on the file system.</text>
+              </g>
+            </svg>
+          </div>
+          <figcaption>The regions answer different questions: how to boot, how the file system is organised, what describes a file, and where its contents are stored.</figcaption>
+        </figure>
+        <article class="subtopic" id="boot-block">
+          <h3>1. Boot Block: Bootstrapping Information</h3>
+          <p>A boot block is a reserved region that <strong>may contain bootstrap code</strong> used during startup to help load the operating system. Whether it is used depends on the boot arrangement; a file system used only for data need not contain active boot code.</p>
+        </article>
+        <article class="subtopic" id="superblock">
+          <h3>2. Superblock: Information About the Whole File System</h3>
+          <p>The superblock stores <strong>file-system-wide metadata</strong>, such as the file system's size, block size, block and inode counts, and information needed to locate or manage free-space structures. The exact fields depend on the implementation.</p>
+          <p>Think of it as the file system's overall information record, rather than the record of any one file.</p>
+        </article>
+        <article class="subtopic" id="inode-list">
+          <h3>3. Inode List: Information About Individual Files</h3>
+          <p>In an inode-based file system, each file or directory is represented by an <strong>inode (index node)</strong>. An inode records attributes such as size, owner, permissions, timestamps, and information for locating its data blocks. The inode list or table holds these records.</p>
+          <p><strong>The file name is normally not stored in the inode.</strong> A directory entry maps a name to an inode number. The inode then identifies the file's metadata and data locations.</p>
+          <p>Some traditional file systems reserve a fixed inode table when created. They can run out of inodes even while data space remains free. Other file systems organise or allocate these records differently.</p>
+        </article>
+        <article class="subtopic" id="data-blocks">
+          <h3>4. Data Blocks: File and Directory Contents</h3>
+          <p>Data blocks hold the <strong>actual contents</strong>: text in a document, image bytes in a photo, or instructions in a program file. They also hold directory contents, including name-to-inode mappings, in the traditional Unix-style model.</p>
+          <p>Thus, a directory's inode describes the directory, while its data blocks contain the entries naming its children.</p>
+        </article>
+        <article class="subtopic" id="file-layout-example">
+          <h3>Example: Locating notes.txt</h3>
+          <p>Suppose <code>notes.txt</code> contains <strong>10 KiB</strong> of text and the file-system block size is <strong>4 KiB</strong>. Assume an ordinary file stored in full-sized blocks, without compression, sparse regions, or inline data.</p>
+          <p class="equation">Data blocks required = &lceil;10 / 4&rceil; = <strong>3 blocks</strong></p>
+          <ol>
+            <li>The parent directory has an entry mapping <strong>notes.txt</strong> to its inode number.</li>
+            <li>The inode records the <strong>10 KiB file size</strong> and identifies the three data blocks. For example, these could be blocks 18, 41, and 70; they need not be consecutive.</li>
+            <li>The blocks contain <strong>4 KiB + 4 KiB + 2 KiB</strong> of file data. With full-block allocation, 2 KiB in the final block is unused.</li>
+          </ol>
+          <p class="equation">Directory entry: name &rarr; inode number &rarr; inode &rarr; data blocks</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Component</th><th scope="col">Main purpose</th></tr></thead>
+              <tbody>
+                <tr><td>Boot block</td><td>May hold bootstrapping code.</td></tr>
+                <tr><td>Superblock</td><td>Describes the entire file system.</td></tr>
+                <tr><td>Inode list</td><td>Holds metadata records for individual files and directories.</td></tr>
+                <tr><td>Data blocks</td><td>Hold actual file and directory contents.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note"><strong>Keep the levels distinct:</strong> the superblock describes the file system, an inode describes a particular file, and data blocks contain its contents. The three-block calculation counts file data only, not additional directory or metadata storage.</p>
+        </article>
+      </section>
+      <section class="rule" id="contiguous-allocation">
+        <div class="section-heading">
+          <span class="section-number">04</span>
+          <h2>Contiguous Allocation</h2>
+        </div>
+        <p class="definition"><strong>Contiguous allocation</strong> stores all blocks of a file in <strong>consecutive disk block locations</strong>, without gaps. Instead of scattering the file across the disk, the file system reserves one continuous run of blocks.</p>
+        <article class="subtopic" id="contiguous-allocation-example">
+          <h3>Example: A.txt Occupies Three Consecutive Blocks</h3>
+          <p>A disk has blocks numbered <strong>0&ndash;9</strong>. File <code>A.txt</code> contains <strong>12 KiB</strong> and each block holds <strong>4 KiB</strong>:</p>
+          <p class="equation">Blocks required = &lceil;12 / 4&rceil; = <strong>3</strong></p>
+          <figure class="address-diagram">
+            <div class="diagram-scroll">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 220" role="img" aria-labelledby="contiguous-title contiguous-desc">
+                <title id="contiguous-title">File A occupies disk blocks 3, 4, and 5</title>
+                <desc id="contiguous-desc">Ten adjacent blocks numbered 0 through 9. Blocks 3, 4, and 5 contain File A; all other blocks are free. Starting block is 3 and length is 3 blocks.</desc>
+                <g font-family="Inter, Segoe UI, sans-serif" fill="#172033" text-anchor="middle">
+                  <text x="510" y="30" font-size="19" font-weight="700">A.txt: one continuous run of three blocks</text>
+                  <g stroke="#94a3b8" stroke-width="1.5">
+                    <g fill="#f1f5f9"><rect x="30" y="76" width="96" height="68"/><rect x="126" y="76" width="96" height="68"/><rect x="222" y="76" width="96" height="68"/><rect x="606" y="76" width="96" height="68"/><rect x="702" y="76" width="96" height="68"/><rect x="798" y="76" width="96" height="68"/><rect x="894" y="76" width="96" height="68"/></g>
+                    <g fill="#dceee5"><rect x="318" y="76" width="96" height="68"/><rect x="414" y="76" width="96" height="68"/><rect x="510" y="76" width="96" height="68"/></g>
+                  </g>
+                  <g font-size="14"><text x="78" y="116">Free</text><text x="174" y="116">Free</text><text x="270" y="116">Free</text><text x="366" y="116" font-weight="700">File A</text><text x="462" y="116" font-weight="700">File A</text><text x="558" y="116" font-weight="700">File A</text><text x="654" y="116">Free</text><text x="750" y="116">Free</text><text x="846" y="116">Free</text><text x="942" y="116">Free</text></g>
+                  <g font-size="13"><text x="78" y="166">0</text><text x="174" y="166">1</text><text x="270" y="166">2</text><text x="366" y="166">3</text><text x="462" y="166">4</text><text x="558" y="166">5</text><text x="654" y="166">6</text><text x="750" y="166">7</text><text x="846" y="166">8</text><text x="942" y="166">9</text></g>
+                  <text x="510" y="204" font-size="14">Starting block = 3 &nbsp; | &nbsp; Length = 3 blocks</text>
+                </g>
+              </svg>
+            </div>
+            <figcaption>Blocks 3, 4, and 5 are contiguous. Allocating blocks 2, 5, and 8 instead would not be contiguous.</figcaption>
+          </figure>
+        </article>
+        <article class="subtopic" id="contiguous-block-address">
+          <h3>How Does the File System Locate a Block?</h3>
+          <p>The allocation can be described using just the <strong>starting block</strong> and <strong>length in blocks</strong>. The file's byte size and other attributes are still maintained separately.</p>
+          <p class="equation">Disk block for file block i = start + i &nbsp; (zero-based: 0 &le; i &lt; length)</p>
+          <p>For A.txt, the third file block has index i = 2, so its disk block number is <strong>3 + 2 = 5</strong>. No chain of earlier blocks needs to be traversed.</p>
+        </article>
+        <article class="subtopic" id="contiguous-pros-cons">
+          <h3>Advantages and Limitations</h3>
+          <div class="study-grid">
+            <div class="panel">
+              <p class="panel-label">Advantages</p>
+              <ul>
+                <li><strong>Efficient sequential access:</strong> successive file blocks are adjacent, reducing seeks on a hard disk.</li>
+                <li><strong>Direct access:</strong> any file block's address is calculated from its index.</li>
+                <li><strong>Small allocation metadata:</strong> one starting address and one length describe the run.</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <p class="panel-label">Limitations</p>
+              <ul>
+                <li><strong>External fragmentation:</strong> enough free blocks in total may exist without a sufficiently long consecutive run.</li>
+                <li><strong>Difficult growth:</strong> extending the run requires adjacent free space; otherwise relocation or another allocation scheme may be needed.</li>
+              </ul>
+            </div>
+          </div>
+          <p><strong>Fragmentation example:</strong> free runs of lengths 3, 3, and 4 give 10 free blocks in total, but cannot hold a contiguous 5-block file. As with other block-based methods, a partly used final block may also waste space internally.</p>
+          <h4>Why Not Put Another File in the Unused Bytes?</h4>
+          <p>Assume the allocation unit is a <strong>512-byte block</strong> (one sector here). In the basic model, each file receives whole blocks, even if its contents use only part of the last block:</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Block</th><th scope="col">File data</th><th scope="col">Unused space</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>File A: 400 bytes</td><td>512 &minus; 400 = <strong>112 bytes</strong></td></tr>
+                <tr><td>1</td><td>File B: 100 bytes</td><td>512 &minus; 100 = <strong>412 bytes</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Although 400 + 100 = 500 bytes could fit in one block, block 0 is already allocated entirely to A. Its unused 112 bytes are <strong>internal fragmentation</strong>, not a free block available to B. Sharing would require additional bookkeeping for sub-block ownership and updates.</p>
+          <p><strong>Both kinds can occur:</strong> external fragmentation is free space split between allocated runs; internal fragmentation is unused space inside an allocated block. Some file systems reduce internal waste using tail packing or sub-block allocation, but those are outside this simple model.</p>
+          <p class="note"><strong>Remember:</strong> contiguous allocation means consecutive block locations, described by a start and a length. Address calculation is simple, but finding and extending an unbroken free run can be difficult.</p>
+        </article>
+        <article class="subtopic" id="extent-based-allocation">
+          <h3>Extent-Based Allocation</h3>
+          <p class="definition">An <strong>extent</strong> is a consecutive run of disk blocks allocated to a file. Extent-based allocation lets a file occupy <strong>one or more extents</strong>: blocks within an extent are consecutive, but different extents need not be adjacent.</p>
+          <p><strong>Example:</strong> File A needs 8 blocks. Instead of requiring one 8-block run, allocate blocks <strong>2&ndash;4</strong> and <strong>9&ndash;13</strong>:</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Extent in file order</th><th scope="col">Starting disk block</th><th scope="col">Length</th><th scope="col">Disk blocks</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>2</td><td>3 blocks</td><td>2, 3, 4</td></tr>
+                <tr><td>2</td><td>9</td><td>5 blocks</td><td>9, 10, 11, 12, 13</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Metadata describes these runs using <strong>start-and-length entries</strong>: here, just <strong>(2, 3)</strong> and <strong>(9, 5)</strong> represent all 8 data blocks. Larger implementations may index extents in a tree rather than a small array.</p>
+          <p><strong>Easier growth:</strong> if the block after an existing extent is occupied, allocate another free run elsewhere and add an extent entry. The whole file need not be relocated. Long runs also need fewer address entries than listing each block separately.</p>
+          <p class="note"><strong>Contiguous allocation:</strong> one continuous run per file. <strong>Extent-based allocation:</strong> multiple continuous runs per file. External fragmentation can still make large extents difficult to find, but the entire file no longer needs one unbroken region.</p>
+          <div class="subtopic practice-question" id="extent-total-blocks-question">
+            <h4>Question: Total Blocks in Three Extents</h4>
+            <p>A file is stored using <strong>three extents</strong>, as shown below. How many total blocks does the file occupy?</p>
+            <div class="table-wrap">
+              <table class="comparison-table">
+                <thead><tr><th scope="col">Extent</th><th scope="col">Start</th><th scope="col">Length (blocks)</th></tr></thead>
+                <tbody>
+                  <tr><td>E1</td><td>40</td><td>5</td></tr>
+                  <tr><td>E2</td><td>100</td><td>3</td></tr>
+                  <tr><td>E3</td><td>200</td><td>4</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <ol type="A">
+              <li>5</li>
+              <li>7</li>
+              <li>12</li>
+              <li>3</li>
+            </ol>
+            <p><strong>Solution:</strong> Add the extent lengths, not their starting addresses. E1 occupies blocks 40&ndash;44, E2 occupies 100&ndash;102, and E3 occupies 200&ndash;203. Gaps between extents do not belong to this file.</p>
+            <p class="equation">Total blocks = 5 + 3 + 4 = <strong>12</strong></p>
+            <p class="note"><strong>Correct answer: C. 12 blocks.</strong> Start identifies an extent's location; length gives the number of blocks it contributes.</p>
+          </div>
+          <div class="subtopic practice-question" id="extent-definition-question">
+            <h4>Question: What Is an Extent?</h4>
+            <p>An extent in an extent-based file system is:</p>
+            <ol type="A">
+              <li>A single contiguous block of fixed size</li>
+              <li>A contiguous group of blocks allocated together</li>
+              <li>A linked list node pointing to the next block</li>
+              <li>A block that stores file metadata only</li>
+            </ol>
+            <p class="note"><strong>Correct answer: B.</strong> An extent is a consecutive run of blocks allocated together, described by its starting block and length. Its length can vary; it is not restricted to one fixed-size block. Keeping blocks together supports efficient sequential access, though external fragmentation can still occur.</p>
+          </div>
+        </article>
+      </section>
+      <section class="rule" id="linked-allocation">
+        <div class="section-heading">
+          <span class="section-number">05</span>
+          <h2>Linked Allocation</h2>
+        </div>
+        <p class="definition"><strong>Linked allocation</strong> lets a file's blocks occupy any free locations on disk. Each block stores file data and a <strong>pointer to the next block</strong>; the last has an end-of-chain marker, shown as NULL. The pointers determine logical order, not physical position.</p>
+        <article class="subtopic" id="linked-allocation-example">
+          <h3>Example: File A</h3>
+          <p>File A's logical blocks B1, B2, and B3 are stored at disk blocks <strong>3, 6, and 1</strong>. Starting at block 3, follow each next-block pointer:</p>
+          <div class="flow" role="group" aria-label="File A's linked block chain">
+            <div class="flow-step">B1: Disk 3<br>Next = 6</div>
+            <span class="flow-arrow" aria-hidden="true">&rarr;</span>
+            <div class="flow-step">B2: Disk 6<br>Next = 1</div>
+            <span class="flow-arrow" aria-hidden="true">&rarr;</span>
+            <div class="flow-step">B3: Disk 1<br>Next = NULL</div>
+          </div>
+          <p>The file record keeps its starting block; some implementations also keep the last block for appending. In <strong>basic linked allocation</strong>, pointers are stored inside the file's blocks:</p>
+          <p class="equation">Usable data per block = 4096-byte block &minus; 4-byte pointer = <strong>4092 bytes</strong></p>
+          <p><strong>Benefits:</strong> no external fragmentation and easy growth by linking another free block. <strong>Costs:</strong> pointer overhead, potentially scattered disk reads, and a broken pointer can make the rest of the chain inaccessible.</p>
+          <p>Sequential access follows the chain naturally. Random access is inefficient: without cached location information, finding the 100th block requires following the preceding 99 links. A partly used final block may still waste space internally.</p>
+        </article>
+        <article class="subtopic practice-question" id="linked-pointer-overhead-question">
+          <h3>Question: Total Pointer Overhead</h3>
+          <p>Assume block numbers start from 0. In a <strong>linked file allocation</strong> system, each block stores <strong>4 KB of data plus a 4-byte pointer</strong> to the next block. A file contains <strong>1000 blocks</strong>. What is the total pointer overhead?</p>
+          <ol type="A">
+            <li>4 KB</li>
+            <li>4 MB</li>
+            <li>4000 bytes</li>
+            <li>4000 KB</li>
+          </ol>
+          <p><strong>Solution:</strong> Each of the 1000 blocks reserves one 4-byte pointer field, including the final block, whose field stores the end-of-chain marker.</p>
+          <p class="equation">Pointer overhead = 1000 &times; 4 bytes = <strong>4000 bytes</strong></p>
+          <p class="note"><strong>Correct answer: C.</strong> Block numbering and data size do not change the pointer count. Here the pointer is additional to the stated data capacity, unlike the earlier fixed-total-block-size example. Under the common binary convention, 4 KiB is 4096 bytes; 4000 bytes is the exact answer requested.</p>
+        </article>
+        <article class="subtopic" id="fat-allocation">
+          <h3>FAT &mdash; File Allocation Table</h3>
+          <p class="definition"><strong>FAT is a variation of linked allocation</strong> that moves next-block pointers out of the data blocks and into a separate table. A directory entry identifies the file's starting cluster; following FAT entries reveals the rest of its chain.</p>
+          <p>A <strong>cluster</strong> is FAT's allocation unit and consists of one or more sectors. The following teaching examples use block/cluster numbers interchangeably. Real FAT formats reserve some entries and marker values; the small numbers here are illustrative.</p>
+          <figure class="address-diagram">
+            <div class="diagram-scroll">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 440" role="img" aria-labelledby="fat-table-title fat-table-desc">
+                <title id="fat-table-title">Directory, FAT links, and file data are separate</title>
+                <desc id="fat-table-desc">A directory entry gives File A's starting cluster as 2. The FAT maps 2 to 5, 5 to 8, 8 to 3, 3 to 9, and 9 to end-of-chain. Each FAT row corresponds to a separate data cluster containing the corresponding portion of the file. The next-cluster pointers are in the FAT, not in the data clusters.</desc>
+                <defs><marker id="fat-table-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569"/></marker></defs>
+                <g font-family="Inter, Segoe UI, sans-serif" fill="#172033">
+                  <text x="510" y="30" text-anchor="middle" font-size="19" font-weight="700">One table stores the links; clusters store the data</text>
+                  <rect x="25" y="95" width="230" height="95" rx="5" fill="#e0eafa" stroke="#94a3b8"/>
+                  <text x="140" y="125" text-anchor="middle" font-size="16" font-weight="700">Directory entry</text>
+                  <text x="140" y="155" text-anchor="middle" font-size="14">File A: start = 2</text>
+                  <text x="490" y="64" text-anchor="middle" font-size="16" font-weight="700">FAT: cluster &#8594; next</text>
+                  <g fill="#f5e8cf" stroke="#94a3b8"><rect x="370" y="80" width="240" height="48"/><rect x="370" y="128" width="240" height="48"/><rect x="370" y="176" width="240" height="48"/><rect x="370" y="224" width="240" height="48"/><rect x="370" y="272" width="240" height="48"/></g>
+                  <g text-anchor="middle" font-size="16"><text x="490" y="110">FAT[2] = 5</text><text x="490" y="158">FAT[5] = 8</text><text x="490" y="206">FAT[8] = 3</text><text x="490" y="254">FAT[3] = 9</text><text x="490" y="302">FAT[9] = EOF</text></g>
+                  <text x="845" y="64" text-anchor="middle" font-size="16" font-weight="700">Data clusters</text>
+                  <g fill="#dceee5" stroke="#94a3b8"><rect x="730" y="84" width="230" height="40"/><rect x="730" y="132" width="230" height="40"/><rect x="730" y="180" width="230" height="40"/><rect x="730" y="228" width="230" height="40"/><rect x="730" y="276" width="230" height="40"/></g>
+                  <g text-anchor="middle" font-size="14"><text x="845" y="110">Cluster 2: B1 data</text><text x="845" y="158">Cluster 5: B2 data</text><text x="845" y="206">Cluster 8: B3 data</text><text x="845" y="254">Cluster 3: B4 data</text><text x="845" y="302">Cluster 9: B5 data</text></g>
+                  <g fill="none" stroke="#475569" stroke-width="1.8" marker-end="url(#fat-table-arrow)"><path d="M257 141 H310 V104 H360"/><path d="M613 104 H720"/><path d="M613 152 H720"/><path d="M613 200 H720"/><path d="M613 248 H720"/><path d="M613 296 H720"/></g>
+                  <text x="510" y="366" text-anchor="middle" font-size="17" font-weight="700">Logical chain: 2 &#8594; 5 &#8594; 8 &#8594; 3 &#8594; 9 &#8594; EOF</text>
+                  <text x="510" y="406" text-anchor="middle" font-size="13" fill="#64748b">Rows are arranged in traversal order here; FAT entries are addressed by cluster number.</text>
+                </g>
+              </svg>
+            </div>
+            <figcaption>EOF denotes an end-of-chain marker, not an extra data cluster. The horizontal arrows associate each FAT entry with its data cluster; its stored value identifies the next cluster.</figcaption>
+          </figure>
+          <p>Read <strong>FAT[2] = 5</strong> as &ldquo;after cluster 2, go to cluster 5.&rdquo; FAT stores links and allocation markers, not file names. For another independent example, FAT[2] = 5, FAT[5] = 6, and FAT[6] = EOF describe the chain <strong>2 &rarr; 5 &rarr; 6 &rarr; EOF</strong>.</p>
+          <h4 id="fat-directory-example">Example: Directory Entries for Two Files</h4>
+          <p>Suppose a directory at illustrative block <strong>5</strong> contains <strong>a &rarr; start 6</strong> and <strong>b &rarr; start 2</strong>. The corresponding FAT is:</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Entry</th><th scope="col">FAT value</th><th scope="col">Interpretation</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>Free</td><td>Unused in this simplified table.</td></tr>
+                <tr><td>1</td><td>EOF</td><td>Last cluster of b.</td></tr>
+                <tr><td>2</td><td>1</td><td>b continues at cluster 1.</td></tr>
+                <tr><td>3</td><td>EOF</td><td>Last cluster of a.</td></tr>
+                <tr><td>4</td><td>3</td><td>a continues at cluster 3.</td></tr>
+                <tr><td>5</td><td>EOF</td><td>The directory occupies one cluster.</td></tr>
+                <tr><td>6</td><td>4</td><td>a continues at cluster 4.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="flow" role="group" aria-label="File a's FAT chain">
+            <div class="flow-step">File a<br>Start = 6</div><span class="flow-arrow" aria-hidden="true">&rarr;</span><div class="flow-step">Cluster 6<br>Next = 4</div><span class="flow-arrow" aria-hidden="true">&rarr;</span><div class="flow-step">Cluster 4<br>Next = 3</div><span class="flow-arrow" aria-hidden="true">&rarr;</span><div class="flow-step">Cluster 3<br>EOF</div>
+          </div>
+          <div class="flow" role="group" aria-label="File b's FAT chain">
+            <div class="flow-step">File b<br>Start = 2</div><span class="flow-arrow" aria-hidden="true">&rarr;</span><div class="flow-step">Cluster 2<br>Next = 1</div><span class="flow-arrow" aria-hidden="true">&rarr;</span><div class="flow-step">Cluster 1<br>EOF</div>
+          </div>
+          <p>File a occupies <strong>3 data clusters</strong>; file b occupies <strong>2</strong>. &ldquo;Directory (5)&rdquo; identifies the directory's location, not either file's starting cluster.</p>
+          <h4 id="fat-disk-accesses">Does FAT Remove Pointer Chasing?</h4>
+          <p><strong>No: the chain still needs traversal.</strong> The improvement is that the FAT, or relevant parts of it, can be cached in RAM. To find B4, follow the links in memory, then read only its data cluster from disk.</p>
+          <div class="study-grid">
+            <div class="panel">
+              <p class="panel-label">Basic linked allocation</p>
+              <p>Read B1 to locate B2, B2 to locate B3, B3 to locate B4, then read B4's data.</p>
+              <p class="equation"><strong>4 data-block reads</strong></p>
+            </div>
+            <div class="panel">
+              <p class="panel-label">FAT with links in memory</p>
+              <p>Traverse FAT entries in RAM to locate B4, then read B4's data. Earlier data blocks need not be read.</p>
+              <p class="equation"><strong>1 data-cluster read</strong></p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <caption>Reading B4: start address already known, no file data cached, no read-ahead, and one read per data block/cluster</caption>
+              <thead><tr><th scope="col">Method / cache assumption</th><th scope="col">Metadata reads</th><th scope="col">Data reads</th><th scope="col">Total reads</th></tr></thead>
+              <tbody>
+                <tr><td>Basic linked allocation</td><td>0 additional</td><td>4: B1 through B4</td><td><strong>4</strong></td></tr>
+                <tr><td>FAT already cached</td><td>0</td><td>1: B4</td><td><strong>1</strong></td></tr>
+                <tr><td>Required FAT information fetched in one read</td><td>1</td><td>1: B4</td><td><strong>2</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note"><strong>The two-read answer is conditional.</strong> A FAT may span many disk blocks; fetching all needed entries can require several reads. Count directory lookup separately if it is not already cached or excluded. Cached FAT improves disk I/O, but does not turn linked traversal into constant-time indexed access.</p>
+          <h4 id="fat-entry-size">FAT Entry Size and Trade-offs</h4>
+          <p>A 16-bit entry occupies <strong>2 bytes</strong> and can encode a next-cluster number or a special marker such as free or end-of-chain. Some values are reserved, so not every bit pattern represents a usable data cluster.</p>
+          <p class="equation">Size of one FAT copy = number of entries &times; bytes per entry</p>
+          <p><strong>Example:</strong> 1000 entries &times; 2 bytes = <strong>2000 bytes</strong>. Count all table entries specified by the question; multiple FAT copies require additional space.</p>
+          <p>FAT avoids external fragmentation and supports growth by appending free clusters. Links no longer consume space inside each data cluster, but the separate table uses disk space and its cache uses RAM. A partially filled final cluster can still cause internal fragmentation.</p>
+          <p class="note"><strong>Key distinction:</strong> basic linked allocation finds the next address inside a data block; FAT finds it in a separate table, preferably cached in memory. FAT is still linked allocation, not an index listing every file block by logical position.</p>
+          <div class="subtopic practice-question" id="fat-chain-question">
+            <h4>Question: Find the Complete FAT Chain</h4>
+            <p>Consider the following FAT table. The directory entry gives <strong>File A's starting block as 0</strong>. What is the complete block chain of File A?</p>
+            <div class="table-wrap">
+              <table class="comparison-table">
+                <thead><tr><th scope="col">Index</th><th scope="col">0</th><th scope="col">1</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th><th scope="col">6</th><th scope="col">7</th></tr></thead>
+                <tbody><tr><th scope="row">Value</th><td>5</td><td>7</td><td>EOF</td><td>1</td><td>2</td><td>4</td><td>EOF</td><td>6</td></tr></tbody>
+              </table>
+            </div>
+            <ol type="A">
+              <li>0 &rarr; 5 &rarr; 4 &rarr; 2 &rarr; EOF</li>
+              <li>0 &rarr; 5 &rarr; 4 &rarr; 2</li>
+              <li>0 &rarr; 5 &rarr; 4 &rarr; EOF</li>
+              <li>0 &rarr; 5 &rarr; 4 &rarr; 2 &rarr; 3 &rarr; EOF</li>
+            </ol>
+            <p><strong>Solution:</strong> Start at block 0 and use each FAT value as the next index: <strong>FAT[0] = 5</strong>, <strong>FAT[5] = 4</strong>, <strong>FAT[4] = 2</strong>, and <strong>FAT[2] = EOF</strong>. Stop at the end-of-chain marker.</p>
+            <p class="equation">File A: <strong>0 &rarr; 5 &rarr; 4 &rarr; 2 &rarr; EOF</strong></p>
+            <p class="note"><strong>Correct answer: A.</strong> The file occupies four blocks: 0, 5, 4, and 2. EOF is a marker, not another block. Use the question's simplified numbering; block 0 is a valid starting block here.</p>
+          </div>
+          <div class="subtopic practice-question" id="fat-file-b-block-count">
+            <h4>Question: How Many Blocks Does File B Occupy?</h4>
+            <p>Consider the following FAT table. The directory entry gives <strong>File B's starting block as 2</strong>. How many blocks does File B occupy?</p>
+            <div class="table-wrap">
+              <table class="comparison-table">
+                <thead><tr><th scope="col">Index</th><th scope="col">0</th><th scope="col">1</th><th scope="col">2</th><th scope="col">3</th><th scope="col">4</th><th scope="col">5</th><th scope="col">6</th></tr></thead>
+                <tbody><tr><th scope="row">Value</th><td>3</td><td>EOF</td><td>1</td><td>2</td><td>6</td><td>EOF</td><td>5</td></tr></tbody>
+              </table>
+            </div>
+            <ol type="A">
+              <li>2</li>
+              <li>3</li>
+              <li>4</li>
+              <li>5</li>
+            </ol>
+            <p><strong>Solution:</strong> FAT[2] = 1, so follow block 2 to block 1. FAT[1] = EOF, so block 1 is the last block.</p>
+            <p class="equation">File B: <strong>2 &rarr; 1 &rarr; EOF</strong> &nbsp; &rArr; &nbsp; <strong>2 blocks</strong></p>
+            <p class="note"><strong>Correct answer: A. 2.</strong> Count both the starting block and the final block. EOF is not a block, and unrelated FAT entries do not belong to this file's chain.</p>
+          </div>
+          <div class="subtopic practice-question" id="gate-cse-1996-question-23">
+            <h4>Question: GATE CSE 1996 &middot; Question 23</h4>
+            <p>A file system with a <strong>one-level directory</strong> is implemented on a disk with a block size of <strong>4K bytes</strong>. The disk is used as follows:</p>
+            <div class="table-wrap">
+              <table class="comparison-table">
+                <thead><tr><th scope="col">Disk block</th><th scope="col">Contents</th></tr></thead>
+                <tbody>
+                  <tr><td>0</td><td>File Allocation Table: one 8-bit entry per data block, storing the data-block address of the next block in a file.</td></tr>
+                  <tr><td>1</td><td>Directory: one 32-bit entry per file.</td></tr>
+                  <tr><td>2</td><td>Data-block 1.</td></tr>
+                  <tr><td>3</td><td>Data-block 2; and so on.</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <ol type="a">
+              <li>What is the maximum possible number of files?</li>
+              <li>What is the maximum possible file size in blocks?</li>
+            </ol>
+            <p><strong>Part (a): Directory capacity.</strong> Using K = 1024, the directory occupies 4096 bytes. Each entry occupies 32 bits = 4 bytes:</p>
+            <p class="equation">Maximum directory entries = 4096 / 4 = <strong>1024 files</strong></p>
+            <p>This counts file names the directory can represent. Reaching this limit assumes files may be empty; requiring a data block for every file would introduce a separate data-space limit.</p>
+            <p><strong>Part (b): Data-block address capacity.</strong> An 8-bit next-block address has 2<sup>8</sup> possible values. Under the simplified model in which all values identify data blocks, one file can occupy the entire addressable data-block pool:</p>
+            <p class="equation">Maximum file size = <strong>2<sup>8</sup> = 256 data blocks</strong></p>
+            <p>The 4 KiB FAT can physically hold 4096 one-byte entries, but an 8-bit link cannot distinguish that many next-block addresses. The address width, not the FAT block's byte capacity, is the tighter limit here.</p>
+            <p class="note"><strong>Why the supplied 254-block solution needs an extra assumption:</strong> subtracting the FAT and directory blocks from 256 assumes links address the same physical disk-block namespace. The question instead says <em>data-block addresses</em> and explicitly distinguishes disk block 2 from data-block 1. Thus, 256 is the simplified data-address capacity; 254 applies if two of the 256 address values are reserved for those physical metadata blocks. Reserved end-of-chain or other marker values can also reduce usable capacity, but their encoding is not specified here.</p>
+          </div>
+          <div class="subtopic practice-question" id="fat-partition-capacity-question">
+            <h4>Question: Maximum Partition Size in a FAT Design</h4>
+            <p>Consider a FAT file system where the disk is divided into <strong>M-byte blocks</strong>, and every FAT entry can store an <strong>N-bit block number</strong>. What is the maximum size of a disk partition that can be managed by such a FAT design?</p>
+            <p><strong>Solution:</strong> An N-bit block number can represent <strong>2<sup>N</sup> distinct block addresses</strong>. Each addressed block holds M bytes, so:</p>
+            <p class="equation">Maximum partition size = number of addressable blocks &times; block size</p>
+            <p class="equation">= <strong>2<sup>N</sup> &times; M bytes</strong></p>
+            <p><strong>Example:</strong> N = 16 and M = 512 = 2<sup>9</sup> bytes give 2<sup>16</sup> &times; 2<sup>9</sup> = <strong>2<sup>25</sup> bytes = 32 MiB</strong>.</p>
+            <p class="note"><strong>Addressable capacity is not FAT table size.</strong> The answer is 2<sup>N</sup>M bytes under the question's simplified model. Reserved address values and file-system metadata can reduce usable file-data capacity. For a hypothetical table with 2<sup>N</sup> tightly packed N-bit entries, the table itself occupies 2<sup>N</sup>N / 8 bytes.</p>
+          </div>
+        </article>
+        <article class="subtopic" id="allocation-method-comparison">
+          <h3>Contiguous vs. Linked Allocation</h3>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Feature</th><th scope="col">Contiguous</th><th scope="col">Basic linked</th></tr></thead>
+              <tbody>
+                <tr><td>Block locations</td><td>Consecutive</td><td>Anywhere</td></tr>
+                <tr><td>Next-block pointers</td><td>Not required</td><td>Stored in each file block</td></tr>
+                <tr><td>Sequential access</td><td>Efficient</td><td>Supported by following links</td></tr>
+                <tr><td>Random access</td><td>Direct address calculation</td><td>Requires chain traversal</td></tr>
+                <tr><td>External fragmentation</td><td>Possible</td><td>Avoided</td></tr>
+                <tr><td>File expansion</td><td>Needs adjacent space or relocation</td><td>Append a free block anywhere</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note"><strong>Remember:</strong> in contiguous allocation, block positions determine order; in linked allocation, pointers determine order.</p>
+        </article>
+      </section>
+      <section class="rule" id="indexed-allocation">
+        <div class="section-heading">
+          <span class="section-number">06</span>
+          <h2>Indexed Allocation</h2>
+        </div>
+        <p class="definition"><strong>Indexed allocation</strong> keeps the addresses of a file's data blocks in a separate <strong>index structure</strong>. In the basic model, each file has an index block containing one pointer per data block. The data blocks can be anywhere on disk.</p>
+        <p>Unlike linked allocation, the data blocks do not form a next-block chain. The file's metadata identifies its index, and the index entries determine the file's logical block order.</p>
+        <p class="note"><strong>Index block vs. inode:</strong> they are not interchangeable terms. An inode stores file metadata and may contain direct pointers plus pointers to indirect index blocks. It need not directly list every data block of a large file.</p>
+        <article class="subtopic" id="indexed-allocation-example">
+          <h3>Example: Scattered Blocks, Ordered Index</h3>
+          <p>A file has four logical blocks B1&ndash;B4, stored at disk blocks <strong>7, 2, 15, and 9</strong>. Its index lists those addresses in logical file order:</p>
+          <figure class="address-diagram">
+            <div class="diagram-scroll">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 375" role="img" aria-labelledby="indexed-title indexed-desc">
+                <title id="indexed-title">An index block points to four scattered data blocks</title>
+                <desc id="indexed-desc">Four index entries contain addresses 7, 2, 15, and 9. Each entry has its own arrow to the corresponding data block: B1 at 7, B2 at 2, B3 at 15, and B4 at 9. No chain traversal through earlier data blocks is required.</desc>
+                <defs><marker id="indexed-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#475569"/></marker></defs>
+                <g font-family="Inter, Segoe UI, sans-serif" fill="#172033">
+                  <text x="510" y="30" text-anchor="middle" font-size="19" font-weight="700">Index entries preserve the file's logical order</text>
+                  <text x="275" y="65" text-anchor="middle" font-size="16" font-weight="700">Index block</text>
+                  <g fill="#f5e8cf" stroke="#94a3b8"><rect x="180" y="83" width="190" height="52"/><rect x="180" y="135" width="190" height="52"/><rect x="180" y="187" width="190" height="52"/><rect x="180" y="239" width="190" height="52"/></g>
+                  <g text-anchor="middle" font-size="15"><text x="275" y="115">Entry 1: 7</text><text x="275" y="167">Entry 2: 2</text><text x="275" y="219">Entry 3: 15</text><text x="275" y="271">Entry 4: 9</text></g>
+                  <g fill="#dceee5" stroke="#94a3b8"><rect x="650" y="83" width="245" height="42"/><rect x="650" y="143" width="245" height="42"/><rect x="650" y="203" width="245" height="42"/><rect x="650" y="263" width="245" height="42"/></g>
+                  <g text-anchor="middle" font-size="15"><text x="772" y="110">B1: disk block 7</text><text x="772" y="170">B2: disk block 2</text><text x="772" y="230">B3: disk block 15</text><text x="772" y="290">B4: disk block 9</text></g>
+                  <g fill="none" stroke="#475569" stroke-width="2" marker-end="url(#indexed-arrow)"><path d="M373 109 L640 104"/><path d="M373 161 L640 164"/><path d="M373 213 L640 224"/><path d="M373 265 L640 284"/></g>
+                  <text x="510" y="347" text-anchor="middle" font-size="13" fill="#64748b">Data blocks are shown in logical order; their disk addresses need not be consecutive.</text>
+                </g>
+              </svg>
+            </div>
+            <figcaption>To locate B3, read entry 3 to obtain disk address 15, then access that data block.</figcaption>
+          </figure>
+          <p>In basic linked allocation, reaching B4 requires following the chain <strong>B1 &rarr; B2 &rarr; B3 &rarr; B4</strong>. With a single-level index, select entry 4 directly. The index may need to be read first if it is not cached, but earlier file-data blocks need not be read.</p>
+          <p>The same rule applies to a three-block file at addresses <strong>3, 8, and 1</strong>: its first, second, and third index entries contain 3, 8, and 1, respectively.</p>
+        </article>
+        <article class="subtopic" id="indexed-allocation-limits">
+          <h3>Benefits and Index Capacity</h3>
+          <ul>
+            <li><strong>Direct and sequential access:</strong> look up the required logical block's index entry.</li>
+            <li><strong>No external fragmentation:</strong> any free data blocks can be used; consecutive space is unnecessary.</li>
+            <li><strong>Index overhead:</strong> storing pointers requires extra metadata space and may require additional I/O. A mostly empty index block can waste space for a small file.</li>
+            <li><strong>Finite capacity:</strong> one index block holds only a limited number of pointers. Larger files need additional indexing structures.</li>
+          </ul>
+          <p>Inode-based designs can combine <strong>direct pointers</strong> with <strong>single-, double-, and triple-indirect pointers</strong>, reaching data blocks through one or more index levels. These levels extend capacity rather than enlarging the inode without limit.</p>
+        </article>
+        <article class="subtopic" id="three-allocation-methods">
+          <h3>Contiguous, Linked, and Indexed Allocation</h3>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Feature</th><th scope="col">Contiguous</th><th scope="col">Basic linked</th><th scope="col">Indexed</th></tr></thead>
+              <tbody>
+                <tr><td>Block placement</td><td>One consecutive run</td><td>Anywhere</td><td>Anywhere</td></tr>
+                <tr><td>Locating blocks</td><td>Start + logical index</td><td>Follow next-block pointers</td><td>Look up index entries</td></tr>
+                <tr><td>Random access</td><td>Efficient</td><td>Inefficient</td><td>Efficient; index lookup required</td></tr>
+                <tr><td>Allocation metadata</td><td>Start and length</td><td>Pointer in each data block</td><td>Separate index pointers</td></tr>
+                <tr><td>External fragmentation</td><td>Possible</td><td>Avoided</td><td>Avoided</td></tr>
+                <tr><td>Growth</td><td>Needs adjacent space or relocation</td><td>Append another block</td><td>Add block addresses; extend index if needed</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note"><strong>Remember:</strong> contiguous uses consecutive positions; linked uses a chain; indexed uses a table of block addresses.</p>
+        </article>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,2067 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Detailed GATE Operating Systems notes on processes, system calls, and CPU scheduling.">
+  <title>Process, System Calls &amp; CPU Scheduling Notes</title>
+  <style>
+    :root {
+      --ink: #111;
+      --muted: #555;
+      --line: #d9dce1;
+      --soft: #f5f6f8;
+      --paper: #fff;
+      --page: #f1f2f4;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--page);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.68;
+    }
+
+    a { color: inherit; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 58px;
+      padding: 0 24px;
+      color: #fff;
+      background: #111;
+      border-bottom: 1px solid #000;
+    }
+
+    .brand {
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: -0.2px;
+    }
+
+    .topbar-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .author-credit { color: #bbb; font-size: 12px; }
+    .author-credit strong { color: #fff; }
+
+    .course-tag {
+      padding: 3px 9px;
+      border: 1px solid #666;
+      border-radius: 999px;
+      color: #ddd;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 232px minmax(0, 1fr);
+      gap: 24px;
+      width: min(1280px, calc(100% - 40px));
+      margin: 24px auto;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 74px;
+      align-self: start;
+      max-height: calc(100dvh - 90px);
+      overflow-x: hidden;
+      overflow-y: scroll;
+      overscroll-behavior-y: contain;
+      scrollbar-gutter: stable;
+      scrollbar-color: #9a9a9a transparent;
+      padding: 4px 14px 12px 0;
+      border-right: 1px solid var(--line);
+    }
+
+    .sidebar::-webkit-scrollbar { width: 10px; }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: #aaa;
+      border: 2px solid var(--page);
+      border-radius: 999px;
+    }
+
+    .sidebar nav { display: grid; gap: 2px; }
+
+    .sidebar-title {
+      margin: 0 0 10px 10px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .sidebar a {
+      display: block;
+      padding: 8px 10px;
+      border-left: 3px solid transparent;
+      color: #333;
+      font-size: 13.5px;
+      font-weight: 650;
+      line-height: 1.4;
+      text-decoration: none;
+    }
+
+    .sidebar a:hover,
+    .sidebar a:focus-visible {
+      color: #000;
+      background: var(--paper);
+      border-left-color: var(--ink);
+      outline: none;
+    }
+
+    main {
+      min-width: 0;
+      padding: clamp(24px, 4vw, 46px);
+      background: var(--paper);
+      border-radius: 3px;
+      box-shadow: 0 3px 14px rgb(0 0 0 / 4%);
+    }
+
+    .eyebrow {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 3.4vw, 38px);
+      line-height: 1.12;
+      letter-spacing: -1.4px;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .rule {
+      margin-top: 28px;
+      padding-top: 25px;
+      border-top: 2px solid var(--ink);
+      scroll-margin-top: 82px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-number {
+      color: var(--muted);
+      font: 700 13px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 23px;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+    }
+
+    .definition {
+      max-width: 880px;
+      margin: 0 0 16px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 16px;
+    }
+
+    .study-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .panel {
+      padding: 16px;
+      border-top: 2px solid var(--ink);
+      background: #fafafa;
+    }
+
+    .panel-label {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .panel p:last-child,
+    .panel ul:last-child { margin-bottom: 0; }
+
+    .equation {
+      margin: 12px 0;
+      padding: 12px 14px;
+      overflow-x: auto;
+      background: var(--soft);
+      font-family: "Cambria Math", Cambria, Georgia, serif;
+      font-size: 16px;
+      line-height: 1.65;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 7px;
+      margin: 14px 0;
+      overflow-x: auto;
+      padding-bottom: 3px;
+    }
+
+    .flow-step {
+      display: grid;
+      min-width: 120px;
+      min-height: 64px;
+      place-items: center;
+      padding: 10px 12px;
+      background: var(--soft);
+      border-top: 2px solid var(--ink);
+      font-weight: 750;
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .flow-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .comparison-table th {
+      background: var(--soft);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .gantt-wrap {
+      overflow-x: auto;
+      margin: 14px 0 18px;
+      padding-bottom: 3px;
+    }
+
+    .gantt-chart { min-width: 680px; }
+
+    .gantt-bar {
+      display: grid;
+      grid-template-columns: 24fr 3fr 3fr;
+      height: 66px;
+      border: 1px solid var(--ink);
+    }
+
+    .gantt-segment {
+      display: grid;
+      place-items: center;
+      font-size: 17px;
+      font-weight: 750;
+    }
+
+    .gantt-segment + .gantt-segment { border-left: 1px solid var(--ink); }
+    .gantt-segment:nth-child(1) { background: #f1f2f4; }
+    .gantt-segment:nth-child(2) { background: #e4e7eb; }
+    .gantt-segment:nth-child(3) { background: #d7dce2; }
+    .gantt-segment:nth-child(4) { background: #cbd2d9; }
+    .gantt-segment:nth-child(5) { background: #bec8d2; }
+
+    .gantt-times {
+      position: relative;
+      height: 32px;
+      font: 700 13px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .gantt-times span {
+      position: absolute;
+      top: 5px;
+      transform: translateX(-50%);
+    }
+
+    .gantt-times span:first-child { left: 0; transform: none; }
+    .gantt-times span:nth-child(2) { left: 80%; }
+    .gantt-times span:nth-child(3) { left: 90%; }
+    .gantt-times span:last-child { left: 100%; transform: translateX(-100%); }
+
+    .sjf-gantt .gantt-bar { grid-template-columns: 3fr 6fr 7fr 8fr; }
+    .sjf-gantt .gantt-times span:nth-child(2) { left: 12.5%; }
+    .sjf-gantt .gantt-times span:nth-child(3) { left: 37.5%; }
+    .sjf-gantt .gantt-times span:nth-child(4) { left: 66.6667%; }
+    .sjf-gantt .gantt-times span:nth-child(5) { left: 100%; transform: translateX(-100%); }
+
+    .rr-gantt .gantt-bar { grid-template-columns: 4fr 3fr 3fr 20fr; }
+    .rr-gantt .gantt-times span:nth-child(2) { left: 13.3333%; }
+    .rr-gantt .gantt-times span:nth-child(3) { left: 23.3333%; }
+    .rr-gantt .gantt-times span:nth-child(4) { left: 33.3333%; }
+    .rr-gantt .gantt-times span:nth-child(5) { left: 100%; transform: translateX(-100%); }
+
+    .srtf-gantt .gantt-chart { min-width: 900px; }
+    .srtf-gantt .gantt-bar { grid-template-columns: 1fr 4fr 5fr 7fr 9fr; }
+    .srtf-gantt .gantt-times span:nth-child(2) { left: 3.8462%; }
+    .srtf-gantt .gantt-times span:nth-child(3) { left: 19.2308%; }
+    .srtf-gantt .gantt-times span:nth-child(4) { left: 38.4615%; }
+    .srtf-gantt .gantt-times span:nth-child(5) { left: 65.3846%; }
+    .srtf-gantt .gantt-times span:nth-child(6) { left: 100%; transform: translateX(-100%); }
+
+    .ljf-gantt .gantt-bar { grid-template-columns: 2fr 6fr 3fr 1fr; }
+    .ljf-gantt .gantt-times span:nth-child(2) { left: 16.6667%; }
+    .ljf-gantt .gantt-times span:nth-child(3) { left: 66.6667%; }
+    .ljf-gantt .gantt-times span:nth-child(4) { left: 91.6667%; }
+    .ljf-gantt .gantt-times span:nth-child(5) { left: 100%; transform: translateX(-100%); }
+
+    .lrtf-gantt .gantt-chart { min-width: 1260px; }
+    .lrtf-gantt .gantt-bar {
+      grid-template-columns: 1fr 1fr 1fr 1fr 4fr 2fr 2fr 1fr 2fr 1fr 2fr 1fr 1fr 1fr;
+    }
+    .lrtf-gantt .gantt-segment:nth-child(odd) { background: #f1f2f4; }
+    .lrtf-gantt .gantt-segment:nth-child(even) { background: #e4e7eb; }
+    .lrtf-gantt .gantt-segment:first-child { color: var(--muted); }
+    .lrtf-gantt .gantt-times span:nth-child(2) { left: 4.7619%; }
+    .lrtf-gantt .gantt-times span:nth-child(3) { left: 9.5238%; }
+    .lrtf-gantt .gantt-times span:nth-child(4) { left: 14.2857%; }
+    .lrtf-gantt .gantt-times span:nth-child(5) { left: 19.0476%; }
+    .lrtf-gantt .gantt-times span:nth-child(6) { left: 38.0952%; }
+    .lrtf-gantt .gantt-times span:nth-child(7) { left: 47.6190%; }
+    .lrtf-gantt .gantt-times span:nth-child(8) { left: 57.1429%; }
+    .lrtf-gantt .gantt-times span:nth-child(9) { left: 61.9048%; }
+    .lrtf-gantt .gantt-times span:nth-child(10) { left: 71.4286%; }
+    .lrtf-gantt .gantt-times span:nth-child(11) { left: 76.1905%; }
+    .lrtf-gantt .gantt-times span:nth-child(12) { left: 85.7143%; }
+    .lrtf-gantt .gantt-times span:nth-child(13) { left: 90.4762%; }
+    .lrtf-gantt .gantt-times span:nth-child(14) { left: 95.2381%; }
+    .lrtf-gantt .gantt-times span:nth-child(15) { left: 100%; transform: translateX(-100%); }
+
+    .note {
+      margin: 12px 0 0;
+      padding: 11px 13px;
+      background: var(--soft);
+      font-size: 13px;
+    }
+
+    .subtopic {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      scroll-margin-top: 82px;
+    }
+
+    .subtopic h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+      line-height: 1.3;
+    }
+
+    .subtopic h4 {
+      margin: 20px 0 10px;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .derivation {
+      display: grid;
+      gap: 8px;
+      margin: 14px 0;
+      padding: 2px 2px 2px 16px;
+    }
+
+    .derivation p { margin: 0; }
+    ul { margin-top: 8px; padding-left: 22px; }
+    li + li { margin-top: 5px; }
+    code {
+      padding: 2px 5px;
+      background: var(--soft);
+      font: 0.92em/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .code-sample {
+      margin: 12px 0;
+      padding: 12px 14px;
+      overflow-x: auto;
+      background: var(--soft);
+      font: 14px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .code-sample code { padding: 0; }
+
+    .diagram {
+      margin: 18px 0 0;
+    }
+
+    .diagram-frame {
+      overflow-x: auto;
+      background: #000;
+      border: 1px solid #222;
+    }
+
+    .diagram svg {
+      display: block;
+      width: 100%;
+      min-width: 980px;
+      height: auto;
+    }
+
+    .state-diagram .diagram-frame {
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .state-diagram svg { min-width: 900px; }
+
+    .diagram figcaption {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 760px) {
+      .topbar { padding: 0 16px; }
+      .author-credit { display: none; }
+      .layout {
+        display: block;
+        width: min(100% - 20px, 720px);
+        margin: 10px auto;
+      }
+      .sidebar {
+        position: sticky;
+        top: 58px;
+        z-index: 9;
+        max-height: none;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 7px 0;
+        background: var(--page);
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+        scrollbar-gutter: auto;
+      }
+      .sidebar-title { display: none; }
+      .sidebar nav { display: flex; gap: 3px; width: max-content; }
+      .sidebar a {
+        padding: 7px 9px;
+        border-left: 0;
+        border-bottom: 2px solid transparent;
+        white-space: nowrap;
+      }
+      .sidebar a:hover,
+      .sidebar a:focus-visible { border-bottom-color: var(--ink); }
+      main { padding: 22px 18px; }
+      .study-grid { grid-template-columns: 1fr; }
+      .table-wrap { overflow-x: auto; }
+      .comparison-table { min-width: 620px; }
+    }
+
+    @media (max-width: 430px) {
+      .brand { max-width: 235px; line-height: 1.25; }
+      .course-tag { flex: 0 0 auto; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Process, System Calls &amp; CPU Scheduling</div>
+    <div class="topbar-meta">
+      <span class="author-credit">By <strong>ProFonCoDe</strong></span>
+      <span class="course-tag">GATE &middot; OS</span>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" aria-label="Table of contents">
+      <p class="sidebar-title">Contents</p>
+      <nav>
+        <a href="#program-and-process">01&nbsp;&nbsp;Program &amp; Process</a>
+        <a href="#cpu-os-control">02&nbsp;&nbsp;CPU &amp; OS Control</a>
+        <a href="#all-about-fork">03&nbsp;&nbsp;All About fork()</a>
+        <a href="#all-about-exec">04&nbsp;&nbsp;All about exec</a>
+        <a href="#kernel-and-system-calls">05&nbsp;&nbsp;Kernel and System Calls</a>
+        <a href="#threads">06- Threads</a>
+        <a href="#introduction-to-cpu-scheduling">07&nbsp;&nbsp;Introduction to CPU Scheduling</a>
+        <a href="#fcfs">08&nbsp;&nbsp;FCFS</a>
+        <a href="#sjf">09&nbsp;&nbsp;SJF</a>
+        <a href="#round-robin">10&nbsp;&nbsp;Round Robin</a>
+        <a href="#srtf">11&nbsp;&nbsp;SRTF</a>
+        <a href="#ljf">12&nbsp;&nbsp;LJF</a>
+        <a href="#lrtf">13&nbsp;&nbsp;LRTF</a>
+      </nav>
+    </aside>
+
+    <main>
+      <header>
+        <p class="eyebrow">Operating Systems</p>
+        <h1>Process, System Calls &amp; CPU Scheduling</h1>
+        <p class="subtitle">Detailed concepts, execution flows, distinctions, and exam-ready notes for GATE revision.</p>
+      </header>
+
+      <section class="rule" id="program-and-process">
+        <div class="section-heading">
+          <span class="section-number">01</span>
+          <h2>Program and Process</h2>
+        </div>
+
+        <p class="definition">A program begins as source code written by a programmer. After compilation, it becomes an executable file on disk. When the Operating System loads that executable into main memory and begins its execution, it becomes a process.</p>
+
+        <div class="study-grid">
+          <article class="panel">
+            <p class="panel-label">Before compilation</p>
+            <p><code>prog.c</code> is the <strong>source-code file</strong>. It contains the C instructions written by the programmer in a human-readable programming language.</p>
+          </article>
+
+          <article class="panel">
+            <p class="panel-label">After compilation</p>
+            <p>The compiler translates <code>prog.c</code> into <code>a.out</code>, an <strong>executable program</strong> containing machine-level instructions and stored on secondary storage such as a disk.</p>
+          </article>
+        </div>
+
+        <p class="equation"><code>prog.c</code> &nbsp;&rarr;&nbsp; Compiler &nbsp;&rarr;&nbsp; <code>a.out</code></p>
+
+        <div class="subtopic" id="loading-the-program">
+          <h3>From Executable to Running Process</h3>
+          <div class="derivation">
+            <p>When the user runs <code>a.out</code>, the Operating System loads the executable into <strong>main memory (RAM)</strong>.</p>
+            <p>The OS creates the required execution state and allows the CPU to begin executing the program's instructions.</p>
+            <p>At this stage, the passive executable has become an active <strong>process</strong>.</p>
+          </div>
+
+          <div class="flow" aria-label="Flow from source code to process">
+            <div class="flow-step">Source code</div>
+            <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+            <div class="flow-step">Compile</div>
+            <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+            <div class="flow-step">Executable</div>
+            <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+            <div class="flow-step">Load into RAM</div>
+            <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+            <div class="flow-step">Process</div>
+          </div>
+        </div>
+
+        <div class="subtopic">
+          <h3>Program vs Process</h3>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th>Property</th>
+                  <th>Program</th>
+                  <th>Process</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Meaning</strong></td>
+                  <td>A set of instructions stored as an executable file.</td>
+                  <td>A program that has been loaded and is being executed.</td>
+                </tr>
+                <tr>
+                  <td><strong>Nature</strong></td>
+                  <td>Passive</td>
+                  <td>Active</td>
+                </tr>
+                <tr>
+                  <td><strong>Location</strong></td>
+                  <td>Normally stored on secondary storage such as a disk.</td>
+                  <td>Has an execution image in main memory and an associated execution state.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note"><strong>Remember:</strong> A program is a passive executable file on disk, whereas a process is an executing instance of that program.</p>
+        </div>
+      </section>
+
+      <section class="rule" id="cpu-os-control">
+        <div class="section-heading">
+          <span class="section-number">02</span>
+          <h2>CPU Execution and OS Control</h2>
+        </div>
+
+        <p class="definition">The CPU does not execute only the instructions of a user program. It also executes Operating System instructions whenever the OS must manage the program, hardware, or another system event.</p>
+
+        <p>An illustrative instruction stream may contain several OS instructions, followed by instructions of Program A, and then more OS instructions:</p>
+        <p class="equation">OS &rarr; OS &rarr; OS &rarr; A &rarr; A &rarr; A &rarr; OS &rarr; &hellip;</p>
+        <p>Here, <strong>A</strong> represents instructions belonging to user Program A. The exact number of instructions executed during each interval can vary. OS instructions are required for loading programs, handling system calls and interrupts, scheduling processes, managing memory, and performing input/output operations.</p>
+
+        <div class="subtopic" id="switching-control">
+          <h3>Switching Control Between the OS and User Programs</h3>
+          <p>The CPU executes one instruction stream at a time. Depending on events and scheduling decisions, control moves between Operating System code and user-program code.</p>
+          <p class="equation">Operating System code &rarr; User Program A &rarr; Operating System code &rarr; Another program</p>
+          <p class="note"><strong>Key idea:</strong> The CPU executes whichever instruction the current control flow directs it to execute. The OS arranges and manages the execution of user programs, while OS code itself also runs as machine instructions on the same CPU.</p>
+        </div>
+
+        <div class="subtopic" id="after-program-finishes">
+          <h3>What Happens After a Program Finishes?</h3>
+          <p>After the last instruction of Program A executes, the CPU does not simply stop. Program termination returns control to the Operating System.</p>
+          <p>The OS records that Program A has terminated, performs the required cleanup, and may release or reclaim the resources associated with the completed process. The scheduler can then select another ready process and allow it to run.</p>
+        </div>
+
+        <div class="subtopic" id="need-for-os">
+          <h3>Why Is an Operating System Required?</h3>
+          <p>To understand the need for an Operating System, consider a computer on which no OS is installed. Suppose the following program is compiled into an executable file such as <code>a.out</code>:</p>
+          <pre class="code-sample"><code>int a = 1;
+int b = 2;
+int c = a + b;</code></pre>
+          <p>Although this program is very small, the CPU cannot execute it directly from the disk without preparation. The program must be loaded into memory, the CPU must be directed to its first instruction, and the program must be given controlled access to hardware resources. Without an OS, the programmer would have to arrange all of this manually.</p>
+        </div>
+
+        <div class="subtopic" id="program-counter">
+          <h3>Program Loading and the Program Counter</h3>
+          <p>Before execution can begin, the executable instructions must be loaded into RAM. The CPU must then know the memory address from which it should fetch the first instruction.</p>
+          <p>The <strong>Program Counter (PC)</strong> is a special CPU register that stores the <strong>memory address of the next instruction to be executed</strong>.</p>
+          <p>For example, if the first instruction of the program is loaded at address <code>1000</code>, execution must begin with:</p>
+          <p class="equation">PC = 1000</p>
+          <p>The CPU fetches and executes the instruction at that address. The PC is then updated so that the CPU can fetch the next instruction in the sequence, unless an instruction changes the control flow.</p>
+          <p>Thus, two essential tasks must occur before execution:</p>
+          <ol>
+            <li>Load the executable program into main memory.</li>
+            <li>Initialize the PC with the address of the appropriate first instruction, called the program's entry point.</li>
+          </ol>
+          <p>Without an OS, these tasks would have to be performed manually whenever a program is run.</p>
+          <p class="note"><strong>Remember:</strong> PC stands for Program Counter. It stores the address of the next instruction to be executed.</p>
+        </div>
+
+        <div class="subtopic" id="hardware-interaction">
+          <h3>Interaction with Hardware</h3>
+          <p>Consider a program containing <code>printf("Hello");</code>. The CPU and the monitor are separate hardware components, so the CPU cannot display the text merely by naming the monitor. The output must be sent through the appropriate hardware interface and device controller.</p>
+          <p>Direct hardware communication requires knowledge of device-specific details such as control registers, addresses, supported operations, communication protocols, and access permissions. Requiring every application programmer to manage these details would make even simple programs difficult to write and highly dependent on particular hardware.</p>
+          <p>The OS provides a convenient, controlled interface to hardware. A library function such as <code>printf()</code> ultimately requests an output service from the OS. The OS and the appropriate device driver translate that request into operations understood by the display hardware.</p>
+          <p class="equation">Application request &rarr; Operating System &rarr; Device driver &rarr; Hardware device</p>
+          <p>A <strong>device driver</strong> is system software that allows the OS to communicate with a particular type of hardware device. This arrangement hides device-specific implementation details from application programs.</p>
+        </div>
+
+        <div class="subtopic" id="memory-management">
+          <h3>Memory Management</h3>
+          <p>When several programs are present in memory, their memory regions must be allocated and managed carefully. The system must decide where each program will be placed, how much memory it may use, and which addresses belong to it.</p>
+          <p>For example, suppose Program 1 occupies addresses <code>1000&ndash;1999</code> and Program 2 occupies addresses <code>2000&ndash;2999</code>. If Program 2 incorrectly writes to address <code>1500</code>, it may overwrite the instructions or data of Program 1.</p>
+          <p>The OS performs <strong>memory management</strong> by tracking the memory assigned to programs, allocating and reclaiming memory, and preventing unauthorized overlap or access. Without an OS, programmers would have to coordinate these memory locations manually.</p>
+        </div>
+
+        <div class="subtopic" id="protection-security">
+          <h3>Protection and Security</h3>
+          <p>If programs could access every memory location and hardware device without restriction, one program could read or modify another program's data, corrupt important system memory, or issue unsafe hardware operations.</p>
+          <p>The OS establishes controlled execution environments using mechanisms such as:</p>
+          <ul>
+            <li><strong>Process isolation:</strong> separates the execution state of different processes.</li>
+            <li><strong>Memory protection:</strong> restricts a process to memory that it is permitted to access.</li>
+            <li><strong>Access permissions:</strong> control the use of files, devices, and other resources.</li>
+            <li><strong>Privileged operations:</strong> reserve sensitive machine operations for trusted OS code.</li>
+          </ul>
+          <p>The central requirement is that one program must not be allowed to arbitrarily read, modify, or damage another program or the Operating System.</p>
+        </div>
+
+        <div class="subtopic" id="multiple-programs">
+          <h3>Managing Multiple Programs</h3>
+          <p>When several programs are ready to run, they compete for the CPU. A single CPU core normally executes only one instruction at a time, so the system must decide which process runs, when it runs, and how long it may continue before another process gets a turn.</p>
+          <p>This controlled sharing of the CPU is part of <strong>concurrency and resource management</strong>. The OS scheduler selects processes for execution and switches the CPU among them. The subject is studied in detail under <strong>CPU scheduling</strong>.</p>
+          <p class="equation">Time: P1 &nbsp; P1 &nbsp; P1 &nbsp;|&nbsp; P2 &nbsp; P2 &nbsp;|&nbsp; P1 &nbsp; P1 &nbsp;|&nbsp; P3 &nbsp; P3 &nbsp;|&nbsp; &hellip;</p>
+          <p>The illustrated order is only an example. The actual order depends on the scheduling policy and the state of each process.</p>
+
+          <h4>Example: Concurrent Background Processes</h4>
+          <pre class="code-sample"><code>#include &lt;stdio.h&gt;
+
+int main(int argc, char *argv[]) {
+    while (1) {
+        printf("%s\n", argv[1]);
+    }
+    return 0;
+}</code></pre>
+          <p>The condition <code>while (1)</code> is always true, so the loop runs indefinitely. During every iteration, <code>printf()</code> prints the string stored in <code>argv[1]</code>.</p>
+          <p>In the <code>main()</code> function:</p>
+          <ul>
+            <li><code>argc</code> stores the number of command-line arguments, including the program name.</li>
+            <li><code>argv</code> is an array of strings containing those arguments.</li>
+            <li><code>argv[0]</code> normally contains the name or path used to invoke the program.</li>
+            <li><code>argv[1]</code> contains the first argument supplied after the program name.</li>
+          </ul>
+          <p>For example, when the program is executed as <code>./prog A</code>, the argument values are:</p>
+          <p class="equation">argv[0] = "./prog" &nbsp;&nbsp; and &nbsp;&nbsp; argv[1] = "A"</p>
+          <p>Therefore, this process repeatedly prints <code>A</code>.</p>
+
+          <p>Now consider running four instances:</p>
+          <pre class="code-sample"><code>./prog A &amp; ./prog B &amp; ./prog C &amp; ./prog D</code></pre>
+          <p>In a Unix-like shell, <code>&amp;</code> requests background execution. Each invocation creates an independent process, so four processes are active and repeatedly attempt to print <code>A</code>, <code>B</code>, <code>C</code>, and <code>D</code>, respectively.</p>
+          <p>On a single CPU core, only one of these processes executes at a particular instant. The OS scheduler rapidly switches the CPU among the runnable processes, creating <strong>concurrent execution</strong>. Consequently, their output may be interleaved in the terminal, and an order such as <code>A, C, B, D, ...</code> is possible. No fixed output order is guaranteed because scheduling decisions can vary.</p>
+          <p class="note"><strong>Safety condition:</strong> The program should be run with at least one command-line argument. Before using <code>argv[1]</code>, robust code should verify that <code>argc &gt; 1</code>; otherwise, passing the missing argument to <code>printf("%s", ...)</code> results in undefined behavior.</p>
+
+          <figure class="diagram">
+            <div class="diagram-frame">
+              <svg viewBox="0 0 1320 390" role="img" aria-labelledby="compiler-diagram-title compiler-diagram-desc" xmlns="http://www.w3.org/2000/svg">
+                <title id="compiler-diagram-title">Compilation system from C source code to executable</title>
+                <desc id="compiler-diagram-desc">hello.c passes through the preprocessor, compiler, assembler, and linker to produce the executable hello. The linker also receives printf.o.</desc>
+                <defs>
+                  <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
+                    <path d="M0,0 L8,3 L0,6 Z" fill="#eee"/>
+                  </marker>
+                  <style>
+                    .d-text { fill: #eee; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+                    .d-file { font-size: 24px; }
+                    .d-label { font-size: 22px; }
+                    .d-box-text { font-size: 24px; text-anchor: middle; }
+                    .d-box { fill: #080808; stroke: #eee; stroke-width: 3; rx: 10; }
+                    .d-line { stroke: #eee; stroke-width: 2; fill: none; marker-end: url(#arrowhead); }
+                  </style>
+                </defs>
+
+                <text class="d-text d-file" x="48" y="178">hello.c</text>
+                <text class="d-text d-label" text-anchor="middle" x="90" y="237">Source</text>
+                <text class="d-text d-label" text-anchor="middle" x="90" y="265">program</text>
+                <text class="d-text d-label" text-anchor="middle" x="90" y="293">(text)</text>
+                <path class="d-line" d="M28 188 H178"/>
+
+                <rect class="d-box" x="180" y="132" width="135" height="120"/>
+                <text class="d-text d-box-text" x="247" y="171">Pre-</text>
+                <text class="d-text d-box-text" x="247" y="201">processor</text>
+                <text class="d-text d-box-text" x="247" y="231">(cpp)</text>
+                <path class="d-line" d="M315 188 H452"/>
+                <text class="d-text d-file" text-anchor="middle" x="383" y="177">hello.i</text>
+                <text class="d-text d-label" text-anchor="middle" x="383" y="237">Modified</text>
+                <text class="d-text d-label" text-anchor="middle" x="383" y="265">source program</text>
+                <text class="d-text d-label" text-anchor="middle" x="383" y="293">(text)</text>
+
+                <rect class="d-box" x="455" y="132" width="130" height="120"/>
+                <text class="d-text d-box-text" x="520" y="183">Compiler</text>
+                <text class="d-text d-box-text" x="520" y="217">(cc1)</text>
+                <path class="d-line" d="M585 188 H730"/>
+                <text class="d-text d-file" text-anchor="middle" x="658" y="177">hello.s</text>
+                <text class="d-text d-label" text-anchor="middle" x="658" y="237">Assembly</text>
+                <text class="d-text d-label" text-anchor="middle" x="658" y="265">program</text>
+                <text class="d-text d-label" text-anchor="middle" x="658" y="293">(text)</text>
+
+                <rect class="d-box" x="733" y="132" width="140" height="120"/>
+                <text class="d-text d-box-text" x="803" y="183">Assembler</text>
+                <text class="d-text d-box-text" x="803" y="217">(as)</text>
+                <path class="d-line" d="M873 188 H1032"/>
+                <text class="d-text d-file" text-anchor="middle" x="950" y="177">hello.o</text>
+                <text class="d-text d-label" text-anchor="middle" x="950" y="237">Relocatable</text>
+                <text class="d-text d-label" text-anchor="middle" x="950" y="265">object program</text>
+                <text class="d-text d-label" text-anchor="middle" x="950" y="293">(binary)</text>
+
+                <text class="d-text d-file" text-anchor="middle" x="950" y="86">printf.o</text>
+                <path class="d-line" d="M950 96 V126 H1032"/>
+
+                <rect class="d-box" x="1035" y="132" width="125" height="120"/>
+                <text class="d-text d-box-text" x="1097" y="183">Linker</text>
+                <text class="d-text d-box-text" x="1097" y="217">(ld)</text>
+                <path class="d-line" d="M1160 188 H1302"/>
+                <text class="d-text d-file" text-anchor="middle" x="1230" y="177">hello</text>
+                <text class="d-text d-label" text-anchor="middle" x="1230" y="237">Executable</text>
+                <text class="d-text d-label" text-anchor="middle" x="1230" y="265">object program</text>
+                <text class="d-text d-label" text-anchor="middle" x="1230" y="293">(binary)</text>
+              </svg>
+            </div>
+            <figcaption>Compilation stages: preprocessing, compilation, assembly, and linking.</figcaption>
+          </figure>
+        </div>
+
+        <div class="subtopic" id="common-os-services">
+          <h3>Common Tasks Performed by the OS</h3>
+          <p>Without an OS, the following work would have to be repeated manually whenever programs are executed:</p>
+          <ol>
+            <li>Load the executable program into RAM.</li>
+            <li>Identify the address of its first instruction.</li>
+            <li>Initialize the Program Counter with that address.</li>
+            <li>Arrange communication with hardware devices.</li>
+            <li>Grant only the hardware access permitted to the program.</li>
+            <li>Allocate memory to every program.</li>
+            <li>Prevent programs from overwriting or reading one another's memory.</li>
+            <li>Decide which process receives the CPU.</li>
+            <li>Protect programs and the system from interference.</li>
+            <li>Repeat the same setup and management for every program execution.</li>
+          </ol>
+          <p>These tasks are common to almost all application programs; they are not part of the unique problem that each application is designed to solve. If no OS existed, every programmer would have to recreate much of the same loading, hardware-management, memory-management, scheduling, and protection infrastructure.</p>
+        </div>
+      </section>
+
+      <section class="rule" id="all-about-fork">
+        <div class="section-heading">
+          <span class="section-number">03</span>
+          <h2>All About <code>fork()</code></h2>
+        </div>
+
+        <p><code>fork()</code> is a Unix/Linux system call used to create a <strong>new child process from an existing parent process</strong>. Before <code>fork()</code>, only the parent exists. After <code>fork()</code>, there are two separate processes: the parent and the child. Both continue executing from the statement immediately after <code>fork()</code>, but they have different PIDs, their own CPU state, their own program counters/registers, and their own virtual address spaces. Logically, the child gets a copy of the parent&rsquo;s memory, but the OS usually avoids copying all physical RAM immediately by using <strong>Copy-on-Write (COW)</strong>: parent and child initially share the same physical memory pages for reading, and if either one writes to a shared page, the OS creates a separate physical copy for that process. Therefore, they remain independent even though some RAM may initially be shared. If RAM later becomes full, the OS may move process pages to <strong>swap space</strong> on secondary storage. These swapped pages are separate from the original executable file: the executable is the permanent program stored on disk, while swap contains temporary runtime memory pages belonging to processes. If both parent and child pages are swapped out, the OS stores them in separate swap locations and keeps track of which page belongs to which process.</p>
+
+        <pre class="code-sample"><code>Executable on disk
+       |
+       | run
+       v
+   Parent process
+       |
+     fork()
+      / \
+     /   \
+ Parent   Child
+   |        |
+   └─ initially may share RAM pages ─┘
+              |
+        one process writes
+              |
+              v
+      separate physical pages
+              |
+        if RAM is needed
+              |
+              v
+      pages may be swapped out
+      to separate swap locations</code></pre>
+
+        <p>The key idea to remember is:</p>
+        <p class="note"><strong><code>fork()</code> creates a new independent process logically; Copy-on-Write makes that creation memory-efficient physically.</strong></p>
+
+        <div class="subtopic" id="fork-question-1">
+          <h3>Question 1: Predict the Output</h3>
+          <pre class="code-sample"><code>int main()
+{
+    int pid = fork();
+    printf("%d\n", pid);
+}</code></pre>
+          <p><strong>Solution:</strong> The <code>fork()</code> system call creates a new process. It returns different values to the parent and the child:</p>
+          <ul>
+            <li>In the child process, <code>fork()</code> returns <code>0</code>.</li>
+            <li>In the parent process, <code>fork()</code> returns the process ID (PID) of the child, which is a non-zero positive integer.</li>
+          </ul>
+          <p>Therefore, the output will be two lines: <code>0</code> printed by the child and a non-zero integer printed by the parent. Either line may appear first.</p>
+        </div>
+
+        <div class="subtopic" id="fork-question-2">
+          <h3>Question 2: Output Printed by Parent and Child</h3>
+          <pre class="code-sample"><code>int main()
+{
+    int pid = fork();
+
+    if (pid == 0)
+        printf("A");
+    else
+        printf("B");
+}</code></pre>
+          <p><strong>Solution:</strong> The parent prints <code>B</code> and the child prints <code>A</code>. Their execution order is not guaranteed, so the combined output may be <code>AB</code> or <code>BA</code>.</p>
+        </div>
+
+        <div class="subtopic" id="fork-question-3">
+          <h3>Question 3: Address Printed by Parent and Child</h3>
+          <p><strong>Question:</strong> What is the output of the following code?</p>
+          <pre class="code-sample"><code>#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    int a = 10;
+    if (fork() == 0) {
+        printf("%p", &amp;a);
+    } else {
+        printf("%p", &amp;a);
+    }
+}</code></pre>
+          <p><strong>Options:</strong></p>
+          <ol type="A">
+            <li>The parent and child print DIFFERENT addresses.</li>
+            <li>The parent and child print SAME addresses.</li>
+            <li>The child cannot access <code>a</code>, so no address is printed.</li>
+            <li>The addresses printed depend on the scheduling order of the processes.</li>
+          </ol>
+          <p><strong>Solution:</strong> The correct answer is <strong>B</strong>. The parent and child print the same virtual address for <code>a</code>.</p>
+        </div>
+
+        <div class="subtopic">
+          <pre class="code-sample"><code>#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    int a = 10;
+
+    printf("Before fork: PID = %d, a = %d, &amp;a = %p\n",
+           getpid(), a, (void *)&amp;a);
+
+    int x = fork();
+
+    if (x == 0) {
+        a = 20;
+        printf("Child: PID = %d, a = %d, &amp;a = %p\n",
+               getpid(), a, (void *)&amp;a);
+    } else {
+        a = 30;
+        printf("Parent: PID = %d, a = %d, &amp;a = %p\n",
+               getpid(), a, (void *)&amp;a);
+    }
+
+    return 0;
+}</code></pre>
+
+          <p>This source code is first compiled into an executable program, and that executable is stored in secondary memory. When you run the executable, the operating system creates a parent process. That process gets a PID, its own virtual address space, stack, heap, program counter, register state, page table, and other process-related information. The variable <code>a</code> may appear to the parent at a virtual address such as <code>1000</code>. That <code>1000</code> is not an actual RAM location; it is simply the address the parent process uses inside its own virtual address space. The MMU translates that virtual address using the parent's page table to some real physical RAM location, for example <code>5000</code>, and the actual bytes representing the value of <code>a</code> are stored there. When <code>fork()</code> is executed, the operating system creates a child process. The child gets a different PID and its own process context, page table, virtual address space, stack, heap, and register state, but it initially inherits the same virtual memory layout as the parent. Therefore, the child may also see <code>a</code> at virtual address <code>1000</code>. Initially, because of copy-on-write, the parent and child may even share the same physical RAM page. If either one modifies that memory, the operating system creates a separate physical copy for the process that writes. So after the parent changes <code>a</code> to <code>30</code> and the child changes <code>a</code> to <code>20</code>, both may still see <code>a</code> at virtual address <code>1000</code>, but the parent's <code>1000</code> may map to physical RAM location <code>5000</code>, while the child's <code>1000</code> may map to physical RAM location <code>9000</code>. Therefore, <code>1000</code> is not where the data physically sits in RAM; it is the process-visible virtual address, while <code>5000</code> and <code>9000</code> are example physical locations in RAM where the actual bytes are stored. If <code>printf("%p", &amp;a)</code> is used, both processes can print the same virtual address because each process has its own separate virtual address space.</p>
+        </div>
+
+        <div class="subtopic" id="fork-question-4">
+          <h3>Question 4: Values and Addresses After <code>fork()</code></h3>
+          <p><strong>Consider the following code fragment:</strong></p>
+          <pre class="code-sample"><code>if (fork() == 0) {
+    a = a + 5;
+    printf("%d, %p\n", a, &amp;a);
+}
+else {
+    a = a - 5;
+    printf("%d, %p\n", a, &amp;a);
+}</code></pre>
+          <p>Let <code>u, v</code> be the values printed by the parent process and <code>x, y</code> be the values printed by the child process. Which one of the following is <strong>TRUE</strong>?</p>
+          <ol type="A">
+            <li><code>u = x + 10</code> and <code>v = y</code></li>
+            <li><code>u = x + 10</code> and <code>v != y</code></li>
+            <li><code>u + 10 = x</code> and <code>v = y</code></li>
+            <li><code>u + 10 = x</code> and <code>v != y</code></li>
+          </ol>
+          <p><strong>Solution:</strong> Suppose <code>a</code> has the value <code>k</code> before <code>fork()</code>. The parent prints <code>u = k - 5</code>, while the child prints <code>x = k + 5</code>. Thus, <code>u + 10 = x</code>. Parent and child have separate virtual address spaces with the same layout immediately after <code>fork()</code>, so the process-visible address of <code>a</code> is the same in both: <code>v = y</code>. <strong>Option C is correct.</strong> The order of the two printed lines can vary.</p>
+        </div>
+
+        <div class="subtopic" id="fork-question-5">
+          <h3>Question 5: Two Consecutive <code>fork()</code> Calls</h3>
+          <pre class="code-sample"><code>int main() {
+    fork();
+    fork();
+    printf("hello\n");
+    exit(0);
+}</code></pre>
+          <p><strong>Solution:</strong> The first <code>fork()</code> creates one child, giving 2 processes. Both execute the second <code>fork()</code>, giving <code>2<sup>2</sup> = 4</code> total processes. Each process eventually executes <code>printf("hello\n")</code>, so <code>hello</code> is printed four times.</p>
+        </div>
+
+        <div class="subtopic" id="fork-question-6">
+          <h3>Question 6: Possible Output with <code>waitpid()</code></h3>
+          <pre class="code-sample"><code>int main() {
+    if (fork() == 0) {
+        printf("a");
+    } else {
+        printf("b");
+        waitpid(-1, NULL, 0);
+    }
+    printf("c");
+    exit(0);
+}</code></pre>
+          <p><strong>Solution:</strong> The possible output patterns listed in the notes are:</p>
+          <ul>
+            <li><code>B A C C</code></li>
+            <li><code>A B C C</code></li>
+            <li><code>A C B C</code></li>
+          </ul>
+          <p>The child's <code>a</code> comes before its <code>c</code>. The parent's final <code>c</code> comes after the child has finished because the parent calls <code>waitpid()</code>. The two processes can otherwise be scheduled in different orders.</p>
+        </div>
+
+        <div class="subtopic" id="fork-question-7">
+          <h3>Question 7: Child Processes from Three <code>fork()</code> Calls</h3>
+          <p><strong>How many child process will create?</strong></p>
+          <pre class="code-sample"><code>for (i = 1; i &lt;= 3; i++) {
+    fork();
+}</code></pre>
+          <p><strong>Solution:</strong> Three rounds of <code>fork()</code> result in <code>2<sup>3</sup> = 8</code> total processes, including the original process. Therefore, <code>2<sup>3</sup> - 1 = 7</code> child processes are created.</p>
+        </div>
+
+        <div class="subtopic" id="fork-question-8">
+          <h3>Question 8: Two <code>fork()</code> Calls in Each Iteration</h3>
+          <p><strong>How many child process will create?</strong></p>
+          <pre class="code-sample"><code>for (i = 1; i &lt;= 3; i++)
+{
+    fork();
+    fork();
+}</code></pre>
+          <p><strong>Solution:</strong> There are 6 total fork calls along each process path (2 forks per iteration for 3 iterations). The total number of processes is <code>2<sup>6</sup> = 64</code>. The number of child processes is <code>2<sup>6</sup> - 1 = 63</code>.</p>
+        </div>
+
+        <div class="subtopic" id="fork-question-9">
+          <h3>Question 9: Child Processes After <code>n</code> Iterations</h3>
+          <p>A process executes the following code. The total number of child processes created is:</p>
+          <pre class="code-sample"><code>for (i = 0; i &lt; n; i++)
+    fork();</code></pre>
+          <ol type="A">
+            <li><code>n</code></li>
+            <li><code>2<sup>n</sup> - 1</code></li>
+            <li><code>2<sup>n</sup></code></li>
+            <li><code>2<sup>n+1</sup> - 1</code></li>
+          </ol>
+          <p><strong>Solution:</strong> Each iteration doubles the number of processes. Starting with one process, after <code>n</code> iterations there are <code>2<sup>n</sup></code> processes in total. Excluding the original process gives <code>2<sup>n</sup> - 1</code> child processes. <strong>Option B is correct.</strong></p>
+        </div>
+
+        <div class="subtopic" id="fork-question-10">
+          <h3>Question 10: Negative Return Value of <code>fork()</code></h3>
+          <p><strong>Statement:</strong> When <code>fork()</code> returns a negative integer, an error has occurred that must be dealt with in both the parent and child process.</p>
+          <p><strong>Answer: False.</strong> When <code>fork()</code> returns a negative integer, an error has occurred, but no child process is actually created. Therefore, only the original process can handle the error.</p>
+        </div>
+
+        <div class="subtopic" id="fork-question-11">
+          <h3>Question 11: Conditional <code>fork()</code> Calls</h3>
+          <p>Find the total number of processes created by the following code:</p>
+          <pre class="code-sample"><code>pid_t pid1, pid2;
+pid1 = fork();
+pid2 = fork();
+if (pid1 &gt; 0 &amp;&amp; pid2 == 0) {
+    if (fork())
+        fork();
+}</code></pre>
+          <p><strong>Solution:</strong> The first two <code>fork()</code> calls leave 4 processes. Only one of them—the child created by the second <code>fork()</code> in the original parent—has <code>pid1 &gt; 0</code> and <code>pid2 == 0</code>. That process executes <code>if (fork())</code>, creating one more child. The parent of that new child receives a nonzero return value and executes the final <code>fork()</code>, creating one more child. Thus, there are <code>4 + 1 + 1 = 6</code> processes in total, of which <code>5</code> are newly created child processes.</p>
+        </div>
+
+        <div class="subtopic" id="fork-question-12">
+          <h3>Question 12: <code>printf()</code> Before <code>fork()</code></h3>
+          <p>For the first code,</p>
+          <pre class="code-sample"><code>for (i = 1; i &lt;= 3; i++) {
+    printf("Hello");
+    fork();
+}</code></pre>
+          <p><code>printf("Hello")</code> executes <strong>before</strong> each <code>fork()</code>. In the first iteration only 1 process exists, so <code>Hello</code> is printed once; after the fork there are 2 processes. In the second iteration, those 2 processes each print <code>Hello</code>, giving 2 more prints, and then both fork to make 4 processes. In the third iteration, the 4 processes each print <code>Hello</code>, giving 4 more prints. Therefore, the total number of prints is <strong>1 + 2 + 4 = 7</strong>.</p>
+        </div>
+
+        <div class="subtopic" id="fork-question-13">
+          <h3>Question 13: <code>printf()</code> After <code>fork()</code></h3>
+          <p>For the second code,</p>
+          <pre class="code-sample"><code>for (i = 1; i &lt;= 3; i++) {
+    fork();
+    printf("Hello");
+}</code></pre>
+          <p>the <code>fork()</code> happens <strong>before</strong> the <code>printf()</code>. In the first iteration, 1 process forks into 2, so <code>Hello</code> is printed 2 times; in the second iteration, 2 processes fork into 4, so it is printed 4 times; in the third iteration, 4 processes fork into 8, so it is printed 8 times. Therefore, the total number of prints is <strong>2 + 4 + 8 = 14</strong>. The key idea is that when <code>printf()</code> comes before <code>fork()</code>, it is executed by the processes that already exist at the start of that iteration, whereas when <code>printf()</code> comes after <code>fork()</code>, both the parent and newly created child execute it.</p>
+        </div>
+
+        <div class="subtopic" id="fork-question-14">
+          <h3>Question 14: <code>continue</code> and <code>break</code> After <code>fork()</code></h3>
+          <p>Consider the following program snippet. Assume that the program compiles and runs successfully. Further, assume that the <code>fork()</code> system call is always successful in creating a process.</p>
+          <pre class="code-sample"><code>int main() {
+    int i;
+
+    for (i = 0; i &lt; 3; i++) {
+        if (fork() == 0) {
+            continue;
+        }
+        break;
+    }
+
+    printf("Hello!");
+    return 0;
+}</code></pre>
+          <p><strong>The total number of times that the <code>printf</code> statement gets executed is ____ (answer in integer).</strong></p>
+          <p><strong>Solution:</strong> Initially, one process enters the loop and executes <code>fork()</code>. The <strong>parent</strong> gets a positive return value, so <code>fork() == 0</code> is false and it executes <code>break</code>, leaves the loop, and prints <code>"Hello!"</code>; the <strong>child</strong> gets <code>0</code>, executes <code>continue</code>, and moves to the next iteration. In the second iteration, only that child executes another <code>fork()</code>; again its parent breaks and prints <code>"Hello!"</code>, while its new child continues. In the third iteration, the same thing happens once more: the parent breaks and prints, while the newest child continues; after <code>i</code> becomes <code>3</code>, that final child exits the loop normally and also prints <code>"Hello!"</code>. Therefore, there are <strong>4 processes reaching <code>printf()</code></strong>, so the answer is <strong>4</strong>.</p>
+        </div>
+      </section>
+
+      <section class="rule" id="all-about-exec">
+        <div class="section-heading">
+          <span class="section-number">04</span>
+          <h2>All about exec</h2>
+        </div>
+
+        <p><code>exec()</code> is a Unix/Linux system call family used to <strong>replace the program that is currently running inside a process with another program</strong>. The most important point is that <code>exec()</code> does <strong>not create a new process</strong>. The process keeps the same identity, including the same PID, but the program code and most of the process memory image are replaced by the new executable. So if a process is currently running <code>a.out</code> and then successfully calls <code>exec()</code> to run <code>b.out</code>, the same process stops executing the code of <code>a.out</code> and starts executing the code of <code>b.out</code>. You can think of it as keeping the same process container but replacing what is running inside that container.</p>
+
+        <p>Suppose <code>a.out</code> contains code that first prints <code>"hello"</code>, then calls <code>exec()</code> to run <code>b.out</code>, and then has another <code>printf()</code> statement after the <code>exec()</code> call. Once <code>exec()</code> succeeds, the old program <code>a.out</code> is replaced by <code>b.out</code>, so execution does not come back to the next line of <code>a.out</code>. That means the <code>printf("I am back")</code> statement will never execute. A successful <code>exec()</code> effectively says, “from this point onward, this process is now running the new program.” Only if <code>exec()</code> fails would control return to the old program.</p>
+
+        <p>A simplified version of <code>a.out</code> can be written like this:</p>
+        <pre class="code-sample"><code>#include &lt;stdio.h&gt;
+#include &lt;unistd.h&gt;
+
+int main() {
+    printf("hello\n");
+
+    execl("./b.out", "b.out", NULL);
+
+    printf("I am back\n");   // executes only if exec fails
+
+    return 0;
+}</code></pre>
+
+        <p>Here, <code>execl()</code> is one member of the <code>exec</code> family. The first argument tells the OS which executable to run. After <code>execl("./b.out", ...)</code> succeeds, the process no longer continues with the remaining code of <code>a.out</code>. Instead, the process starts executing <code>b.out</code>.</p>
+
+        <p>Now suppose <code>b.out</code> was produced from this program:</p>
+        <pre class="code-sample"><code>#include &lt;stdio.h&gt;
+
+int main() {
+    printf("hey, it is b\n");
+
+    return 0;
+}</code></pre>
+
+        <p>When <code>a.out</code> is executed, the process first prints <code>"hello"</code>. Then <code>exec()</code> replaces <code>a.out</code> with <code>b.out</code>, and the same process begins executing <code>b.out</code>, which prints <code>"hey, it is b"</code>. Therefore, the output is approximately:</p>
+        <pre class="code-sample"><code>hello
+hey, it is b</code></pre>
+
+        <p>The line <code>"I am back"</code> is not printed because <code>exec()</code> does not behave like a normal function call that returns after the new program finishes. It replaces the old program entirely. The PID can remain the same because no new process has been created; only the program running inside that process has changed. This is the major difference between <code>fork()</code> and <code>exec()</code>: <code>fork()</code> creates a new child process, while <code>exec()</code> keeps the existing process and replaces its current program with another executable. In real Unix systems, these two are commonly used together: a parent calls <code>fork()</code> to create a child, and the child then calls <code>exec()</code> to run a different program.</p>
+
+        <p>When you type <code>./a.out</code> in a terminal, the shell process does not replace itself with <code>a.out</code>; instead, the shell first calls <code>fork()</code> to create a child process, so there are temporarily two processes: the original parent shell and a child that initially looks like the shell. The child then calls <code>exec("./a.out")</code>, which replaces the child’s current program with <code>a.out</code> while keeping the same child PID. The parent shell usually waits while <code>a.out</code> runs, and when <code>a.out</code> finishes, the child process terminates and the shell becomes active again and shows the prompt. So the key idea is: <strong><code>fork()</code> creates a new process, while <code>exec()</code> replaces the program running inside that process.</strong></p>
+      </section>
+
+      <section class="rule" id="kernel-and-system-calls">
+        <div class="section-heading">
+          <span class="section-number">05</span>
+          <h2>Kernel and system calls</h2>
+        </div>
+
+        <p>The <strong>kernel</strong> is the core and most privileged part of an operating system. It manages important system resources such as the CPU, memory, files, devices, and processes. Normal applications do not get direct unrestricted access to these resources, because that would make the system unsafe. Instead, the CPU operates using different privilege levels, mainly <strong>user mode</strong> and <strong>kernel mode</strong>. Normal programs such as browsers, editors, and C programs execute in <strong>user mode</strong>, where their privileges are restricted. The operating system kernel executes in <strong>kernel mode</strong>, where it can perform privileged operations and directly manage hardware and protected memory.</p>
+
+        <p>A <strong>system call</strong> is the mechanism through which a program running in user mode requests a service from the operating system kernel. For example, operations such as reading a file, writing output, creating a process, or waiting for another process require help from the OS. Common system calls include <code>read()</code>, <code>write()</code>, <code>open()</code>, <code>close()</code>, <code>fork()</code>, <code>exec()</code>, and <code>wait()</code>. A simple computation such as <code>a = b + c</code> does not require a system call because the CPU can perform it directly in user mode.</p>
+
+        <p>When a system call occurs, execution must temporarily move from user mode to kernel mode. In the common textbook convention, the CPU maintains a <strong>mode bit</strong>, where <code>1</code> represents user mode and <code>0</code> represents kernel mode. While the user program is executing, the mode bit is <code>1</code>. When the program requests a system service, a special CPU mechanism such as a <strong>trap</strong> or <strong>software interrupt</strong> transfers control to the kernel and changes the mode to kernel mode. The kernel then performs the requested operation. After the operation is completed, control returns to the user process and the CPU switches back to user mode. Therefore, the basic sequence is:</p>
+        <pre class="code-sample"><code>User mode
+   ↓
+System call
+   ↓
+Trap / software interrupt
+   ↓
+Kernel mode
+   ↓
+Execute requested service
+   ↓
+Return
+   ↓
+User mode</code></pre>
+
+        <p>A <strong>trap</strong> in this context should not be thought of as an error. It is a controlled mechanism by which the CPU safely transfers execution from user code to kernel code. A user process cannot simply jump into the kernel using an ordinary function call because kernel code is protected and executes with greater privilege. The special trap or system-call instruction ensures that this transition happens safely.</p>
+
+        <p>It is also important to distinguish between a <strong>library call</strong> and a <strong>system call</strong>. A library call is simply a function supplied by a software library. It may or may not invoke a system call. For example, <code>strlen()</code> or <code>strcpy()</code> can perform their work entirely in user memory, so they normally do not need a system call. On the other hand, some library functions eventually need services from the operating system and therefore invoke system calls.</p>
+
+        <p><code>printf()</code> is a very important example. <strong><code>printf()</code> is not itself a system call</strong>; it is a C standard library function. It performs tasks such as formatting and buffering the output. When the output actually needs to be sent to a terminal or file, the library may eventually use the <code>write()</code> system call. So the conceptual path can be written as:</p>
+        <pre class="code-sample"><code>printf()
+   ↓
+C standard library
+   ↓
+write()
+   ↓
+System call mechanism
+   ↓
+Kernel</code></pre>
+
+        <p>This also explains the idea of an <strong>API, or Application Programming Interface</strong>. An API is a set of functions and other programming facilities that applications use to perform common operations. User programs usually interact with these convenient functions rather than dealing directly with low-level kernel mechanisms. Some API functions require no system call, some are almost direct wrappers around system calls, and some perform additional work before eventually invoking one. For example, <code>strcpy()</code> generally uses no system call, <code>write()</code> closely corresponds to a system call, and <code>printf()</code> performs formatting and buffering before possibly using <code>write()</code>.</p>
+
+        <p>So the complete picture is:</p>
+        <pre class="code-sample"><code>Application / User Program
+          ↓
+API / Library Function
+          ↓
+may require a System Call
+          ↓
+Trap / special CPU instruction
+          ↓
+Kernel Mode
+          ↓
+Operating System performs service
+          ↓
+Return to User Mode</code></pre>
+
+        <p><strong>The kernel is the privileged core of the OS; user mode is restricted while kernel mode is privileged; a system call is a request from a user program to the kernel; a system call causes a controlled user-mode-to-kernel-mode transition; and not every library/API function is a system call.</strong> In particular, remember: <strong><code>printf()</code> is a library function, while <code>write()</code> is a system call.</strong></p>
+
+        <p>Inside a system call, a library wrapper such as <code>write()</code> prepares the arguments and a <strong>system call number</strong>, usually placing them in CPU registers, then executes a special instruction such as <code>syscall</code>. This transfers control from user mode to kernel mode through a protected entry point. The CPU and kernel preserve the user process state needed to resume it, including its execution position and stack context; the <strong>PC (Program Counter)</strong> identifies the next instruction to execute, and the <strong>SP (Stack Pointer)</strong> identifies the current stack position. Execution moves to a protected kernel stack and the kernel's system call handler. The handler uses the system call number to find the appropriate service routine in the <strong>system call table</strong>, which maps call numbers to kernel functions and prevents applications from entering arbitrary kernel code. The selected routine checks the request, performs the operation, and places a result or error indication where the user program can receive it. The saved state is then restored and execution returns to user mode after the system call. The numeric encoding of user and kernel privilege depends on the architecture; the essential transition is from restricted user mode into privileged kernel mode and back. A system call costs more than an ordinary function call because it involves this controlled transition, state saving and restoration, kernel work, and often stack switching or other hardware effects. To reduce repeated system calls when practical, libraries may buffer output: <code>printf()</code> can collect characters and send them with fewer, larger <code>write()</code> calls.</p>
+      </section>
+
+      <section class="rule" id="threads">
+        <div class="section-heading">
+          <span class="section-number">06</span>
+          <h2>Threads</h2>
+        </div>
+
+        <p>A <strong>process</strong> is a program that is currently executing, and it contains the program code, data section, heap, stack, and the resources required for execution. To manage each process, the operating system maintains a <strong>Process Control Block (PCB)</strong>, which is a kernel data structure stored in <strong>kernel memory</strong>. The PCB contains important information about the process such as its Process ID (PID), current process state, program counter, CPU registers, scheduling information, memory-management information, open files, and other resource details. The actual code, heap, and stack are part of the process itself, while the PCB only stores the information needed by the OS to control, schedule, stop, and later resume that process.</p>
+
+        <p>Threads of the same process share its <strong>address space, program code, static data, and heap</strong>. They do <strong>not share their program counters, CPU register states, or stack spaces</strong>: each thread has its own PC showing where it is executing, its own registers (including a stack pointer), and its own stack for function calls and local variables. The separate stacks still lie within the process's shared virtual address space.</p>
+
+        <figure class="diagram">
+          <div class="diagram-frame">
+            <svg viewBox="0 0 1100 640" role="img" aria-labelledby="threads-diagram-title threads-diagram-desc" xmlns="http://www.w3.org/2000/svg">
+              <title id="threads-diagram-title">Process address space with three threads</title>
+              <desc id="threads-diagram-desc">Three separate thread stacks and stack pointers occupy the upper part of one process address space. The threads share the heap, static data, and code. Each has its own program counter pointing into the shared code.</desc>
+              <defs>
+                <marker id="threads-arrow-white" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+                  <path d="M0 0 L9 3.5 L0 7 Z" fill="#f3f3f3"/>
+                </marker>
+                <marker id="threads-arrow-cyan" markerWidth="9" markerHeight="7" refX="8" refY="3.5" orient="auto">
+                  <path d="M0 0 L9 3.5 L0 7 Z" fill="#26d4f4"/>
+                </marker>
+                <style>
+                  .t-text { fill: #f4f4f4; font-family: Inter, Arial, sans-serif; }
+                  .t-title { fill: #13bdf5; font-size: 37px; font-family: Inter, Arial, sans-serif; }
+                  .t-label { font-size: 23px; text-anchor: middle; }
+                  .t-side { font-size: 21px; }
+                  .t-cyan { fill: #26d4f4; }
+                  .t-outline { stroke: #ddd; stroke-width: 2; }
+                  .t-pointer { stroke: #eee; stroke-width: 2; fill: none; marker-end: url(#threads-arrow-white); }
+                </style>
+              </defs>
+
+              <rect x="0" y="0" width="1100" height="640" fill="#050505"/>
+              <text class="t-title" x="26" y="48">Process address space with threads</text>
+
+              <text class="t-text t-side t-cyan" x="95" y="172">0xFFFFFFFF</text>
+              <line x1="165" y1="200" x2="165" y2="310" stroke="#26d4f4" stroke-width="2" marker-end="url(#threads-arrow-cyan)"/>
+              <text class="t-text t-side t-cyan" x="84" y="335">address space</text>
+              <line x1="165" y1="355" x2="165" y2="467" stroke="#26d4f4" stroke-width="2" marker-end="url(#threads-arrow-cyan)"/>
+              <text class="t-text t-side t-cyan" x="99" y="558">0x00000000</text>
+
+              <rect x="325" y="95" width="300" height="72" fill="#430606" class="t-outline"/>
+              <text class="t-text t-label" x="475" y="139">thread 1 stack</text>
+              <rect x="325" y="167" width="300" height="72" fill="#430606" class="t-outline"/>
+              <text class="t-text t-label" x="475" y="211">thread 2 stack</text>
+              <rect x="325" y="239" width="300" height="72" fill="#430606" class="t-outline"/>
+              <text class="t-text t-label" x="475" y="283">thread 3 stack</text>
+              <rect x="325" y="311" width="300" height="56" fill="#050505" class="t-outline"/>
+              <rect x="325" y="367" width="300" height="80" fill="#171717" class="t-outline"/>
+              <text class="t-text t-label" x="475" y="400">heap</text>
+              <text class="t-text" x="475" y="428" text-anchor="middle" font-size="18">(dynamically allocated memory)</text>
+              <rect x="325" y="447" width="300" height="70" fill="#07303b" class="t-outline"/>
+              <text class="t-text t-label" x="475" y="478">static data</text>
+              <text class="t-text" x="475" y="505" text-anchor="middle" font-size="18">(data segment)</text>
+              <rect x="325" y="517" width="300" height="92" fill="#24220a" class="t-outline"/>
+              <text class="t-text t-label" x="475" y="553">code</text>
+              <text class="t-text" x="475" y="583" text-anchor="middle" font-size="18">(text segment)</text>
+
+              <path class="t-pointer" d="M690 130 H636"/>
+              <text class="t-text t-side" x="704" y="138">SP (T1)</text>
+              <path class="t-pointer" d="M690 202 H636"/>
+              <text class="t-text t-side" x="704" y="210">SP (T2)</text>
+              <path class="t-pointer" d="M690 274 H636"/>
+              <text class="t-text t-side" x="704" y="282">SP (T3)</text>
+
+              <path class="t-pointer" d="M690 541 H636"/>
+              <text class="t-text t-side" x="704" y="549">PC (T2)</text>
+              <path class="t-pointer" d="M690 570 H636"/>
+              <text class="t-text t-side" x="704" y="578">PC (T1)</text>
+              <path class="t-pointer" d="M690 599 H636"/>
+              <text class="t-text t-side" x="704" y="607">PC (T3)</text>
+
+              <path d="M855 370 C925 370 905 420 955 488 C905 556 925 608 855 608" fill="none" stroke="#f385b7" stroke-width="3"/>
+              <text x="969" y="496" fill="#f385b7" font-family="Inter, Arial, sans-serif" font-size="24">shared</text>
+            </svg>
+          </div>
+          <figcaption>Each thread has its own stack, stack pointer (SP), registers, and program counter (PC); the code, static data, heap, and address space are shared.</figcaption>
+        </figure>
+
+        <p>In a multithreaded process, all threads share the same <strong>code, data, heap, and open files</strong>, but each thread has its own <strong>stack, registers, program counter, and stack pointer</strong>. Because each thread has a separate stack, a local variable stored in one thread’s stack is normally private to that thread. For example, if <code>a</code> is a local variable in Thread <code>T2</code>’s stack, then Thread <code>T1</code> cannot directly access <code>a</code> as its own local variable. However, since all threads belong to the same process and therefore share the same virtual address space, <code>T1</code> can indirectly access <code>a</code> if it somehow gets the address of <code>a</code>, for example through a pointer. So the key idea is: <strong>stack is private logically, but the memory is still inside the same process address space, so another thread can access it if it knows the address.</strong></p>
+
+        <p>Creating a <strong>process</strong> is the most expensive because the OS must set up a separate process with its own address-space-related structures and other process resources. Creating a <strong>kernel-level thread</strong> is cheaper because threads of the same process share resources such as code, data, heap, and open files, but the kernel still has to create and manage the thread, so there is system-call and scheduling overhead. <strong>User-level threads</strong> are usually the cheapest and fastest to create or switch because they are managed in user space by a thread library with little or no kernel involvement. Hence, in terms of overhead, the general order is <strong>Process &gt; Kernel-level thread &gt; User-level thread</strong>.</p>
+
+        <div class="subtopic" id="thread-mapping-models">
+          <h3>Thread Mapping Models</h3>
+          <p>In the <strong>many-to-one model</strong>, many user-level threads such as <code>U1</code>, <code>U2</code>, and <code>U3</code> are mapped onto a single kernel thread <code>K1</code>. The important point is that the <strong>kernel does not know about U1, U2, or U3 individually</strong>; it only knows about <code>K1</code>. The OS scheduler gives CPU time to <code>K1</code>, and then the <strong>user-level thread library inside the process</strong> decides which user thread will use that CPU time. So the thread library may run <code>U1</code> for some time and then switch to <code>U2</code>, while the kernel still sees only the same <code>K1</code>. Because all user threads depend on one kernel thread, if one user thread makes a blocking system call and <code>K1</code> gets blocked, then the <strong>entire process effectively stops</strong>, since the other user threads have no other kernel thread through which they can execute. Also, true parallel execution on multiple CPUs is not possible because there is only one kernel thread.</p>
+          <p>In the <strong>one-to-one model</strong>, every user-level thread is mapped to its own kernel thread, for example <code>U1 &rarr; K1</code>, <code>U2 &rarr; K2</code>, and <code>U3 &rarr; K3</code>. Here the kernel knows each kernel thread separately and can schedule them independently. Therefore, if one thread blocks, the others can still continue running. Also, on a multicore system, <code>K1</code>, <code>K2</code>, and <code>K3</code> can be scheduled on different CPU cores at the same time, giving true parallelism. The disadvantage is that creating and managing many kernel threads is more expensive because the kernel has to maintain each one separately.</p>
+          <p>In the <strong>many-to-many model</strong>, many user-level threads are mapped onto multiple kernel threads. For example, a process may have <code>U1, U2, U3, U4, U5</code> but only <code>K1</code> and <code>K2</code>. The user-level thread library decides which user thread will run on an available kernel thread, while the kernel schedules only the kernel threads onto CPUs. This gives more flexibility than many-to-one because if one kernel thread blocks, other user threads may still run through another kernel thread. It also allows parallel execution because multiple kernel threads can run on different CPUs. At the same time, it can use fewer kernel threads than the total number of user threads, reducing kernel overhead compared with one-to-one.</p>
+          <p>So the core idea of <strong>mapping</strong> is simply: <strong>which kernel thread is used to carry the execution of a user thread to the CPU</strong>. In many-to-one, the kernel sees only one thread; in one-to-one, each user thread has its own kernel thread; and in many-to-many, many user threads share a pool of multiple kernel threads.</p>
+        </div>
+
+        <div class="subtopic" id="threads-question-1">
+          <h3>Question 1</h3>
+          <p>The OS provides the illusion to each thread that it has its own address space.</p>
+          <p><strong>Solution: False</strong> - Each process has its own address space, but threads in the same address space share the same address space (e.g., they use the same code and heap).</p>
+        </div>
+
+        <div class="subtopic" id="threads-question-2">
+          <h3>Question 2</h3>
+          <p>With kernel-level threads, multiple threads from the same process can be scheduled on multiple CPUs simultaneously.</p>
+          <p><strong>Solution: True</strong> - this is the benefit of kernel-level threads (true thread support from OS). User-level threads mapped many-to-one onto a single kernel thread cannot run on multiple CPUs simultaneously; a many-to-many mapping can do so through multiple kernel threads.</p>
+        </div>
+
+        <div class="subtopic" id="threads-question-3">
+          <h3>Question 3: GATE CSE 2011, Question 16 / UGC NET June 2013, Question 65</h3>
+          <p><strong>Question:</strong> A thread is usually defined as a "light weight process" because an Operating System (OS) maintains smaller data structure for a thread than for a process. In relation to this, which of the following statement is TRUE?</p>
+          <ol type="A">
+            <li>On per-thread basis, the OS maintains only CPU register state.</li>
+            <li>The OS does not maintain a separate stack for each thread.</li>
+            <li>On per-thread basis, the OS does not maintain virtual memory state.</li>
+            <li>On per-thread basis, the OS maintains only scheduling and accounting information.</li>
+          </ol>
+          <p><strong>Solution:</strong> The correct answer is <strong>C</strong>.</p>
+          <p><strong>Explanation:</strong> Threads within the same process share the same address space (virtual memory state), including the code section, data section, and OS resources (like open files). Therefore, the OS does not need to maintain a separate virtual memory state for each thread.</p>
+          <p>However, each thread must have its own:</p>
+          <ul>
+            <li><strong>Program Counter (PC)</strong></li>
+            <li><strong>CPU Registers</strong></li>
+            <li><strong>Stack</strong> (for local variables and function calls)</li>
+          </ul>
+          <p>This is why options A, B, and D are incorrect. In particular, the word <strong>only</strong> makes A and D false: the OS maintains more than just registers or just scheduling and accounting information for a kernel-supported thread. The virtual memory mappings and page tables belong to the shared process address space.</p>
+        </div>
+
+        <div class="subtopic" id="threads-question-4">
+          <h3>Question 4: User-Level and Kernel-Supported Threads</h3>
+          <p>Consider the following statements with respect to user-level threads and kernel-supported threads:</p>
+          <ol type="I">
+            <li>Context switch is faster with kernel-supported threads.</li>
+            <li>For user-level threads, a system call can block the entire process.</li>
+            <li>Kernel-supported threads can be scheduled independently.</li>
+            <li>User-level threads are transparent to the kernel.</li>
+          </ol>
+          <p>Which of the above statements are true?</p>
+          <ol type="A">
+            <li>(II), (III) and (IV) only</li>
+            <li>(II) and (III) only</li>
+            <li>(I) and (III) only</li>
+            <li>(I) and (II) only</li>
+          </ol>
+          <p><strong>Answer: A.</strong> A user-level thread switch is generally faster than a kernel-supported thread switch because the thread library can perform it without entering the kernel, so I is false. In a many-to-one model, a blocking system call can block the sole kernel thread and thereby the entire process, so II is true. The kernel schedules kernel-supported threads independently, so III is true. In a many-to-one model, the kernel sees the kernel thread but is unaware of the individual user-level threads, so IV is true.</p>
+        </div>
+
+        <div class="subtopic" id="threads-question-5">
+          <h3>Question 5: Resource Not Shared by Threads</h3>
+          <p>Which of the following is <strong>NOT</strong> shared by threads of the same process?</p>
+          <ol type="A">
+            <li>Stack</li>
+            <li>Address Space</li>
+            <li>File Descriptor Table</li>
+            <li>Message Queue</li>
+          </ol>
+          <p><strong>Answer: A. Stack.</strong> Each thread needs its own stack to manage function calls and local variables independently. Threads of the same process share the address space and process-level resources such as the file descriptor table.</p>
+        </div>
+
+        <div class="subtopic" id="threads-question-6">
+          <h3>Question 6: GATE CSE 2007, Question 17</h3>
+          <p>Which statement about user-level and kernel-level threads is <strong>FALSE</strong>?</p>
+          <ol type="A">
+            <li>Context switch time is longer for kernel level threads than for user level threads.</li>
+            <li>User level threads do not need any hardware support.</li>
+            <li>Related kernel level threads can be scheduled on different processors in a multi-processor system.</li>
+            <li>Blocking one kernel level thread blocks all related threads.</li>
+          </ol>
+          <p><strong>Answer: D.</strong> Kernel-level thread switches usually cost more because the kernel participates, so A is true. User-level threading can be implemented by a library without special kernel threading support, so B is true. Different kernel threads of one process can run on different processors, so C is true. If one kernel-level thread blocks, other kernel-level threads of the process can still run; therefore D is false. Blocking all threads is the concern for a <strong>many-to-one</strong> mapping when its sole kernel thread blocks, not for independently scheduled kernel threads.</p>
+        </div>
+
+        <div class="subtopic" id="threads-question-7">
+          <h3>Question 7: Which Statement Is False?</h3>
+          <p>Which one of the following is <strong>FALSE</strong>?</p>
+          <ol type="A">
+            <li>User level threads are not scheduled by the kernel.</li>
+            <li>When a user level thread is blocked, all other threads of its process are blocked.</li>
+            <li>Context switching between user level threads is faster than context switching between kernel level threads.</li>
+            <li>Kernel level threads cannot share the code segment.</li>
+          </ol>
+          <p><strong>Answer: D.</strong> Threads in the same process share the code segment, whether they are managed at user level or kernel level. In the standard many-to-one model assumed by B, a blocking system call that blocks the only kernel thread prevents the other user-level threads from running; B does not describe a user-level thread merely waiting in the thread library or a many-to-many mapping. User-level thread switches are generally faster because they avoid a kernel transition, although the library still saves and restores the threads' execution state.</p>
+        </div>
+
+        <div class="subtopic" id="threads-question-8">
+          <h3>Question 8: State Shared by All Threads</h3>
+          <p>Which of the following is/are shared by all the threads in a process?</p>
+          <ol type="I">
+            <li>Program counter</li>
+            <li>Stack</li>
+            <li>Address space</li>
+            <li>Registers</li>
+          </ol>
+          <ol type="A">
+            <li>(I) and (II) only</li>
+            <li>(III) only</li>
+            <li>(IV) only</li>
+            <li>(III) and (IV) only</li>
+          </ol>
+          <p><strong>Answer: B.</strong> All threads in a process share its address space. Each thread has its own program counter, stack, and register state.</p>
+        </div>
+
+        <div class="subtopic" id="threads-question-9">
+          <h3>Question 9: Protection Between Threads</h3>
+          <p>Which of the following statements about threads is/are <strong>TRUE</strong>?</p>
+          <ol type="A">
+            <li>Threads can only be implemented in kernel space.</li>
+            <li>Each thread has its own file descriptor table for open files.</li>
+            <li>All the threads belonging to a process share a common stack.</li>
+            <li>Threads belonging to a process are by default not protected from each other.</li>
+          </ol>
+          <p><strong>Answer: D.</strong> Threads can be implemented at user level, so A is false. Threads in one process share its file descriptor table, so B is false. They have separate stacks, so C is false. Because they share one address space, one thread can access memory used by another thread if it has the address; they are not protected from one another by default, so D is true.</p>
+        </div>
+      </section>
+
+      <section class="rule" id="introduction-to-cpu-scheduling">
+        <div class="section-heading">
+          <span class="section-number">07</span>
+          <h2>Introduction to CPU Scheduling</h2>
+        </div>
+
+        <p>A <strong>process state diagram</strong> shows the different stages through which a process passes during its lifetime. A process does not remain in one condition from start to finish. Sometimes it is being created, sometimes it is waiting for the CPU, sometimes it is actually executing, sometimes it is waiting for an I/O operation to finish, and finally it terminates. The OS keeps track of these changes in the <strong>PCB (Process Control Block)</strong> of the process. So whenever we say that a process changes state, internally the OS updates the state information in its PCB and manages that process accordingly.</p>
+
+        <figure class="diagram state-diagram">
+          <div class="diagram-frame">
+            <svg viewBox="0 0 1100 560" role="img" aria-labelledby="process-states-title process-states-desc" xmlns="http://www.w3.org/2000/svg">
+              <title id="process-states-title">Five-state process diagram</title>
+              <desc id="process-states-desc">New moves to Ready after admission. The scheduler dispatches Ready to Running. A Running process may terminate and Exit, be preempted back to Ready, or wait for I/O in Waiting. When the event completes, Waiting returns to Ready.</desc>
+              <defs>
+                <marker id="states-arrow-blue" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+                  <path d="M0 0 L10 4 L0 8 Z" fill="#2563eb"/>
+                </marker>
+                <marker id="states-arrow-amber" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+                  <path d="M0 0 L10 4 L0 8 Z" fill="#a16207"/>
+                </marker>
+                <marker id="states-arrow-teal" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
+                  <path d="M0 0 L10 4 L0 8 Z" fill="#0f766e"/>
+                </marker>
+                <style>
+                  .s-heading { font: 700 15px Inter, Arial, sans-serif; fill: #475569; letter-spacing: 0.12em; }
+                  .s-name { font: 700 24px Inter, Arial, sans-serif; fill: #111827; text-anchor: middle; }
+                  .s-detail { font: 14px Inter, Arial, sans-serif; fill: #64748b; text-anchor: middle; }
+                  .s-label { font: 600 15px Inter, Arial, sans-serif; fill: #334155; text-anchor: middle; }
+                  .s-blue { stroke: #2563eb; stroke-width: 3; fill: none; marker-end: url(#states-arrow-blue); }
+                  .s-amber { stroke: #a16207; stroke-width: 3; fill: none; marker-end: url(#states-arrow-amber); }
+                  .s-teal { stroke: #0f766e; stroke-width: 3; fill: none; marker-end: url(#states-arrow-teal); }
+                </style>
+              </defs>
+
+              <rect width="1100" height="560" fill="#fff"/>
+              <text class="s-heading" x="54" y="62">PROCESS LIFECYCLE</text>
+
+              <path class="s-blue" d="M220 235 H289"/>
+              <text class="s-label" x="255" y="216">Admit</text>
+              <path class="s-blue" d="M475 235 H584"/>
+              <text class="s-label" x="530" y="216">Dispatch</text>
+              <path class="s-blue" d="M770 235 H894"/>
+              <text class="s-label" x="832" y="216">Terminate</text>
+
+              <path class="s-amber" d="M650 282 V342 H430 V288"/>
+              <text class="s-label" x="538" y="366">Preemption</text>
+              <path class="s-teal" d="M700 282 V403"/>
+              <text class="s-label" x="773" y="357">I/O or event wait</text>
+              <path class="s-teal" d="M590 448 H345 V288"/>
+              <text class="s-label" x="456" y="476">I/O or event completes</text>
+
+              <rect x="60" y="190" width="160" height="92" rx="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+              <text class="s-name" x="140" y="230">New</text>
+              <text class="s-detail" x="140" y="254">being created</text>
+
+              <rect x="295" y="190" width="180" height="92" rx="12" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+              <text class="s-name" x="385" y="230">Ready</text>
+              <text class="s-detail" x="385" y="254">waiting for CPU</text>
+
+              <rect x="590" y="190" width="180" height="92" rx="12" fill="#111827" stroke="#111827" stroke-width="2"/>
+              <text x="680" y="230" text-anchor="middle" fill="#fff" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="700">Running</text>
+              <text x="680" y="254" text-anchor="middle" fill="#cbd5e1" font-family="Inter, Arial, sans-serif" font-size="14">using the CPU</text>
+
+              <rect x="900" y="190" width="160" height="92" rx="12" fill="#f8fafc" stroke="#94a3b8" stroke-width="2"/>
+              <text class="s-name" x="980" y="230">Exit</text>
+              <text class="s-detail" x="980" y="254">terminated</text>
+
+              <rect x="590" y="410" width="180" height="92" rx="12" fill="#f0fdfa" stroke="#0f766e" stroke-width="2"/>
+              <text class="s-name" x="680" y="450">Waiting</text>
+              <text class="s-detail" x="680" y="474">blocked on event</text>
+            </svg>
+          </div>
+          <figcaption>Process-state transitions. The CPU scheduler selects a ready process to run; a blocked process returns to Ready when its event completes.</figcaption>
+        </figure>
+
+        <p>The first state is the <strong>New state</strong>. When a user or another process requests the OS to create a new process, the process initially enters this state. At this stage, the process is not yet ready to run. The operating system is still setting it up. It may create the PCB, assign a process ID, create the process address space, load the program code, initialize registers, allocate required memory, and set up other resources. Once all the necessary setup has been completed and the OS is willing to allow the process to compete for CPU time, the process moves from <strong>New to Ready</strong>. So the New state essentially means, &ldquo;the process is currently being created.&rdquo;</p>
+
+        <p>The <strong>Ready state</strong> means that the process has been created successfully and is fully capable of executing, but it is not currently getting the CPU. This distinction is very important. A process in the Ready state is not blocked by I/O or some event. It has everything it needs except access to the processor. In a system, many processes can be in the Ready state at the same time. These ready processes are usually organized in a structure called the <strong>Ready Queue</strong>. The CPU scheduler examines this set of ready processes and chooses one of them to execute. So when we study scheduling algorithms such as FCFS, SJF, SRTF, Priority Scheduling, and Round Robin, we are mainly studying the different rules used to decide which process from the Ready Queue should be selected next.</p>
+
+        <p>When a process is selected by the scheduler, it moves from the <strong>Ready state to the Running state</strong>. In the Running state, the CPU is actually executing the instructions of that process. On a single-core processor, only one process can truly be in the Running state at a particular instant, although many other processes may be waiting in the Ready Queue. On a multicore processor, multiple processes can be running simultaneously, with each core executing one process or thread. The transition from Ready to Running is therefore one of the most important transitions in CPU scheduling because this is where the scheduler decides who gets the processor.</p>
+
+        <p>A process does not necessarily continue running until it finishes. While it is in the Running state, several things can happen. The simplest possibility is that the process completes all of its instructions. In that case, it moves from <strong>Running to Exit</strong>, also called the <strong>Terminated state</strong>. At this point, the process has finished execution. The operating system can then release resources that were associated with the process, such as memory, open files, and other kernel resources. Eventually the process entry itself is cleaned up after any required termination information has been collected.</p>
+
+        <p>Another possibility is that a running process requests an <strong>I/O operation</strong> or needs to wait for some event. For example, suppose a process asks the disk to read a file, waits for keyboard input, requests data from the network, or waits for a resource to become available. The CPU cannot continue executing the process meaningfully until that required event occurs. Therefore, the OS moves the process from the <strong>Running state to the Waiting state</strong>. This state is also commonly called the <strong>Blocked state</strong>. A Waiting process is fundamentally different from a Ready process. A Ready process can execute immediately if it is given the CPU, whereas a Waiting process cannot execute even if you give it the CPU because the thing it is waiting for has not happened yet.</p>
+
+        <p>For example, imagine process P1 is currently running and suddenly requests data from the disk. Disk access is much slower than CPU execution. If the CPU simply waited idly for the disk to respond, a lot of CPU time would be wasted. Instead, the OS puts P1 into the Waiting state and allows some other process, say P2, from the Ready Queue to use the CPU. This is one of the main reasons multiprogramming improves CPU utilization. While one process is waiting for I/O, another process can make productive use of the processor.</p>
+
+        <p>Once the event that the process was waiting for has completed, the process moves from the <strong>Waiting state back to the Ready state</strong>. For example, if P1 was waiting for disk data and the disk operation finishes, P1 is now capable of continuing execution. However, it usually does not go directly from Waiting to Running because another process may already be using the CPU. Instead, P1 joins the Ready Queue again and waits for the CPU scheduler to select it. So the normal path is <strong>Waiting &rarr; Ready &rarr; Running</strong>, not directly Waiting &rarr; Running.</p>
+
+        <p>There is also another very important transition that is often present in the complete process-state diagram: <strong>Running to Ready</strong>. This transition occurs when the currently running process is forced to give up the CPU even though it has not finished and is not waiting for I/O. This is called <strong>preemption</strong>. For example, in Round Robin scheduling, each process is allowed to run for only a fixed amount of time called the <strong>time quantum</strong>. If the process does not finish within that time, the OS interrupts it, saves its current execution state in the PCB, moves it back to the Ready Queue, and gives the CPU to another process. The interrupted process can continue later from exactly where it stopped.</p>
+
+        <p>This Running-to-Ready transition is what separates many <strong>preemptive</strong> scheduling algorithms from <strong>non-preemptive</strong> ones. In non-preemptive scheduling, once a process gets the CPU, it usually keeps it until it either terminates or voluntarily blocks, for example by requesting I/O. In preemptive scheduling, the OS may take the CPU away from a running process. You will see this idea repeatedly when comparing algorithms such as SJF versus SRTF or FCFS versus Round Robin.</p>
+
+        <p>So the entire life cycle can be understood as follows. The process begins in <strong>New</strong>, where the OS is creating it. After creation, it goes to <strong>Ready</strong>, where it waits for CPU time. When selected by the scheduler, it becomes <strong>Running</strong>. From Running, it can either finish and move to <strong>Exit</strong>, request I/O and move to <strong>Waiting</strong>, or be preempted and return to <strong>Ready</strong>. If it enters Waiting, then when the awaited event or I/O completes, it returns to Ready and waits for the scheduler again.</p>
+
+        <p>The most important thing to remember for scheduling is the difference among <strong>Ready, Running, and Waiting</strong>. A process in <strong>Ready</strong> wants the CPU and can run immediately if selected. A process in <strong>Running</strong> currently has the CPU. A process in <strong>Waiting</strong> is not competing for the CPU because it cannot proceed until some external event or I/O completes. Therefore, CPU scheduling algorithms mainly operate on the processes that are in the <strong>Ready Queue</strong>.</p>
+
+        <p>You can mentally summarize the whole diagram like this:</p>
+        <p><strong>New means being created, Ready means waiting for CPU, Running means using CPU, Waiting means waiting for some event or I/O, and Exit means finished.</strong></p>
+
+        <p>And the key scheduling idea is:</p>
+        <p><strong>Ready &rarr; Running is decided by the CPU scheduler. Running &rarr; Ready happens because of preemption. Running &rarr; Waiting happens because the process needs something such as I/O. Waiting &rarr; Ready happens when that event finishes.</strong></p>
+
+        <div class="subtopic" id="scheduling-time-terms">
+          <h3>Scheduling Time Terms</h3>
+          <ul>
+            <li><strong>Arrival Time (AT):</strong> The time at which a process <strong>enters the ready queue</strong> and becomes available for CPU scheduling. Example: if P1 becomes ready at time 3, then <strong>AT = 3</strong>.</li>
+            <li><strong>Burst Time (BT):</strong> The total amount of <strong>CPU execution time required by the process</strong>. It tells us how long the process needs the CPU to complete its current CPU burst. Example: if P1 needs 5 ms of CPU time, then <strong>BT = 5 ms</strong>.</li>
+            <li><strong>Completion Time (CT):</strong> The time at which a process <strong>finishes its execution completely</strong>. Example: if P1 finishes at time 12, then <strong>CT = 12</strong>.</li>
+            <li><strong>Turnaround Time (TAT):</strong> The total time a process spends in the system, from its arrival until its completion. <strong>TAT = CT &minus; AT</strong>.</li>
+            <li><strong>Waiting Time (WT):</strong> The total time a process spends <strong>waiting in the ready queue for the CPU</strong>. It does not include the time during which the process is actually executing on the CPU. In the standard scheduling problems we solve, <strong>WT = TAT &minus; BT</strong>. This formula assumes there is no separate time spent blocked for I/O.</li>
+          </ul>
+
+          <p>So the key formulas are:</p>
+          <p class="equation"><strong>TAT = CT &minus; AT</strong></p>
+          <p class="equation"><strong>WT = TAT &minus; BT</strong></p>
+
+          <p>For example, if a process has <strong>AT = 2, BT = 5, CT = 10</strong>, then:</p>
+          <p class="equation">TAT = 10 &minus; 2 = 8</p>
+          <p class="equation">WT = 8 &minus; 5 = 3</p>
+          <p>So the process was in the system for <strong>8 units</strong>, out of which it used the CPU for <strong>5 units</strong> and waited in the ready queue for <strong>3 units</strong>.</p>
+        </div>
+      </section>
+
+      <section class="rule" id="fcfs">
+        <div class="section-heading">
+          <span class="section-number">08</span>
+          <h2>FCFS (First-Come, First-Served)</h2>
+        </div>
+
+        <p class="definition">In FCFS scheduling, the process that enters the ready queue first gets the CPU first. This is a non-preemptive algorithm: once selected, a process keeps the CPU until its CPU burst finishes or it blocks.</p>
+
+        <p>In <strong>FCFS (First Come, First Served)</strong>, the two ideas are very different:</p>
+        <p><strong>Convoy effect</strong> means that a <strong>long CPU-bound process at the front of the ready queue makes many short processes wait behind it</strong>. Since FCFS is non-preemptive, once the long process gets the CPU, the short processes cannot interrupt it. For example, if P<sub>1</sub> needs 24 units of CPU time and P<sub>2</sub> and P<sub>3</sub> each need only 3 units, but P<sub>1</sub> arrives first, then P<sub>2</sub> and P<sub>3</sub> must wait until P<sub>1</sub> finishes. This increases the average waiting time and turnaround time. It is called the convoy effect because many short processes move behind one long process like vehicles stuck behind a slow truck.</p>
+        <p><strong>Starvation</strong>, on the other hand, means that a process waits for an <strong>indefinitely long time</strong> because other processes keep getting selected before it. In normal FCFS, <strong>starvation does not occur</strong> because processes are served strictly in arrival order. Once a process enters the ready queue, every process ahead of it will eventually finish, and then its turn must come. New processes arriving later cannot jump ahead of it.</p>
+        <p>So for FCFS, remember:</p>
+        <p><strong>Convoy effect: YES</strong> &mdash; a long process can delay many short processes.</p>
+        <p><strong>Starvation: NO</strong> &mdash; every process eventually gets the CPU.</p>
+        <p>This is an important GATE point: <strong>FCFS may have poor waiting time because of convoy effect, but it is starvation-free.</strong></p>
+
+        <div class="subtopic" id="fcfs-question-1">
+          <h3>Question 1: Calculate CT, TAT, and WT</h3>
+          <p>Three processes have the following arrival and burst times. Schedule them using FCFS and find their completion time, turnaround time, waiting time, average turnaround time, and average waiting time.</p>
+
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th scope="col">Process</th>
+                  <th scope="col">Arrival Time (AT)</th>
+                  <th scope="col">Burst Time (BT)</th>
+                  <th scope="col">Start Time</th>
+                  <th scope="col">Completion Time (CT)</th>
+                  <th scope="col">Turnaround Time (TAT)</th>
+                  <th scope="col">Waiting Time (WT)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">P<sub>1</sub></th>
+                  <td>0</td>
+                  <td>24</td>
+                  <td>0</td>
+                  <td>24</td>
+                  <td>24 &minus; 0 = <strong>24</strong></td>
+                  <td>24 &minus; 24 = <strong>0</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>2</sub></th>
+                  <td>10</td>
+                  <td>3</td>
+                  <td>24</td>
+                  <td>27</td>
+                  <td>27 &minus; 10 = <strong>17</strong></td>
+                  <td>17 &minus; 3 = <strong>14</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>3</sub></th>
+                  <td>15</td>
+                  <td>3</td>
+                  <td>27</td>
+                  <td>30</td>
+                  <td>30 &minus; 15 = <strong>15</strong></td>
+                  <td>15 &minus; 3 = <strong>12</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Gantt Chart</h4>
+          <div class="gantt-wrap" role="img" aria-label="FCFS Gantt chart: P1 runs from time 0 to 24, P2 from 24 to 27, and P3 from 27 to 30.">
+            <div class="gantt-chart">
+              <div class="gantt-bar" aria-hidden="true">
+                <div class="gantt-segment"><span>P<sub>1</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>2</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>3</sub></span></div>
+              </div>
+              <div class="gantt-times" aria-hidden="true">
+                <span>0</span>
+                <span>24</span>
+                <span>27</span>
+                <span>30</span>
+              </div>
+            </div>
+          </div>
+
+          <p>P<sub>1</sub> arrives at time 0 and runs until time 24. While it is running, P<sub>2</sub> arrives at time 10 and P<sub>3</sub> at time 15. FCFS chooses P<sub>2</sub> next because it arrived earlier; P<sub>3</sub> runs last.</p>
+          <p><strong>Average turnaround time:</strong> (24 + 17 + 15) / 3 = 56 / 3 &asymp; <strong>18.67 time units</strong>.</p>
+          <p><strong>Average waiting time:</strong> (0 + 14 + 12) / 3 = 26 / 3 &asymp; <strong>8.67 time units</strong>.</p>
+        </div>
+      </section>
+
+      <section class="rule" id="sjf">
+        <div class="section-heading">
+          <span class="section-number">09</span>
+          <h2>SJF (Shortest Job First)</h2>
+        </div>
+
+        <p class="definition">Shortest Job First (SJF) selects the ready process with the <strong>shortest next CPU burst</strong>. In its non-preemptive form, once a process starts running, it keeps the CPU until that burst finishes or it blocks. The scheduler compares only processes that have already arrived and are ready at the selection time.</p>
+
+        <p><strong>Convoy effect:</strong> SJF reduces the usual FCFS convoy effect by choosing short jobs ahead of a long job when all are waiting in the ready queue. However, non-preemptive SJF cannot interrupt a long job that has already started, so short jobs arriving afterward may still be stuck behind it. Thus, long-job blocking is still possible.</p>
+        <p><strong>Starvation:</strong> SJF can cause starvation of a long job if shorter jobs keep arriving and are always selected first.</p>
+
+        <div class="subtopic" id="sjf-question-1">
+          <h3>Question 1: Calculate CT, TAT, and WT</h3>
+          <p>Schedule the four processes using <strong>non-preemptive SJF</strong>. The image gives their burst times and shows <strong>all arrival times as 0</strong>, so every process is ready when scheduling begins.</p>
+
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th scope="col">Process</th>
+                  <th scope="col">Arrival Time (AT)</th>
+                  <th scope="col">Burst Time (BT)</th>
+                  <th scope="col">Start Time</th>
+                  <th scope="col">Completion Time (CT)</th>
+                  <th scope="col">Turnaround Time (TAT)</th>
+                  <th scope="col">Waiting Time (WT)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">P<sub>1</sub></th>
+                  <td>0</td>
+                  <td>6</td>
+                  <td>3</td>
+                  <td>9</td>
+                  <td>9 &minus; 0 = <strong>9</strong></td>
+                  <td>9 &minus; 6 = <strong>3</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>2</sub></th>
+                  <td>0</td>
+                  <td>8</td>
+                  <td>16</td>
+                  <td>24</td>
+                  <td>24 &minus; 0 = <strong>24</strong></td>
+                  <td>24 &minus; 8 = <strong>16</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>3</sub></th>
+                  <td>0</td>
+                  <td>7</td>
+                  <td>9</td>
+                  <td>16</td>
+                  <td>16 &minus; 0 = <strong>16</strong></td>
+                  <td>16 &minus; 7 = <strong>9</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>4</sub></th>
+                  <td>0</td>
+                  <td>3</td>
+                  <td>0</td>
+                  <td>3</td>
+                  <td>3 &minus; 0 = <strong>3</strong></td>
+                  <td>3 &minus; 3 = <strong>0</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Gantt Chart</h4>
+          <div class="gantt-wrap sjf-gantt" role="img" aria-label="SJF Gantt chart: P4 runs from 0 to 3, P1 from 3 to 9, P3 from 9 to 16, and P2 from 16 to 24.">
+            <div class="gantt-chart">
+              <div class="gantt-bar" aria-hidden="true">
+                <div class="gantt-segment"><span>P<sub>4</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>1</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>3</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>2</sub></span></div>
+              </div>
+              <div class="gantt-times" aria-hidden="true">
+                <span>0</span>
+                <span>3</span>
+                <span>9</span>
+                <span>16</span>
+                <span>24</span>
+              </div>
+            </div>
+          </div>
+
+          <p>Because all four processes arrive together, SJF orders them by increasing burst time: <strong>P<sub>4</sub> (3) &rarr; P<sub>1</sub> (6) &rarr; P<sub>3</sub> (7) &rarr; P<sub>2</sub> (8)</strong>. With AT = 0, each process has TAT = CT, and WT = TAT &minus; BT.</p>
+          <p><strong>Average turnaround time:</strong> (3 + 9 + 16 + 24) / 4 = 52 / 4 = <strong>13 time units</strong>.</p>
+          <p><strong>Average waiting time:</strong> (0 + 3 + 9 + 16) / 4 = 28 / 4 = <strong>7 time units</strong>.</p>
+        </div>
+      </section>
+
+      <section class="rule" id="round-robin">
+        <div class="section-heading">
+          <span class="section-number">10</span>
+          <h2>Round Robin (RR)</h2>
+        </div>
+
+        <p class="definition">Round Robin is a <strong>preemptive</strong> scheduling algorithm. Each ready process receives at most a fixed amount of CPU time called the <strong>time quantum</strong>. If its CPU burst is not finished when the quantum expires, the OS moves it to the back of the ready queue and gives the CPU to the next ready process.</p>
+
+        <p><strong>Convoy effect:</strong> A short quantum limits how long short jobs wait behind one long CPU-bound job, so RR greatly reduces the classic FCFS convoy effect. A very large quantum makes RR behave more like FCFS, and convoy-like delays can then occur.</p>
+        <p><strong>Starvation:</strong> Standard RR does <strong>not</strong> cause starvation. A ready process gets another turn after the processes ahead of it have each received at most one quantum, assuming normal finite scheduling overhead and that new arrivals join the back of the queue.</p>
+
+        <div class="subtopic" id="rr-question-1">
+          <h3>Question 1: RR with Time Quantum = 4</h3>
+          <p>All three processes arrive at <strong>time 0</strong> in the order P<sub>1</sub>, P<sub>2</sub>, P<sub>3</sub>. Use Round Robin with a <strong>time quantum of 4 units</strong> to find CT, TAT, WT, and their averages. Assume context-switch time is zero.</p>
+
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th scope="col">Process</th>
+                  <th scope="col">Arrival Time (AT)</th>
+                  <th scope="col">Burst Time (BT)</th>
+                  <th scope="col">Completion Time (CT)</th>
+                  <th scope="col">Turnaround Time (TAT)</th>
+                  <th scope="col">Waiting Time (WT)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">P<sub>1</sub></th>
+                  <td>0</td>
+                  <td>24</td>
+                  <td>30</td>
+                  <td>30 &minus; 0 = <strong>30</strong></td>
+                  <td>30 &minus; 24 = <strong>6</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>2</sub></th>
+                  <td>0</td>
+                  <td>3</td>
+                  <td>7</td>
+                  <td>7 &minus; 0 = <strong>7</strong></td>
+                  <td>7 &minus; 3 = <strong>4</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>3</sub></th>
+                  <td>0</td>
+                  <td>3</td>
+                  <td>10</td>
+                  <td>10 &minus; 0 = <strong>10</strong></td>
+                  <td>10 &minus; 3 = <strong>7</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Gantt Chart</h4>
+          <div class="gantt-wrap rr-gantt" role="img" aria-label="Round Robin Gantt chart with quantum 4: P1 runs from 0 to 4, P2 from 4 to 7, P3 from 7 to 10, and P1 again from 10 to 30.">
+            <div class="gantt-chart">
+              <div class="gantt-bar" aria-hidden="true">
+                <div class="gantt-segment"><span>P<sub>1</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>2</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>3</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>1</sub></span></div>
+              </div>
+              <div class="gantt-times" aria-hidden="true">
+                <span>0</span>
+                <span>4</span>
+                <span>7</span>
+                <span>10</span>
+                <span>30</span>
+              </div>
+            </div>
+          </div>
+
+          <p>P<sub>1</sub> uses its first quantum from 0 to 4 and has <strong>20 units remaining</strong>. P<sub>2</sub> then finishes from 4 to 7, followed by P<sub>3</sub> from 7 to 10. Only P<sub>1</sub> remains ready, so it continues from 10 to 30 and completes. The final P<sub>1</sub> bar combines its consecutive four-unit quanta because no other process needs the CPU.</p>
+          <p><strong>Average turnaround time:</strong> (30 + 7 + 10) / 3 = 47 / 3 &asymp; <strong>15.67 time units</strong>.</p>
+          <p><strong>Average waiting time:</strong> (6 + 4 + 7) / 3 = 17 / 3 &asymp; <strong>5.67 time units</strong>.</p>
+        </div>
+      </section>
+
+      <section class="rule" id="srtf">
+        <div class="section-heading">
+          <span class="section-number">11</span>
+          <h2>SRTF (Shortest Remaining Time First)</h2>
+        </div>
+
+        <p class="definition">Shortest Remaining Time First (SRTF) is the <strong>preemptive form of SJF</strong>. At each scheduling decision, the ready process with the least CPU time <strong>remaining</strong> is selected. If a newly arrived process needs less time than the currently running process has left, the running process is preempted.</p>
+
+        <p><strong>Convoy effect:</strong> SRTF avoids the classic FCFS convoy effect because an arriving short process can preempt a long process instead of waiting for its entire burst to finish.</p>
+        <p><strong>Starvation:</strong> SRTF <strong>can</strong> starve a long process if shorter jobs keep arriving and repeatedly take priority.</p>
+
+        <div class="subtopic" id="srtf-question-1">
+          <h3>Question 1: Calculate CT, TAT, and WT</h3>
+          <p>Use SRTF for the following processes. Assume context-switch time is zero.</p>
+
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th scope="col">Process</th>
+                  <th scope="col">Arrival Time (AT)</th>
+                  <th scope="col">Burst Time (BT)</th>
+                  <th scope="col">Completion Time (CT)</th>
+                  <th scope="col">Turnaround Time (TAT)</th>
+                  <th scope="col">Waiting Time (WT)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">P<sub>1</sub></th>
+                  <td>0</td>
+                  <td>8</td>
+                  <td>17</td>
+                  <td>17 &minus; 0 = <strong>17</strong></td>
+                  <td>17 &minus; 8 = <strong>9</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>2</sub></th>
+                  <td>1</td>
+                  <td>4</td>
+                  <td>5</td>
+                  <td>5 &minus; 1 = <strong>4</strong></td>
+                  <td>4 &minus; 4 = <strong>0</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>3</sub></th>
+                  <td>2</td>
+                  <td>9</td>
+                  <td>26</td>
+                  <td>26 &minus; 2 = <strong>24</strong></td>
+                  <td>24 &minus; 9 = <strong>15</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>4</sub></th>
+                  <td>3</td>
+                  <td>5</td>
+                  <td>10</td>
+                  <td>10 &minus; 3 = <strong>7</strong></td>
+                  <td>7 &minus; 5 = <strong>2</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Gantt Chart</h4>
+          <div class="gantt-wrap srtf-gantt" role="img" aria-label="SRTF Gantt chart: P1 runs from 0 to 1, P2 from 1 to 5, P4 from 5 to 10, P1 from 10 to 17, and P3 from 17 to 26.">
+            <div class="gantt-chart">
+              <div class="gantt-bar" aria-hidden="true">
+                <div class="gantt-segment"><span>P<sub>1</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>2</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>4</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>1</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>3</sub></span></div>
+              </div>
+              <div class="gantt-times" aria-hidden="true">
+                <span>0</span>
+                <span>1</span>
+                <span>5</span>
+                <span>10</span>
+                <span>17</span>
+                <span>26</span>
+              </div>
+            </div>
+          </div>
+
+          <p>P<sub>1</sub> starts at time 0. At time 1 it has <strong>7 units remaining</strong>, so the arriving P<sub>2</sub> (4 units) preempts it. P<sub>2</sub> continues until time 5 despite the arrivals of P<sub>3</sub> and P<sub>4</sub>, because its remaining time stays shortest. Then P<sub>4</sub> runs from 5 to 10, P<sub>1</sub> resumes from 10 to 17, and P<sub>3</sub> runs from 17 to 26.</p>
+          <p><strong>Average turnaround time:</strong> (17 + 4 + 24 + 7) / 4 = 52 / 4 = <strong>13 time units</strong>.</p>
+          <p><strong>Average waiting time:</strong> (9 + 0 + 15 + 2) / 4 = 26 / 4 = <strong>6.5 time units</strong>.</p>
+        </div>
+      </section>
+
+      <section class="rule" id="ljf">
+        <div class="section-heading">
+          <span class="section-number">12</span>
+          <h2>LJF (Longest Job First)</h2>
+        </div>
+
+        <p class="definition">Longest Job First (LJF) selects the ready process with the <strong>longest next CPU burst</strong>. In its non-preemptive form, the chosen process keeps the CPU until its burst finishes or it blocks. Only processes that have already arrived are compared when the CPU becomes available.</p>
+
+        <p><strong>Convoy effect:</strong> LJF can cause a convoy effect because selecting a long CPU burst can force shorter ready processes to wait behind it.</p>
+        <p><strong>Starvation:</strong> A short process can starve if longer jobs keep arriving and are always selected first. With a fixed, finite set of processes whose bursts finish, every process eventually runs.</p>
+
+        <div class="subtopic" id="ljf-question-1">
+          <h3>Question 1: Calculate CT, TAT, and WT</h3>
+          <p>Use <strong>non-preemptive LJF</strong> for the following processes. Arrival and burst times are in milliseconds; assume context-switch time is zero.</p>
+
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th scope="col">Process</th>
+                  <th scope="col">Arrival Time (AT)</th>
+                  <th scope="col">Burst Time (BT)</th>
+                  <th scope="col">Start Time</th>
+                  <th scope="col">Completion Time (CT)</th>
+                  <th scope="col">Turnaround Time (TAT)</th>
+                  <th scope="col">Waiting Time (WT)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">P<sub>1</sub></th>
+                  <td>0</td>
+                  <td>2</td>
+                  <td>0</td>
+                  <td>2</td>
+                  <td>2 &minus; 0 = <strong>2</strong></td>
+                  <td>2 &minus; 2 = <strong>0</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>2</sub></th>
+                  <td>1</td>
+                  <td>1</td>
+                  <td>11</td>
+                  <td>12</td>
+                  <td>12 &minus; 1 = <strong>11</strong></td>
+                  <td>11 &minus; 1 = <strong>10</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>3</sub></th>
+                  <td>2</td>
+                  <td>6</td>
+                  <td>2</td>
+                  <td>8</td>
+                  <td>8 &minus; 2 = <strong>6</strong></td>
+                  <td>6 &minus; 6 = <strong>0</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>4</sub></th>
+                  <td>3</td>
+                  <td>3</td>
+                  <td>8</td>
+                  <td>11</td>
+                  <td>11 &minus; 3 = <strong>8</strong></td>
+                  <td>8 &minus; 3 = <strong>5</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Gantt Chart</h4>
+          <div class="gantt-wrap ljf-gantt" role="img" aria-label="LJF Gantt chart: P1 runs from 0 to 2, P3 from 2 to 8, P4 from 8 to 11, and P2 from 11 to 12.">
+            <div class="gantt-chart">
+              <div class="gantt-bar" aria-hidden="true">
+                <div class="gantt-segment"><span>P<sub>1</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>3</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>4</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>2</sub></span></div>
+              </div>
+              <div class="gantt-times" aria-hidden="true">
+                <span>0</span>
+                <span>2</span>
+                <span>8</span>
+                <span>11</span>
+                <span>12</span>
+              </div>
+            </div>
+          </div>
+
+          <p>At time 0, only P<sub>1</sub> has arrived, so it runs first from 0 to 2. At time 2, P<sub>2</sub> and P<sub>3</sub> are ready; P<sub>3</sub> has the longer burst and runs until time 8. P<sub>4</sub> arrived at time 3, so at time 8 its 3 ms burst is chosen before P<sub>2</sub>'s 1 ms burst. P<sub>2</sub> runs last.</p>
+          <p><strong>Average turnaround time:</strong> (2 + 11 + 6 + 8) / 4 = 27 / 4 = <strong>6.75 ms</strong>.</p>
+          <p><strong>Average waiting time:</strong> (0 + 10 + 0 + 5) / 4 = 15 / 4 = <strong>3.75 ms</strong>.</p>
+        </div>
+      </section>
+
+      <section class="rule" id="lrtf">
+        <div class="section-heading">
+          <span class="section-number">13</span>
+          <h2>LRTF (Longest Remaining Time First)</h2>
+        </div>
+
+        <p class="definition">Longest Remaining Time First (LRTF) is the <strong>preemptive form of LJF</strong>. At each decision, the scheduler runs the ready process with the most CPU time <strong>remaining</strong>. A newly arrived process or a change in remaining times can cause the running process to be preempted.</p>
+
+        <p><strong>Convoy effect:</strong> LRTF can produce convoy-like delays because processes with short remaining bursts may repeatedly wait while longer remaining bursts receive CPU time.</p>
+        <p><strong>Starvation:</strong> A short process may be postponed indefinitely if longer work keeps arriving. For a fixed, finite set of processes with finite bursts, all processes eventually finish.</p>
+
+        <div class="subtopic" id="lrtf-question-1">
+          <h3>Question 1: Calculate CT, TAT, and WT</h3>
+          <p>Use LRTF for P<sub>1</sub> through P<sub>4</sub>. The original arrival and burst times shown in the image are <strong>(1, 2), (2, 4), (3, 6), and (4, 8)</strong>, respectively; the handwritten numbers beside the burst times show remaining-time updates. Assume context-switch time is zero.</p>
+          <p><strong>Tie rule:</strong> If the running process is tied for the longest remaining time, keep it running. Otherwise, choose the tied process that arrived first. The tie rule matters here because several remaining times become equal; a different tie rule can change individual completion, turnaround, and waiting times.</p>
+
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead>
+                <tr>
+                  <th scope="col">Process</th>
+                  <th scope="col">Arrival Time (AT)</th>
+                  <th scope="col">Burst Time (BT)</th>
+                  <th scope="col">Completion Time (CT)</th>
+                  <th scope="col">Turnaround Time (TAT)</th>
+                  <th scope="col">Waiting Time (WT)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">P<sub>1</sub></th>
+                  <td>1</td>
+                  <td>2</td>
+                  <td>19</td>
+                  <td>19 &minus; 1 = <strong>18</strong></td>
+                  <td>18 &minus; 2 = <strong>16</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>2</sub></th>
+                  <td>2</td>
+                  <td>4</td>
+                  <td>20</td>
+                  <td>20 &minus; 2 = <strong>18</strong></td>
+                  <td>18 &minus; 4 = <strong>14</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>3</sub></th>
+                  <td>3</td>
+                  <td>6</td>
+                  <td>21</td>
+                  <td>21 &minus; 3 = <strong>18</strong></td>
+                  <td>18 &minus; 6 = <strong>12</strong></td>
+                </tr>
+                <tr>
+                  <th scope="row">P<sub>4</sub></th>
+                  <td>4</td>
+                  <td>8</td>
+                  <td>18</td>
+                  <td>18 &minus; 4 = <strong>14</strong></td>
+                  <td>14 &minus; 8 = <strong>6</strong></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h4>Gantt Chart</h4>
+          <div class="gantt-wrap lrtf-gantt" role="img" aria-label="LRTF Gantt chart: idle 0 to 1; P1 1 to 2; P2 2 to 3; P3 3 to 4; P4 4 to 8; P3 8 to 10; P4 10 to 12; P2 12 to 13; P3 13 to 15; P2 15 to 16; P4 16 to 18; P1 18 to 19; P2 19 to 20; P3 20 to 21.">
+            <div class="gantt-chart">
+              <div class="gantt-bar" aria-hidden="true">
+                <div class="gantt-segment"><span>Idle</span></div>
+                <div class="gantt-segment"><span>P<sub>1</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>2</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>3</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>4</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>3</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>4</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>2</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>3</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>2</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>4</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>1</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>2</sub></span></div>
+                <div class="gantt-segment"><span>P<sub>3</sub></span></div>
+              </div>
+              <div class="gantt-times" aria-hidden="true">
+                <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span>
+                <span>8</span><span>10</span><span>12</span><span>13</span><span>15</span>
+                <span>16</span><span>18</span><span>19</span><span>20</span><span>21</span>
+              </div>
+            </div>
+          </div>
+
+          <p>The CPU is idle until P<sub>1</sub> arrives at time 1. Each later arrival initially has a longer remaining burst and preempts the current process. P<sub>4</sub> runs from 4 to 8; at time 8, P<sub>3</sub> has 5 units remaining while P<sub>4</sub> has 4, so P<sub>3</sub> runs next. As the remaining times become close, the stated tie rule determines which process runs at each one-unit boundary. The image shows the schedule only partway through; the chart above continues it until every process finishes.</p>
+          <p><strong>Average turnaround time:</strong> (18 + 18 + 18 + 14) / 4 = 68 / 4 = <strong>17 time units</strong>.</p>
+          <p><strong>Average waiting time:</strong> (16 + 14 + 12 + 6) / 4 = 48 / 4 = <strong>12 time units</strong>.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

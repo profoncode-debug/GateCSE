@@ -1,0 +1,1428 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GATE Operating Systems notes introducing deadlock through the dining philosophers problem.">
+  <title>Deadlock Notes</title>
+  <style>
+    :root {
+      --ink: #111;
+      --muted: #555;
+      --line: #d9dce1;
+      --soft: #f5f6f8;
+      --paper: #fff;
+      --page: #f1f2f4;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--page);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 15px;
+      line-height: 1.68;
+    }
+
+    a { color: inherit; }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 58px;
+      padding: 0 24px;
+      color: #fff;
+      background: #111;
+      border-bottom: 1px solid #000;
+    }
+
+    .brand {
+      font-size: 15px;
+      font-weight: 750;
+      letter-spacing: -0.2px;
+    }
+
+    .topbar-meta {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .author-credit { color: #bbb; font-size: 12px; }
+    .author-credit strong { color: #fff; }
+
+    .course-tag {
+      padding: 3px 9px;
+      border: 1px solid #666;
+      border-radius: 999px;
+      color: #ddd;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 232px minmax(0, 1fr);
+      gap: 24px;
+      width: min(1280px, calc(100% - 40px));
+      margin: 24px auto;
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 74px;
+      align-self: start;
+      max-height: calc(100dvh - 90px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 4px 14px 12px 0;
+      border-right: 1px solid var(--line);
+      scrollbar-color: #9a9a9a transparent;
+    }
+
+    .sidebar-title {
+      margin: 0 0 10px 10px;
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .sidebar nav { display: grid; gap: 2px; }
+
+    .sidebar a {
+      display: block;
+      padding: 8px 10px;
+      border-left: 3px solid transparent;
+      color: #333;
+      font-size: 13.5px;
+      font-weight: 650;
+      line-height: 1.4;
+      text-decoration: none;
+    }
+
+    .sidebar a:hover,
+    .sidebar a:focus-visible {
+      color: #000;
+      background: var(--paper);
+      border-left-color: var(--ink);
+      outline: none;
+    }
+
+    .sidebar a.sub-link {
+      padding-top: 6px;
+      padding-bottom: 6px;
+      padding-left: 25px;
+      color: var(--muted);
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    .sidebar a.question-link { padding-left: 36px; font-size: 12px; }
+    main [id] { scroll-margin-top: 130px; }
+
+    main {
+      min-width: 0;
+      padding: clamp(24px, 4vw, 46px);
+      background: var(--paper);
+      border-radius: 3px;
+      box-shadow: 0 3px 14px rgb(0 0 0 / 4%);
+    }
+
+    .eyebrow {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(26px, 3.4vw, 38px);
+      line-height: 1.12;
+      letter-spacing: -1.4px;
+    }
+
+    .subtitle {
+      max-width: 760px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .rule {
+      margin-top: 28px;
+      padding-top: 25px;
+      border-top: 2px solid var(--ink);
+      scroll-margin-top: 82px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-number {
+      color: var(--muted);
+      font: 700 13px/1 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 23px;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+    }
+
+    .definition {
+      max-width: 900px;
+      margin: 0 0 16px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 16px;
+    }
+
+    .study-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      align-items: stretch;
+    }
+
+    .requirements-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin: 16px 0;
+      align-items: stretch;
+    }
+
+    .panel {
+      padding: 16px;
+      border-top: 2px solid var(--ink);
+      background: #fafafa;
+    }
+
+    .panel-label {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 750;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .panel p:last-child,
+    .panel ul:last-child { margin-bottom: 0; }
+
+    .equation {
+      margin: 12px 0;
+      padding: 12px 14px;
+      overflow-x: auto;
+      background: var(--soft);
+      font-family: "Cambria Math", Cambria, Georgia, serif;
+      font-size: 16px;
+      line-height: 1.65;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .flow {
+      display: flex;
+      align-items: stretch;
+      gap: 7px;
+      margin: 14px 0;
+      overflow-x: auto;
+      padding-bottom: 3px;
+    }
+
+    .flow-step {
+      display: grid;
+      min-width: 135px;
+      min-height: 64px;
+      place-items: center;
+      padding: 10px 12px;
+      background: var(--soft);
+      border-top: 2px solid var(--ink);
+      font-weight: 750;
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    .flow-arrow {
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .subtopic {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      scroll-margin-top: 82px;
+    }
+
+    .subtopic h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+      line-height: 1.3;
+    }
+
+    .subtopic h4 {
+      margin: 20px 0 10px;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .practice-question {
+      margin-top: 24px;
+      padding: clamp(16px, 3vw, 24px);
+      border: 0;
+      border-radius: 8px;
+      background: #edf3fa;
+    }
+
+    .practice-question > :first-child { margin-top: 0; }
+    .practice-question > :last-child { margin-bottom: 0; }
+    .practice-question .equation,
+    .practice-question .note,
+    .practice-question .panel,
+    .practice-question .comparison-table th { background: #f8fafd; }
+    .practice-question .comparison-table td { background: #fff; }
+
+    .note {
+      margin: 12px 0 0;
+      padding: 11px 13px;
+      background: var(--soft);
+      font-size: 13px;
+    }
+
+    .table-wrap {
+      margin: 14px 0;
+      overflow-x: auto;
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    .comparison-table th,
+    .comparison-table td {
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .comparison-table th {
+      background: var(--soft);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .code-sample {
+      margin: 12px 0;
+      padding: 12px 14px;
+      overflow-x: auto;
+      background: var(--soft);
+      font: 14px/1.65 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    code {
+      padding: 2px 5px;
+      background: var(--soft);
+      font: 0.92em/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+
+    .code-sample code { padding: 0; }
+    ul { margin-top: 8px; padding-left: 22px; }
+    li + li { margin-top: 5px; }
+
+    .interleaving {
+      display: grid;
+      grid-template-columns: 70px minmax(170px, 1fr) minmax(170px, 1fr) 110px;
+      min-width: 650px;
+      border: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .interleaving > div {
+      padding: 9px 11px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .interleaving > div:nth-child(4n) { border-right: 0; }
+    .interleaving > div:nth-last-child(-n + 4) { border-bottom: 0; }
+    .interleaving .head {
+      background: var(--soft);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .interleaving .active { font-weight: 700; }
+    .interleaving .empty { color: #aaa; }
+
+    @media (max-width: 760px) {
+      .topbar { padding: 0 16px; }
+      .author-credit { display: none; }
+      .layout {
+        display: block;
+        width: min(100% - 20px, 720px);
+        margin: 10px auto;
+      }
+      .sidebar {
+        position: sticky;
+        top: 58px;
+        z-index: 9;
+        max-height: none;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 7px 0;
+        background: var(--page);
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .sidebar-title { display: none; }
+      .sidebar nav { display: flex; gap: 3px; width: max-content; }
+      .sidebar a {
+        padding: 7px 9px;
+        border-left: 0;
+        border-bottom: 2px solid transparent;
+        white-space: nowrap;
+      }
+      .sidebar a:hover,
+      .sidebar a:focus-visible { border-bottom-color: var(--ink); }
+      main { padding: 22px 18px; }
+      .study-grid,
+      .requirements-grid { grid-template-columns: 1fr; }
+      .comparison-table { min-width: 620px; }
+    }
+
+    @media (max-width: 430px) {
+      .brand { max-width: 235px; line-height: 1.25; }
+      .course-tag { flex: 0 0 auto; }
+    }
+    .address-diagram { margin: 20px 0 26px; }
+    .diagram-scroll { overflow-x: auto; border: 1px solid var(--line); background: #fafafa; }
+    .address-diagram svg { display: block; width: 100%; min-width: 760px; height: auto; }
+    .address-diagram figcaption { margin-top: 8px; color: var(--muted); font-size: 12px; }
+    .binding-flow { display: flex; align-items: center; gap: 10px; overflow-x: auto; padding: 14px 0; }
+    .binding-flow span { flex: 0 0 auto; padding: 10px 12px; border: 1px solid var(--line); background: var(--soft); font-weight: 650; }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Deadlock</div>
+    <div class="topbar-meta">
+      <span class="author-credit">By <strong>ProFonCoDe</strong></span>
+      <span class="course-tag">GATE &middot; OS</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Table of contents">
+      <p class="sidebar-title">Contents</p>
+      <nav aria-label="Deadlock topics">
+        <a href="OS.html">&larr; Operating Systems index</a>
+        <a href="#introduction-to-deadlock">01&nbsp;&nbsp;Introduction to Deadlock</a>
+        <a class="sub-link" href="#dining-philosophers">Dining Philosophers Problem</a>
+        <a class="sub-link" href="#how-deadlock-occurs">How deadlock occurs</a>
+        <a href="#conditions-to-deadlock">02&nbsp;&nbsp;Conditions to Deadlock</a>
+        <a class="sub-link" href="#mutual-exclusion">Mutual exclusion</a>
+        <a class="sub-link" href="#hold-and-wait">Hold and wait</a>
+        <a class="sub-link" href="#no-preemption">No preemption</a>
+        <a class="sub-link" href="#circular-wait">Circular wait</a>
+        <a href="#resource-allocation-graph">03&nbsp;&nbsp;Resource Allocation Graph</a>
+        <a class="sub-link" href="#rag-symbols">Nodes and edges</a>
+        <a class="sub-link" href="#rag-resource-instances">Resource types and instances</a>
+        <a class="sub-link" href="#rag-deadlock-example">Example &middot; Deadlock cycle</a>
+        <a class="sub-link" href="#rag-cycle-without-deadlock">Example &middot; Cycle without deadlock</a>
+        <a class="sub-link" href="#rag-four-process-example">Example &middot; Four-process snapshot</a>
+        <a class="sub-link" href="#rag-cycle-and-deadlock">Cycles vs. deadlock</a>
+        <a class="sub-link" href="#rag-gate-cse-1994">Example &middot; GATE CSE 1994</a>
+        <a href="#deadlock-prevention-techniques">04&nbsp;&nbsp;Deadlock Prevention Techniques</a>
+        <a class="sub-link" href="#prevention-resource-count-example">Example &middot; Minimum resource instances</a>
+        <a class="sub-link" href="#prevention-resource-count-formula">General formula</a>
+        <a class="sub-link" href="#gate-cse-1992-tape-drives">GATE 1992 &middot; Maximum processes</a>
+        <a class="sub-link" href="#gate-cse-2018-question-24">GATE 2018 &middot; Maximum demand K</a>
+        <a class="sub-link" href="#gate-cse-1997-question-6-7">GATE 1997 &middot; Minimum resource units</a>
+        <a class="sub-link" href="#gate-cse-1993-question-7-9">GATE 1993 &middot; Unequal peak demands</a>
+        <a href="#dealing-with-deadlock">05&nbsp;&nbsp;Dealing with Deadlock</a>
+        <a class="sub-link" href="#deadlock-ignore">Ignore the problem</a>
+        <a class="sub-link" href="#deadlock-prevention-strategy">Prevention</a>
+        <a class="sub-link question-link" href="#prevention-mutual-exclusion">Mutual exclusion</a>
+        <a class="sub-link question-link" href="#prevention-hold-and-wait">Hold and wait</a>
+        <a class="sub-link question-link" href="#prevention-no-preemption">No preemption</a>
+        <a class="sub-link question-link" href="#prevention-circular-wait">Circular wait</a>
+        <a class="sub-link question-link" href="#resource-ordering-example">Resource ordering example</a>
+        <a class="sub-link question-link" href="#prevention-condition-comparison">Prevention comparison</a>
+        <a class="sub-link" href="#deadlock-avoidance-strategy">Avoidance</a>
+        <a class="sub-link question-link" href="#safe-and-unsafe-states">Safe and unsafe states</a>
+        <a class="sub-link question-link" href="#bankers-algorithm">Banker's algorithm</a>
+        <a class="sub-link question-link" href="#bankers-tape-drive-example">Example &middot; 12 tape drives</a>
+        <a class="sub-link question-link" href="#bankers-request-check">Checking a new request</a>
+        <a class="sub-link question-link" href="#bankers-p2-trial-allocation">Example &middot; Defer P2's request</a>
+        <a class="sub-link question-link" href="#gate-cse-2017-set-2-question-33">GATE 2017 S2 &middot; Safe state</a>
+        <a class="sub-link question-link" href="#unique-safe-sequence-question">Question &middot; Only safe sequence</a>
+        <a class="sub-link question-link" href="#gate-cse-1996-question-22">GATE 1996 &middot; Banker's request test</a>
+        <a class="sub-link question-link" href="#bankers-independent-requests">Question &middot; Independent requests</a>
+        <a class="sub-link" href="#deadlock-detection-strategy">Detection and recovery</a>
+      </nav>
+    </aside>
+    <main>
+      <header>
+        <p class="eyebrow">Operating Systems</p>
+        <h1>Deadlock</h1>
+        <p class="subtitle">Core concepts, illustrations, and explanations for GATE revision.</p>
+      </header>
+      <section class="rule" id="introduction-to-deadlock">
+        <div class="section-heading">
+          <span class="section-number">01</span>
+          <h2>Introduction to Deadlock</h2>
+        </div>
+        <p class="definition"><strong>Deadlock</strong> is a situation in which a set of processes is permanently blocked because each process is waiting for a resource held by another process in the same set.</p>
+        <article class="subtopic" id="dining-philosophers">
+          <h3>The Dining Philosophers Problem</h3>
+          <p>Four people, <strong>A, B, C, and D</strong>, sit around a circular table with <strong>four shared forks</strong>, one between each pair of neighbours. Each person needs <strong>both adjacent forks</strong> to eat. A fork can be held by only one person at a time.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Dining example</th><th scope="col">Operating Systems equivalent</th></tr></thead>
+              <tbody>
+                <tr><td>People A, B, C, D</td><td>Processes</td></tr>
+                <tr><td>Shared forks</td><td>Exclusive resources</td></tr>
+                <tr><td>Eating</td><td>Executing a task requiring both resources</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <figure class="address-diagram">
+            <div class="diagram-scroll">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 460" role="img" aria-labelledby="dining-title dining-desc">
+                <title id="dining-title">Four dining philosophers holding one fork each</title>
+                <desc id="dining-desc">C sits at the top, D on the right, A at the bottom, and B on the left. Fork F1 between A and B is held by A. F2 between B and C is held by B. F3 between C and D is held by C. F4 between D and A is held by D. Each person waits for the other adjacent fork, producing the cycle A waits for B, B for C, C for D, and D for A.</desc>
+                <g font-family="Inter, Segoe UI, sans-serif" fill="#172033">
+                  <text x="510" y="30" text-anchor="middle" font-size="20" font-weight="700">Four forks exist, but nobody has the two needed to eat</text>
+                  <ellipse cx="510" cy="223" rx="228" ry="130" fill="#f5e8cf" stroke="#b9a17a" stroke-width="2"/>
+                  <text x="510" y="213" text-anchor="middle" font-size="17" font-weight="700">Each holds one fork</text>
+                  <text x="510" y="240" text-anchor="middle" font-size="14">and waits for another</text>
+                  <g fill="#e0eafa" stroke="#94a3b8" stroke-width="1.5">
+                    <circle cx="510" cy="73" r="30"/><circle cx="790" cy="223" r="30"/>
+                    <circle cx="510" cy="373" r="30"/><circle cx="230" cy="223" r="30"/>
+                  </g>
+                  <g text-anchor="middle" font-size="21" font-weight="700">
+                    <text x="510" y="81">C</text><text x="790" y="231">D</text>
+                    <text x="510" y="381">A</text><text x="230" y="231">B</text>
+                  </g>
+                  <g fill="#fff" stroke="#94a3b8">
+                    <rect x="309" y="112" width="148" height="51" rx="5"/>
+                    <rect x="563" y="112" width="148" height="51" rx="5"/>
+                    <rect x="309" y="283" width="148" height="51" rx="5"/>
+                    <rect x="563" y="283" width="148" height="51" rx="5"/>
+                  </g>
+                  <g text-anchor="middle" font-size="14">
+                    <text x="383" y="134" font-weight="700">Fork F2</text><text x="383" y="153">Held by B</text>
+                    <text x="637" y="134" font-weight="700">Fork F3</text><text x="637" y="153">Held by C</text>
+                    <text x="383" y="305" font-weight="700">Fork F1</text><text x="383" y="324">Held by A</text>
+                    <text x="637" y="305" font-weight="700">Fork F4</text><text x="637" y="324">Held by D</text>
+                  </g>
+                  <text x="510" y="439" text-anchor="middle" font-size="14">Waiting cycle: A &#8594; B &#8594; C &#8594; D &#8594; A</text>
+                </g>
+              </svg>
+            </div>
+            <figcaption>Conceptual version of the supplied illustration. Each fork lies between neighbours; the waiting arrows mean &ldquo;waits for a fork held by.&rdquo;</figcaption>
+          </figure>
+        </article>
+        <article class="subtopic" id="how-deadlock-occurs">
+          <h3>How Does Deadlock Occur?</h3>
+          <ol>
+            <li>Initially, all four forks are free. Each person picks up their left fork.</li>
+            <li>Every person now holds one fork and waits for the other, which a neighbour holds.</li>
+            <li>If everyone keeps their first fork until they can eat, nobody can proceed or release a fork. The group is deadlocked.</li>
+          </ol>
+          <p class="note"><strong>The allocation causes the problem.</strong> There are enough forks for one person to eat. If A receives both adjacent forks, A can finish and release them, allowing others to proceed. Deadlock is possible under the described acquisition rule; it is not inevitable.</p>
+        </article>
+      </section>
+      <section class="rule" id="conditions-to-deadlock">
+        <div class="section-heading">
+          <span class="section-number">02</span>
+          <h2>Conditions to Deadlock</h2>
+        </div>
+        <p class="definition">Deadlock requires the following <strong>four necessary conditions</strong>, called the <strong>Coffman conditions</strong>, to hold simultaneously.</p>
+        <article class="subtopic" id="mutual-exclusion">
+          <h3>1. Mutual Exclusion</h3>
+          <p>At least one resource is <strong>non-shareable</strong>: only one process can use it at a time. Other processes requesting it must wait until it is released.</p>
+          <p><strong>Dining example:</strong> A fork can be held by only one person at a time.</p>
+        </article>
+        <article class="subtopic" id="hold-and-wait">
+          <h3>2. Hold and Wait</h3>
+          <p>A process <strong>holds at least one resource</strong> while waiting to acquire additional resources held by other processes.</p>
+          <p><strong>Dining example:</strong> Each person holds one fork while waiting for the second fork.</p>
+        </article>
+        <article class="subtopic" id="no-preemption">
+          <h3>3. No Preemption</h3>
+          <p>A resource already granted to a process <strong>cannot be forcibly taken away</strong>. It must be released voluntarily by the process holding it.</p>
+          <p><strong>Dining example:</strong> A fork cannot be taken from its holder; the person must put it down.</p>
+          <p class="note">This concerns <strong>preemption of resources</strong>, not CPU scheduling or preemption of processes. Switching a process off the CPU does not automatically release the resources it holds.</p>
+        </article>
+        <article class="subtopic" id="circular-wait">
+          <h3>4. Circular Wait</h3>
+          <p>A circular chain of processes exists in which <strong>each process waits for a resource held by the next process</strong> in the chain.</p>
+          <p><strong>Dining example:</strong> A waits for B's fork, B for C's, C for D's, and D for A's.</p>
+          <p class="equation">A &rarr; B &rarr; C &rarr; D &rarr; A</p>
+        </article>
+        <p class="note"><strong>All four are necessary.</strong> Breaking any one prevents deadlock. A system that permits all four conditions is not necessarily deadlocked at every moment; the current allocation and outstanding requests matter.</p>
+      </section>
+      <section class="rule" id="resource-allocation-graph">
+        <div class="section-heading">
+          <span class="section-number">03</span>
+          <h2>Resource Allocation Graph (RAG)</h2>
+        </div>
+        <p class="definition">A <strong>Resource Allocation Graph</strong> is a directed graph representing resources allocated to processes and outstanding requests for additional resources. It shows <strong>who holds a resource</strong> and <strong>who is waiting for one</strong>, helping us analyse deadlock.</p>
+        <article class="subtopic" id="rag-symbols">
+          <h3>Nodes and Edges</h3>
+          <p>A RAG contains two types of nodes and two types of directed edges:</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Symbol</th><th scope="col">Name</th><th scope="col">Meaning</th></tr></thead>
+              <tbody>
+                <tr><td>Circle labelled P<sub>i</sub></td><td>Process node</td><td>A process in the system.</td></tr>
+                <tr><td>Rectangle labelled R<sub>j</sub></td><td>Resource-type node</td><td>A resource type; each dot or small square inside represents one instance.</td></tr>
+                <tr><td>P<sub>i</sub> &rarr; R<sub>j</sub></td><td>Request edge</td><td>P<sub>i</sub> has requested an instance of R<sub>j</sub> and is waiting to acquire it.</td></tr>
+                <tr><td>R<sub>j</sub> instance &rarr; P<sub>i</sub></td><td>Assignment edge</td><td>A particular instance of R<sub>j</sub> is allocated to P<sub>i</sub>.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note"><strong>Direction matters:</strong> P &rarr; R means &ldquo;wants&rdquo;; R &rarr; P means &ldquo;holds&rdquo;. A request points to a resource type; an assignment starts from a specific instance inside its rectangle.</p>
+        </article>
+        <article class="subtopic" id="rag-resource-instances">
+          <h3>Resource Type vs. Resource Instance</h3>
+          <p>One resource type can have <strong>multiple interchangeable instances</strong>. If R1 represents four identical printers, draw one rectangle containing four markers, one per printer.</p>
+          <figure class="address-diagram">
+            <div class="diagram-scroll">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 170" role="img" aria-labelledby="rag-instances-title rag-instances-desc">
+                <title id="rag-instances-title">One resource type with four instances</title>
+                <desc id="rag-instances-desc">Rectangle R1 contains four squares representing four identical printers. P1 holds one, P2 holds two, and one is free. Labels describe the allocation.</desc>
+                <g font-family="Inter, Segoe UI, sans-serif" fill="#172033" text-anchor="middle">
+                  <text x="510" y="28" font-size="18" font-weight="700">R1: four printers, one resource type</text>
+                  <rect x="220" y="48" width="580" height="101" fill="#f5e8cf" stroke="#94a3b8"/>
+                  <g fill="#475569"><rect x="293" y="68" width="14" height="14"/><rect x="433" y="68" width="14" height="14"/><rect x="573" y="68" width="14" height="14"/><rect x="713" y="68" width="14" height="14"/></g>
+                  <g font-size="13"><text x="300" y="118">Held by P1</text><text x="440" y="118">Held by P2</text><text x="580" y="118">Held by P2</text><text x="720" y="118">Free</text></g>
+                </g>
+              </svg>
+            </div>
+            <figcaption>P1 holds one printer, P2 holds two, and one remains free. Allocation is labelled here; a complete RAG uses assignment edges to process nodes.</figcaption>
+          </figure>
+          <p>A <strong>resource type</strong> describes a category; an <strong>instance</strong> is one unit of that category. This distinction matters when interpreting cycles.</p>
+        </article>
+        <article class="subtopic" id="rag-deadlock-example">
+          <h3>Example: Two Processes Waiting for Each Other</h3>
+          <p>Consider <strong>two processes, P1 and P2</strong>, and <strong>two resource types, R1 and R2</strong>, each with <strong>one instance</strong>. P1 holds R1 and requests R2; P2 holds R2 and requests R1. Assume resources cannot be forcibly taken away and each process keeps its current resource while waiting.</p>
+          <figure class="address-diagram">
+            <div class="diagram-scroll">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 415" role="img" aria-labelledby="rag-cycle-title rag-cycle-desc">
+                <title id="rag-cycle-title">A resource allocation graph with a deadlock cycle</title>
+                <desc id="rag-cycle-desc">P1 and P2 are circles. R1 and R2 are rectangles with one instance each. Request edges point from P1 to R2 and P2 to R1. Assignment edges start at the instance in R2 and point to P2, and at the instance in R1 and point to P1. The four edges form a cycle.</desc>
+                <defs>
+                  <marker id="rag-request-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#a16a16"/></marker>
+                  <marker id="rag-assignment-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#247465"/></marker>
+                </defs>
+                <g font-family="Inter, Segoe UI, sans-serif" fill="#172033">
+                  <text x="510" y="30" text-anchor="middle" font-size="19" font-weight="700">Each process holds what the other needs</text>
+                  <g fill="#e0eafa" stroke="#94a3b8" stroke-width="1.5"><circle cx="250" cy="105" r="43"/><circle cx="760" cy="295" r="43"/></g>
+                  <g fill="#f5e8cf" stroke="#94a3b8" stroke-width="1.5"><rect x="700" y="67" width="120" height="76"/><rect x="190" y="257" width="120" height="76"/></g>
+                  <g text-anchor="middle" font-size="19" font-weight="700"><text x="250" y="112">P1</text><text x="760" y="302">P2</text><text x="760" y="91">R2</text><text x="250" y="281">R1</text></g>
+                  <g fill="#475569"><rect x="754" y="107" width="12" height="12"/><rect x="244" y="297" width="12" height="12"/></g>
+                  <g fill="none" stroke-width="2.4">
+                    <path d="M295 105 H696" stroke="#a16a16" marker-end="url(#rag-request-arrow)"/>
+                    <path d="M715 295 H314" stroke="#a16a16" marker-end="url(#rag-request-arrow)"/>
+                    <path d="M760 119 V249" stroke="#247465" marker-end="url(#rag-assignment-arrow)"/>
+                    <path d="M250 297 V151" stroke="#247465" marker-end="url(#rag-assignment-arrow)"/>
+                  </g>
+                  <g font-size="14">
+                    <text x="500" y="87" text-anchor="middle" fill="#805313">Request: P1 wants R2</text><text x="500" y="323" text-anchor="middle" fill="#805313">Request: P2 wants R1</text>
+                    <text x="780" y="200" fill="#247465">Assigned to P2</text><text x="100" y="211" fill="#247465">Assigned to P1</text>
+                  </g>
+                  <text x="510" y="387" text-anchor="middle" font-size="15" font-weight="700">Cycle: P1 &#8594; R2 &#8594; P2 &#8594; R1 &#8594; P1</text>
+                </g>
+              </svg>
+            </div>
+            <figcaption>Each rectangle contains one instance. Neither request can be satisfied while the other process keeps its resource.</figcaption>
+          </figure>
+          <ul>
+            <li><strong>R1 &rarr; P1:</strong> P1 holds R1.</li>
+            <li><strong>P1 &rarr; R2:</strong> P1 is waiting for R2.</li>
+            <li><strong>R2 &rarr; P2:</strong> P2 holds R2.</li>
+            <li><strong>P2 &rarr; R1:</strong> P2 is waiting for R1.</li>
+          </ul>
+          <p><strong>Deadlock has occurred:</strong> P1 needs R2, which P2 holds; P2 needs R1, which P1 holds. Neither can proceed and release the resource the other needs.</p>
+          <p class="note"><strong>Reading cycles:</strong> In the standard RAG model for reusable, non-preemptible resources, no cycle means no deadlock. When every resource type has a single instance, a cycle implies deadlock. With multiple instances, a cycle indicates a possibility of deadlock but does not by itself prove it.</p>
+        </article>
+        <article class="subtopic" id="rag-cycle-without-deadlock">
+          <h3>Example: A Cycle Without Deadlock</h3>
+          <p>Consider the supplied system snapshot. <strong>R1 has one instance</strong>, allocated to P1. <strong>R2 has two instances</strong>: one is allocated to P2 and the other is free. P1 requests one instance of R2, while P2 requests R1.</p>
+          <figure class="address-diagram">
+            <div class="diagram-scroll">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 470" role="img" aria-labelledby="rag-free-title rag-free-desc">
+                <title id="rag-free-title">A resource allocation graph with a cycle but no deadlock</title>
+                <desc id="rag-free-desc">R1 at the top contains one instance assigned to P1 on the left. R2 at the bottom contains two instances: its left instance is free and its right instance is assigned to P2 on the right. Dashed request arrows point from P1 to R2 and P2 to R1. Although a cycle exists, the free instance of R2 can be assigned to P1, allowing progress.</desc>
+                <defs>
+                  <marker id="rag-free-request-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#a16a16"/></marker>
+                  <marker id="rag-free-assignment-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#247465"/></marker>
+                </defs>
+                <g font-family="Inter, Segoe UI, sans-serif" fill="#172033">
+                  <text x="510" y="30" text-anchor="middle" font-size="19" font-weight="700">A free instance lets P1 proceed</text>
+                  <g fill="#f5e8cf" stroke="#94a3b8" stroke-width="1.5"><rect x="420" y="71" width="180" height="63"/><rect x="420" y="326" width="180" height="63"/></g>
+                  <g fill="#e0eafa" stroke="#94a3b8" stroke-width="1.5"><circle cx="220" cy="230" r="43"/><circle cx="800" cy="230" r="43"/></g>
+                  <g font-size="19" font-weight="700" text-anchor="middle"><text x="220" y="237">P1</text><text x="800" y="237">P2</text><text x="510" y="60">R1</text><text x="510" y="414">R2</text></g>
+                  <circle cx="510" cy="102" r="8" fill="#247465"/>
+                  <circle cx="555" cy="357" r="8" fill="#247465"/>
+                  <circle cx="465" cy="357" r="9" fill="#fff" stroke="#247465" stroke-width="2"/>
+                  <g fill="none" stroke-width="2.4">
+                    <path d="M504 106 L260 211" stroke="#247465" marker-end="url(#rag-free-assignment-arrow)"/>
+                    <path d="M561 353 L760 251" stroke="#247465" marker-end="url(#rag-free-assignment-arrow)"/>
+                    <path d="M253 258 L416 342" stroke="#a16a16" stroke-dasharray="8 5" marker-end="url(#rag-free-request-arrow)"/>
+                    <path d="M766 203 L604 120" stroke="#a16a16" stroke-dasharray="8 5" marker-end="url(#rag-free-request-arrow)"/>
+                  </g>
+                  <g font-size="13">
+                    <text x="295" y="145" fill="#247465">R1 assigned to P1</text><text x="643" y="321" fill="#247465">R2 assigned to P2</text>
+                    <text x="280" y="320" fill="#805313">P1 requests R2</text><text x="655" y="145" fill="#805313">P2 requests R1</text>
+                    <text x="350" y="379" fill="#247465">Free instance</text><path d="M439 374 L457 361" fill="none" stroke="#247465"/>
+                  </g>
+                  <text x="510" y="453" text-anchor="middle" font-size="15" font-weight="700">Cycle exists, but no deadlock: R2 still has one free instance.</text>
+                </g>
+              </svg>
+            </div>
+            <figcaption>Dashed arrows represent current requests in this illustration, following the supplied snapshot; solid arrows are assignments. The outlined dot marks R2's free instance.</figcaption>
+          </figure>
+          <p>The graph contains the cycle <strong>P1 &rarr; R2 &rarr; P2 &rarr; R1 &rarr; P1</strong>. However, P1 does not have to wait for the particular R2 instance held by P2: it can receive the <strong>other, free instance</strong>.</p>
+          <ol>
+            <li>Allocate R2's free instance to <strong>P1</strong>, satisfying its outstanding request.</li>
+            <li>Assuming no further requests, P1 can complete and release its instances of R1 and R2.</li>
+            <li>Allocate the released R1 instance to <strong>P2</strong>. P2 can then complete and release its resources.</li>
+          </ol>
+          <p class="equation">Possible completion sequence: P1 &rarr; P2 &nbsp; &rArr; &nbsp; <strong>No deadlock</strong></p>
+          <p class="note"><strong>A cycle alone is not sufficient with multiple instances.</strong> Check whether an outstanding request can be satisfied by a free instance, allowing a process to finish and release resources. This snapshot has a cycle but is not deadlocked.</p>
+        </article>
+        <article class="subtopic practice-question" id="rag-four-process-example">
+          <h3>Example: Does This Four-Process System Have Deadlock?</h3>
+          <p>In the supplied graph, <strong>R1 and R2 each have two instances</strong>. All instances are allocated. Determine whether the system is deadlocked using the current requests shown.</p>
+          <figure class="address-diagram">
+            <div class="diagram-scroll">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 510" role="img" aria-labelledby="rag-four-title rag-four-desc">
+                <title id="rag-four-title">Four processes and two resource types with two instances each</title>
+                <desc id="rag-four-desc">P1 holds one instance of R2 and requests R1. The two instances of R1 are assigned to P2 and P3. P3 requests R2. The second instance of R2 is assigned to P4. P2 and P4 have no outstanding requests. A cycle P1 to R1 to P3 to R2 to P1 exists, but P2 or P4 can finish and release resources, so there is no deadlock.</desc>
+                <defs>
+                  <marker id="rag-four-request-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#a16a16"/></marker>
+                  <marker id="rag-four-assignment-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#247465"/></marker>
+                </defs>
+                <g font-family="Inter, Segoe UI, sans-serif" fill="#172033">
+                  <text x="510" y="30" text-anchor="middle" font-size="19" font-weight="700">All instances are allocated. Is the system deadlocked?</text>
+                  <g fill="#f5e8cf" stroke="#94a3b8" stroke-width="1.5"><rect x="430" y="101" width="110" height="82"/><rect x="430" y="331" width="110" height="82"/></g>
+                  <g fill="#e0eafa" stroke="#94a3b8" stroke-width="1.5"><circle cx="180" cy="255" r="36"/><circle cx="790" cy="85" r="36"/><circle cx="790" cy="255" r="36"/><circle cx="790" cy="435" r="36"/></g>
+                  <g font-size="19" font-weight="700" text-anchor="middle"><text x="180" y="262">P1</text><text x="790" y="92">P2</text><text x="790" y="262">P3</text><text x="790" y="442">P4</text><text x="485" y="88">R1</text><text x="485" y="437">R2</text></g>
+                  <g fill="#247465"><circle cx="485" cy="128" r="7"/><circle cx="485" cy="156" r="7"/><circle cx="485" cy="358" r="7"/><circle cx="485" cy="386" r="7"/></g>
+                  <g fill="none" stroke-width="2.4">
+                    <path d="M209 232 L426 145" stroke="#a16a16" marker-end="url(#rag-four-request-arrow)"/>
+                    <path d="M758 276 L544 357" stroke="#a16a16" marker-end="url(#rag-four-request-arrow)"/>
+                    <path d="M492 128 L751 90" stroke="#247465" marker-end="url(#rag-four-assignment-arrow)"/>
+                    <path d="M492 156 L753 244" stroke="#247465" marker-end="url(#rag-four-assignment-arrow)"/>
+                    <path d="M478 358 L214 274" stroke="#247465" marker-end="url(#rag-four-assignment-arrow)"/>
+                    <path d="M492 386 L751 429" stroke="#247465" marker-end="url(#rag-four-assignment-arrow)"/>
+                  </g>
+                  <g font-size="13" fill="#247465"><text x="840" y="90">Can finish</text><text x="840" y="440">Can finish</text></g>
+                  <text x="510" y="491" text-anchor="middle" font-size="14">Amber: request edges &nbsp; | &nbsp; Green: assignment edges from individual instances</text>
+                </g>
+              </svg>
+            </div>
+            <figcaption>P2 and P4 have no outgoing request edges: neither is waiting for another resource in this snapshot.</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Process</th><th scope="col">Currently holds</th><th scope="col">Outstanding request</th></tr></thead>
+              <tbody>
+                <tr><td>P1</td><td>One R2 instance</td><td>One R1 instance</td></tr>
+                <tr><td>P2</td><td>One R1 instance</td><td>None</td></tr>
+                <tr><td>P3</td><td>One R1 instance</td><td>One R2 instance</td></tr>
+                <tr><td>P4</td><td>One R2 instance</td><td>None</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Solution:</strong> The graph contains the cycle <strong>P1 &rarr; R1 &rarr; P3 &rarr; R2 &rarr; P1</strong>. However, both resource types have multiple instances, so the cycle does not by itself establish deadlock.</p>
+          <ol>
+            <li><strong>P2</strong> has no outstanding request. It can finish and release one instance of R1.</li>
+            <li>Give that R1 instance to <strong>P1</strong>. P1 can finish and release its R1 and R2 instances.</li>
+            <li>Give the released R2 instance to <strong>P3</strong>. P3 can finish and release its resources.</li>
+            <li><strong>P4</strong> has no outstanding request and can also finish.</li>
+          </ol>
+          <p class="equation">Possible completion sequence: P2 &rarr; P1 &rarr; P3 &rarr; P4</p>
+          <p class="note"><strong>Answer: No deadlock.</strong> Even though no instance is initially free, P2 or P4 can release resources and allow the waiting processes to proceed. This reasoning uses the current requests shown and assumes processes finish after those requests are satisfied.</p>
+        </article>
+        <article class="subtopic" id="rag-cycle-and-deadlock">
+          <h3>Cycles and Deadlock: Single vs. Multiple Instances</h3>
+          <p>For reusable, non-preemptible resources in the standard RAG model, the meaning of a cycle depends on the number of instances per resource type.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Resource model</th><th scope="col">Relationship</th><th scope="col">What can we conclude?</th></tr></thead>
+              <tbody>
+                <tr><td>Every resource type has a single instance</td><td><strong>Cycle &hArr; Deadlock</strong></td><td>A cycle is both necessary and sufficient for deadlock.</td></tr>
+                <tr><td>Resource types may have multiple instances</td><td><strong>Deadlock &rArr; Cycle</strong>, but <strong>Cycle &nrArr; Deadlock</strong></td><td>A cycle is necessary, but not sufficient. Check instance availability and whether processes can finish and release resources.</td></tr>
+                <tr><td>Either model</td><td><strong>No cycle &rArr; No deadlock</strong></td><td>Without a cycle, the system is not deadlocked.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h4>Why Can a Cycle Exist Without Deadlock?</h4>
+          <p>Suppose R1 has <strong>two instances</strong>. Even if one instance is allocated, a requesting process may obtain the other if it is free. That process can finish and release resources, allowing other processes to proceed and breaking the cycle.</p>
+          <p>Even when no instance is initially free, a process outside the cycle may finish and release one. This is what happens in the <a href="#rag-four-process-example">four-process example</a>, where P2 or P4 can complete first.</p>
+          <p class="note"><strong>Multiple instances do not rule out deadlock.</strong> They mean that a cycle alone cannot prove it. Another instance must actually be available, or become available through a process that can make progress; merely having additional instances does not guarantee that the cycle will disappear.</p>
+        </article>
+        <article class="subtopic practice-question" id="rag-gate-cse-1994">
+          <h3>Example: GATE CSE 1994</h3>
+          <p><strong>Question:</strong> Is the given system in deadlock?</p>
+          <figure class="address-diagram">
+            <div class="diagram-scroll">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 560" role="img" aria-labelledby="rag-1994-title rag-1994-desc">
+                <title id="rag-1994-title">GATE CSE 1994 resource allocation graph</title>
+                <desc id="rag-1994-desc">R1 has two instances assigned to P1 and P0. R2 has three instances assigned to P1, P2, and P3. R3 has two instances: one assigned to P0 and one free. P1 requests one R1. P0 requests one R2 and one R3. P2 requests one R3. P3 requests one R1 and two R2 instances. The free R3 instance allows P2 to complete first.</desc>
+                <defs>
+                  <marker id="rag-1994-request-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#a16a16"/></marker>
+                  <marker id="rag-1994-assignment-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#247465"/></marker>
+                </defs>
+                <g font-family="Inter, Segoe UI, sans-serif" fill="#172033">
+                  <text x="510" y="30" text-anchor="middle" font-size="19" font-weight="700">Is the system deadlocked?</text>
+                  <g fill="#f5e8cf" stroke="#94a3b8" stroke-width="1.5"><rect x="225" y="65" width="90" height="75"/><rect x="705" y="65" width="90" height="75"/><rect x="465" y="420" width="90" height="75"/></g>
+                  <g fill="#e0eafa" stroke="#94a3b8" stroke-width="1.5"><circle cx="150" cy="280" r="35"/><circle cx="390" cy="280" r="35"/><circle cx="630" cy="280" r="35"/><circle cx="870" cy="280" r="35"/></g>
+                  <g font-size="19" font-weight="700" text-anchor="middle"><text x="150" y="287">P1</text><text x="390" y="287">P0</text><text x="630" y="287">P2</text><text x="870" y="287">P3</text><text x="270" y="54">R1</text><text x="750" y="54">R2</text><text x="510" y="413">R3</text></g>
+                  <g fill="#247465"><circle cx="255" cy="95" r="6"/><circle cx="285" cy="115" r="6"/><circle cx="722" cy="95" r="6"/><circle cx="750" cy="115" r="6"/><circle cx="778" cy="95" r="6"/><circle cx="490" cy="450" r="6"/></g>
+                  <circle cx="530" cy="475" r="7" fill="#fff" stroke="#247465" stroke-width="2"/>
+                  <g fill="none" stroke-width="2">
+                    <g stroke="#247465" marker-end="url(#rag-1994-assignment-arrow)">
+                      <path d="M252 101 L142 243"/><path d="M288 121 L375 244"/>
+                      <path d="M716 98 L182 264"/><path d="M747 121 L644 244"/><path d="M781 101 L879 242"/>
+                      <path d="M486 444 L378 316"/>
+                    </g>
+                    <g stroke="#a16a16" marker-end="url(#rag-1994-request-arrow)">
+                      <path d="M163 246 L222 139"/>
+                      <path d="M418 258 L701 136"/><path d="M411 311 L505 416"/>
+                      <path d="M609 310 L559 419"/>
+                      <path d="M837 267 L319 119"/>
+                      <path d="M852 249 L799 132"/><path d="M894 253 Q900 170 799 88"/>
+                    </g>
+                  </g>
+                  <text x="925" y="180" text-anchor="middle" font-size="12" fill="#805313">2 requests</text>
+                  <text x="925" y="198" text-anchor="middle" font-size="12" fill="#805313">for R2</text>
+                  <text x="615" y="480" font-size="13" fill="#247465">Free R3 instance</text><path d="M605 475 H540" stroke="#247465" fill="none"/>
+                  <text x="510" y="538" text-anchor="middle" font-size="14">Amber: requests &nbsp; | &nbsp; Green: assignments &nbsp; | &nbsp; Outlined dot: free instance</text>
+                </g>
+              </svg>
+            </div>
+            <figcaption>R1 has 2 instances, R2 has 3, and R3 has 2. Two distinct arrows from P3 to R2 represent requests for two additional R2 instances.</figcaption>
+          </figure>
+          <h4>Read the Allocations and Requests</h4>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Process</th><th scope="col">Currently holds</th><th scope="col">Outstanding requests</th></tr></thead>
+              <tbody>
+                <tr><td>P0</td><td>1 R1 and 1 R3</td><td>1 R2 and 1 more R3</td></tr>
+                <tr><td>P1</td><td>1 R1 and 1 R2</td><td>1 more R1</td></tr>
+                <tr><td>P2</td><td>1 R2</td><td>1 R3</td></tr>
+                <tr><td>P3</td><td>1 R2</td><td>1 R1 and 2 more R2</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Initially, the free-instance vector in the order <strong>(R1, R2, R3)</strong> is <strong>(0, 0, 1)</strong>. Only P2's current request can be fully satisfied at this point.</p>
+          <h4>Solution: Find a Completion Sequence</h4>
+          <ol>
+            <li>Give the free R3 instance to <strong>P2</strong>. It can finish and release its R2 and R3 instances. Free resources become <strong>(0, 1, 1)</strong>.</li>
+            <li>Give <strong>P0</strong> one R2 and one additional R3. It can finish and release all its resources. Free resources become <strong>(1, 1, 2)</strong>.</li>
+            <li>Give <strong>P1</strong> one additional R1. It can finish and release its resources. Free resources become <strong>(2, 2, 2)</strong>.</li>
+            <li>Give <strong>P3</strong> one R1 and two additional R2 instances. It can finish. All resources are now free: <strong>(2, 3, 2)</strong>.</li>
+          </ol>
+          <p class="equation">P2 &rarr; P0 &rarr; P1 &rarr; P3 &nbsp; &rArr; &nbsp; <strong>No deadlock</strong></p>
+          <p class="note"><strong>Answer: The system is not in deadlock.</strong> The free R3 instance allows a chain of completions, even though the graph contains cycles. This uses the outstanding requests shown and assumes each process completes after they are satisfied.</p>
+        </article>
+      </section>
+      <section class="rule" id="deadlock-prevention-techniques">
+        <div class="section-heading">
+          <span class="section-number">04</span>
+          <h2>Deadlock Prevention Techniques</h2>
+        </div>
+        <p class="definition"><strong>Deadlock prevention</strong> uses restrictions on resource requests or allocation so that deadlock cannot occur. Classical prevention breaks at least one of the four necessary conditions. The following example establishes a deadlock-free resource count under bounded process demands.</p>
+        <article class="subtopic practice-question" id="prevention-resource-count-example">
+          <h3>Example: How Many Resource Instances Are Sufficient?</h3>
+          <p><strong>Given:</strong></p>
+          <ul>
+            <li>There are <strong>3 processes</strong>: P1, P2, and P3.</li>
+            <li>Each process may require <strong>at most 3 resource instances</strong> in total.</li>
+            <li>Instances are allocated <strong>one at a time</strong>.</li>
+          </ul>
+          <p><strong>Question:</strong> What is the minimum number of resource instances sufficient to guarantee that deadlock can never occur?</p>
+          <p class="note"><strong>Model:</strong> All instances belong to <strong>one resource type</strong> and are interchangeable. A process may retain its allocated instances while requesting more, but completes and releases them once its total requirement is satisfied. The maximum of 3 includes instances already held.</p>
+          <h4>Why Can Six Instances Allow Deadlock?</h4>
+          <p>Consider the worst case: each process needs all 3 instances and has already received 2. All <strong>6 instances</strong> are held, and each process is waiting for one more. None can complete and release its resources.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <caption>Worst-case allocation before any process can finish</caption>
+              <thead><tr><th scope="col">Total instances</th><th scope="col">P1 holds / still needs</th><th scope="col">P2 holds / still needs</th><th scope="col">P3 holds / still needs</th><th scope="col">Free instances</th><th scope="col">Outcome</th></tr></thead>
+              <tbody>
+                <tr><td>6</td><td>2 / 1</td><td>2 / 1</td><td>2 / 1</td><td>0</td><td><strong>Deadlock is possible</strong></td></tr>
+                <tr><td>7</td><td>2 / 1</td><td>2 / 1</td><td>2 / 1</td><td>1</td><td><strong>A process can receive its final instance</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h4>Why Do Seven Instances Guarantee Progress?</h4>
+          <ol>
+            <li>Even if all three processes hold 2 instances each, the seventh instance remains free.</li>
+            <li>Give it to <strong>P1</strong>. P1 now has its maximum requirement of 3, so it can complete and release all 3 instances.</li>
+            <li>Give one of those released instances to <strong>P2</strong>. It can complete and release its resources.</li>
+            <li><strong>P3</strong> can then obtain its final instance and complete.</li>
+          </ol>
+          <p>More generally, if no process can finish yet, each can hold at most 2 instances. Together they can hold at most 6, so with 7 instances there must be a free instance to satisfy another one-at-a-time request. If some process already has its full requirement, it can finish instead.</p>
+          <p class="equation">3 &times; (3 &minus; 1) + 1 = 6 + 1 = <strong>7 resource instances</strong></p>
+          <p class="note"><strong>Answer: 7.</strong> Six instances do not guarantee deadlock freedom; they can produce the allocation above. Seven guarantee that the system cannot become deadlocked under the stated model. With six, deadlock is possible rather than inevitable.</p>
+        </article>
+        <article class="subtopic" id="prevention-resource-count-formula">
+          <h3>General Formula: One Resource Type</h3>
+          <p>For <strong>n processes</strong>, each requiring at most <strong>k instances</strong> of one resource type, with requests granted one instance at a time:</p>
+          <p class="equation">Minimum total instances guaranteeing no deadlock = <strong>n(k &minus; 1) + 1</strong></p>
+          <p>Each process can hold <strong>k &minus; 1</strong> instances and still wait for one more. Thus, <strong>n(k &minus; 1)</strong> instances can all be held without anyone being able to finish. One extra instance guarantees that at least one process can make progress, finish, and release its resources.</p>
+          <p class="note">This bound assumes interchangeable instances, bounded total requirements, and release on completion. It does not directly apply to multiple resource types or requests that must be granted in larger batches.</p>
+        </article>
+        <article class="subtopic practice-question" id="gate-cse-1992-tape-drives">
+          <h3>Question: GATE CSE 1992 &middot; 02-xi</h3>
+          <p>A computer system has <strong>6 tape devices</strong>, with <strong>n processes</strong> competing for them. Each process may need <strong>3 tape drives</strong>. The maximum value of n for which the system is guaranteed to be deadlock-free is:</p>
+          <ol type="A">
+            <li>2</li>
+            <li>3</li>
+            <li>4</li>
+            <li>1</li>
+          </ol>
+          <h4>Solution</h4>
+          <p>Treat the tape drives as interchangeable instances of one resource type, acquired one at a time and released on completion. Each process may require all 3 drives, so use the worst-case demand rather than assuming it will finish with fewer.</p>
+          <p>For n processes with a maximum demand of 3 drives each, the minimum total guaranteeing no deadlock is <strong>n(3 &minus; 1) + 1</strong>. With 6 drives available:</p>
+          <p class="equation">6 &ge; n(3 &minus; 1) + 1 &nbsp; &rArr; &nbsp; 2n &le; 5 &nbsp; &rArr; &nbsp; n &le; 2.5</p>
+          <p>Since n is an integer, its maximum value is <strong>2</strong>.</p>
+          <ul>
+            <li><strong>With 2 processes:</strong> if both hold 2 drives and need one more, only 4 drives are held and 2 remain free. At least one process can obtain its third drive, finish, and release its drives.</li>
+            <li><strong>With 3 processes:</strong> each can hold 2 drives and wait for a third. All 6 drives are then held, so no process can finish. Deadlock is possible.</li>
+          </ul>
+          <p class="equation">n<sub>max</sub> = &lfloor;(6 &minus; 1) / (3 &minus; 1)&rfloor; = <strong>2</strong></p>
+          <p class="note"><strong>Correct answer: A. 2.</strong> The question asks for a guarantee under any permitted allocation. Three processes might finish under a favourable allocation, but they are not guaranteed to remain deadlock-free.</p>
+        </article>
+        <article class="subtopic practice-question" id="gate-cse-2018-question-24">
+          <h3>Question: GATE CSE 2018 &middot; Question 24</h3>
+          <p>Consider a system with <strong>3 processes</strong> that share <strong>4 instances of the same resource type</strong>. Each process can request a maximum of <strong>K instances</strong>. Resources can be requested and released only <strong>one at a time</strong>. The largest value of K that will always avoid deadlock is ________.</p>
+          <h4>Solution</h4>
+          <p>Interpret K as the maximum total number of instances a process may need simultaneously, including those it already holds. In the worst case, each of the three processes holds <strong>K &minus; 1</strong> instances and waits for one more. Together, they can hold <strong>3(K &minus; 1)</strong> instances without reaching their maximum requirement.</p>
+          <p>One additional instance lets a process obtain its final resource, finish, and release its instances. Therefore, the required total for a deadlock-free guarantee must not exceed the four available instances:</p>
+          <p class="equation">3(K &minus; 1) + 1 &le; 4</p>
+          <p class="equation">3K &minus; 2 &le; 4 &nbsp; &rArr; &nbsp; 3K &le; 6 &nbsp; &rArr; &nbsp; <strong>K &le; 2</strong></p>
+          <p>Since K is an integer, its largest permitted value is <strong>2</strong>.</p>
+          <h4>Check the Boundary</h4>
+          <ul>
+            <li><strong>K = 2:</strong> if each process holds one instance and needs one more, three instances are held and the fourth is free. Give it to any process; that process can finish and release both instances. The others can then proceed.</li>
+            <li><strong>K = 3:</strong> an allocation of <strong>(2, 1, 1)</strong> uses all four instances. If every process requests one more while retaining its allocation, nobody can proceed. Thus K = 3 does not guarantee deadlock freedom.</li>
+          </ul>
+          <p class="equation">K<sub>max</sub> = &lfloor;(4 &minus; 1) / 3&rfloor; + 1 = <strong>2</strong></p>
+          <p class="note"><strong>Answer: 2.</strong> Use an inequality because the available instances must be at least the required bound. Setting 3(K &minus; 1) + 1 = 4 also gives K = 2 here; it does not give K = 3.</p>
+        </article>
+        <article class="subtopic practice-question" id="gate-cse-1997-question-6-7">
+          <h3>Question: GATE CSE 1997 &middot; Question 6.7</h3>
+          <p>An operating system contains <strong>3 user processes</strong>, each requiring <strong>2 units of resource R</strong>. The minimum number of units of R such that no deadlocks will ever arise is:</p>
+          <ol type="A">
+            <li>3</li>
+            <li>5</li>
+            <li>4</li>
+            <li>6</li>
+          </ol>
+          <h4>Solution</h4>
+          <p>There is one resource type with interchangeable units. Using the one-at-a-time allocation model, each process may hold one unit while waiting for its second. Substitute <strong>n = 3</strong> and <strong>k = 2</strong> into the deadlock-free bound:</p>
+          <p class="equation">Minimum units = n(k &minus; 1) + 1 = 3(2 &minus; 1) + 1 = <strong>4</strong></p>
+          <ul>
+            <li><strong>With 3 units:</strong> each process can hold one unit and wait for a second. All units are occupied, so none can finish. Deadlock is possible.</li>
+            <li><strong>With 4 units:</strong> even if each process holds one unit, one unit remains free. Allocate it to any process; that process now has both units, can finish, and releases them. The remaining processes can then finish in turn.</li>
+          </ul>
+          <p class="note"><strong>Correct answer: C. 4.</strong> Six units would satisfy all three processes simultaneously, but are not required to guarantee deadlock freedom. Four let at least one process complete and release resources for the others.</p>
+        </article>
+        <article class="subtopic practice-question" id="gate-cse-1993-question-7-9">
+          <h3>Question: GATE CSE 1993 &middot; Question 7.9</h3>
+          <p class="panel-label">Also shown as UGC NET December 2012 &middot; III: 41</p>
+          <p>Consider a system having <strong>m resources of the same type</strong>. These resources are shared by <strong>3 processes A, B, and C</strong>, which have peak demands of <strong>3, 4, and 6</strong>, respectively. For what value of m will deadlock not occur?</p>
+          <ol type="A">
+            <li>7</li>
+            <li>9</li>
+            <li>10</li>
+            <li>13</li>
+            <li>15</li>
+          </ol>
+          <h4>Solution: Different Processes Have Different Maximum Demands</h4>
+          <p>Use the same single-resource-type model: instances are interchangeable, processes acquire them one at a time, and a process can finish and release its instances once its requirement is satisfied.</p>
+          <p>In the worst case, each process holds <strong>one less than its peak demand</strong> and waits for another instance:</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Process</th><th scope="col">Peak demand</th><th scope="col">Can hold while still waiting</th><th scope="col">Additional instance needed</th></tr></thead>
+              <tbody>
+                <tr><td>A</td><td>3</td><td>2</td><td>1</td></tr>
+                <tr><td>B</td><td>4</td><td>3</td><td>1</td></tr>
+                <tr><td>C</td><td>6</td><td>5</td><td>1</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>With <strong>2 + 3 + 5 = 10</strong> instances, this allocation can exhaust all resources while every process waits. Thus, 10 instances still allow deadlock. An eleventh instance lets at least one process reach its peak demand, finish, and release resources for the others.</p>
+          <p class="equation">Minimum guarantee = (3 &minus; 1) + (4 &minus; 1) + (6 &minus; 1) + 1 = <strong>11</strong></p>
+          <h4>General Formula for Unequal Demands</h4>
+          <p>For n processes with positive peak demands k<sub>1</sub>, k<sub>2</sub>, &hellip;, k<sub>n</sub>, the corresponding deadlock-free resource bound is:</p>
+          <p class="equation">m<sub>min</sub> = &sum;<sub>i=1</sub><sup>n</sup>(k<sub>i</sub> &minus; 1) + 1 = &sum;<sub>i=1</sub><sup>n</sup>k<sub>i</sub> &minus; n + 1</p>
+          <p>If no process can finish, A can hold at most 2, B at most 3, and C at most 5 instances. With 11 or more instances, those holdings cannot exhaust the supply. A free instance can satisfy another request, eventually allowing a process to finish.</p>
+          <h4>Check the Given Options</h4>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Option</th><th scope="col">m</th><th scope="col">Guaranteed deadlock-free?</th><th scope="col">Reason</th></tr></thead>
+              <tbody>
+                <tr><td>A</td><td>7</td><td>No</td><td>Holdings (2, 2, 3) can exhaust the supply while all three wait.</td></tr>
+                <tr><td>B</td><td>9</td><td>No</td><td>Holdings (2, 3, 4) can exhaust the supply while all three wait.</td></tr>
+                <tr><td>C</td><td>10</td><td>No</td><td>Holdings (2, 3, 5) are the worst-case deadlocked allocation.</td></tr>
+                <tr><td>D</td><td>13</td><td><strong>Yes</strong></td><td>13 &ge; 11.</td></tr>
+                <tr><td>E</td><td>15</td><td><strong>Yes</strong></td><td>15 &ge; 11.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note"><strong>Correct choices: D and E &mdash; 13 and 15.</strong> The minimum number guaranteeing no deadlock is <strong>11</strong>, which is not listed. Both 13 and 15 satisfy the guarantee; if asked for the smallest sufficient value among the listed options, choose 13.</p>
+        </article>
+      </section>
+      <section class="rule" id="dealing-with-deadlock">
+        <div class="section-heading">
+          <span class="section-number">05</span>
+          <h2>Dealing with Deadlock</h2>
+        </div>
+        <p class="definition">There are four broad strategies for handling deadlocks: <strong>ignore the problem, prevent it, avoid it, or detect it and recover</strong>.</p>
+        <article class="subtopic" id="deadlock-ignore">
+          <h3>1. Ignore the Problem &mdash; The Ostrich Algorithm</h3>
+          <p class="definition">The <strong>Ostrich Algorithm</strong> makes no special attempt to prevent, avoid, or detect deadlock for the resources covered by this policy. It proceeds as though deadlocks will not occur, accepting the possibility rather than paying the cost of actively handling it.</p>
+          <p>The name is a metaphor for &ldquo;putting one's head in the sand&rdquo; and ignoring a problem.</p>
+          <h4>How Is a Problem Handled?</h4>
+          <ul>
+            <li>If an application or system appears deadlocked or stops functioning, a user or administrator may intervene manually.</li>
+            <li>Intervention may involve terminating the affected application or restarting the system when necessary.</li>
+            <li>A system may also be <strong>temporarily frozen</strong> because of slow I/O or heavy load. An apparent freeze alone does not prove deadlock.</li>
+          </ul>
+          <h4>Why Use This Approach?</h4>
+          <p>It can be reasonable when deadlocks are infrequent and the overhead or restrictions of prevention, avoidance, or detection would cost more than occasional manual intervention.</p>
+          <p>The slide cites general-purpose operating systems, including <strong>UNIX</strong>, as examples. Interpret this as ignoring some classes of deadlock, rather than assuming every subsystem ignores every kind of deadlock.</p>
+          <p class="note"><strong>Ignoring is not prevention.</strong> The system can still enter deadlock. Manual recovery after a suspected hang is different from running an automatic deadlock-detection algorithm.</p>
+        </article>
+        <article class="subtopic" id="deadlock-prevention-strategy">
+          <h3>2. Deadlock Prevention</h3>
+          <p class="definition"><strong>Deadlock prevention</strong> imposes rules that make at least one of the <a href="#conditions-to-deadlock">four necessary conditions</a> impossible. If even one condition never holds, deadlock cannot occur.</p>
+          <p>Let M = mutual exclusion, H = hold and wait, N = no preemption, and C = circular wait:</p>
+          <p class="equation">Deadlock &rArr; M &and; H &and; N &and; C</p>
+          <p class="equation">&not;M &or; &not;H &or; &not;N &or; &not;C &rArr; No deadlock</p>
+          <h4 id="prevention-mutual-exclusion">Mutual Exclusion: Cannot Generally Be Eliminated</h4>
+          <p>A non-shareable resource can be used by only one process at a time. For example, two processes cannot independently print different documents on the same physical printer simultaneously without interfering with the output.</p>
+          <p>Allow sharing where it is safe, such as concurrent access to a read-only file. However, <strong>inherently non-shareable resources still require mutual exclusion</strong>, so this is not a universal prevention method.</p>
+          <h4 id="prevention-hold-and-wait">Hold and Wait: Can Be Eliminated</h4>
+          <p>Normally, P1 might hold R1 while requesting R2. If R2 is unavailable, P1 waits while retaining R1. Prevent this using either of these rules:</p>
+          <ul>
+            <li><strong>Request everything together:</strong> P1 requests R1 and R2 as a single all-or-nothing allocation. Grant both only when both are available; otherwise, P1 waits holding neither.</li>
+            <li><strong>Release before requesting:</strong> require P1 to release all currently held resources before requesting a new set. It can request the old resources again along with the new ones.</li>
+          </ul>
+          <p><strong>Disadvantages:</strong> reserving resources before they are needed can reduce utilisation. A process needing several resources together may repeatedly lose out to others and suffer starvation.</p>
+          <h4 id="prevention-no-preemption">No Preemption: Can Sometimes Be Eliminated</h4>
+          <p>If P1 holds R1 and requests an unavailable R2, a preemption policy can <strong>withdraw suitable resources already allocated to P1</strong>. P1 retries later when it can obtain the resources it needs. This prevents it from indefinitely retaining resources while blocked.</p>
+          <p>This works only where the resource's state can be saved, restored, or safely rolled back. Taking a physical printer away halfway through a document can leave incomplete output, so arbitrary preemption is not suitable for every resource.</p>
+          <p class="note"><strong>Resource preemption is different from CPU preemption.</strong> Descheduling P1 does not release R1. Voluntarily releasing all held resources before a new request is the hold-and-wait restriction above; enforced withdrawal of an allocated resource breaks no preemption.</p>
+          <h4 id="prevention-circular-wait">Circular Wait: Can Be Eliminated</h4>
+          <p><strong>Each process can request resources only in an increasing order of enumeration.</strong> Assign all resource types a fixed numerical order, shared by every process:</p>
+          <p class="equation">R<sub>1</sub> &lt; R<sub>2</sub> &lt; R<sub>3</sub> &lt; R<sub>4</sub> &lt; R<sub>5</sub></p>
+          <p>If a process holds R<sub>i</sub>, it may request R<sub>j</sub> only when <strong>j &gt; i</strong>. If it holds several types, the new type must have a higher rank than <strong>every type it currently holds</strong>.</p>
+          <ul>
+            <li>A process holding only R2 may request <strong>R3, R4, or R5</strong>.</li>
+            <li>It cannot request <strong>R1</strong> while retaining R2, because 1 &lt; 2.</li>
+            <li>A process with no resources may initially request <strong>any resource type</strong>; it does not have to start with R1.</li>
+          </ul>
+          <p>This technique is called <strong>resource ordering</strong>. A request forbidden by the ordering rule is disallowed even if the requested resource happens to be free.</p>
+          <h4 id="resource-ordering-example">Example: Printer, Scanner, and Disk</h4>
+          <p>Let <strong>R1 = Printer</strong>, <strong>R2 = Scanner</strong>, and <strong>R3 = Disk</strong>, with the fixed order <strong>R1 &lt; R2 &lt; R3</strong>. For this conceptual example, assume one exclusive instance of each resource.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Process</th><th scope="col">Holding</th><th scope="col">Wants to request</th><th scope="col">Allowed under resource ordering?</th></tr></thead>
+              <tbody>
+                <tr><td>P1</td><td>R1: Printer</td><td>R2: Scanner</td><td><strong>Yes</strong>, because 2 &gt; 1.</td></tr>
+                <tr><td>P2</td><td>R2: Scanner</td><td>R3: Disk</td><td><strong>Yes</strong>, because 3 &gt; 2.</td></tr>
+                <tr><td>P3</td><td>R3: Disk</td><td>R1: Printer</td><td><strong>No</strong>, because 1 &lt; 3.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Without ordering, all three requests could remain outstanding, giving the circular wait <strong>P1 &rarr; P2 &rarr; P3 &rarr; P1</strong>. With ordering, P3 cannot request R1 while holding R3, so the final dependency cannot form.</p>
+          <p>P3 must release R3 before requesting R1 in a new acquisition sequence. If it then needs both resources, it acquires R1 before R3. More generally, it must release any retained resource whose rank is not lower than the new request.</p>
+          <p><strong>Why a cycle is impossible:</strong> imagine 20 resource types. Dependencies may progress from R3 to R8 to R15 to R20, but a process retaining R20 cannot request R3, R8, or R15:</p>
+          <p class="equation">R3 &lt; R8 &lt; R15 &lt; R20 &nbsp; &mdash; &nbsp; no permitted return to R3</p>
+          <p>A circular wait would require resource ranks to increase strictly around a loop and return to the starting rank, implying <strong>rank(R) &lt; rank(R)</strong>. This is impossible. Preventing circular wait therefore prevents deadlock.</p>
+          <p>For resource types with multiple instances, request all needed instances of a type together; later requests while retaining them must be for higher-ranked types.</p>
+          <h4 id="prevention-condition-comparison">Comparison of Prevention Methods</h4>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Necessary condition</th><th scope="col">Can it be eliminated?</th><th scope="col">Method</th></tr></thead>
+              <tbody>
+                <tr><td>Mutual exclusion</td><td>Not generally</td><td>Share resources where safe; inherently non-shareable resources remain exclusive.</td></tr>
+                <tr><td>Hold and wait</td><td>Yes</td><td>Allocate all needed resources together, or release held resources before requesting more.</td></tr>
+                <tr><td>No preemption</td><td>Sometimes</td><td>Enforce withdrawal and later reallocation of resources whose state can be safely restored.</td></tr>
+                <tr><td>Circular wait</td><td>Yes</td><td>Impose a fixed order on resource acquisition.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </article>
+        <article class="subtopic" id="deadlock-avoidance-strategy">
+          <h3>3. Deadlock Avoidance</h3>
+          <p>Examine each resource request and grant it only if the resulting state remains <strong>safe</strong>: there is an order in which all processes can obtain their remaining requirements and finish.</p>
+          <p>Avoidance needs advance information about possible resource demands. <strong>Banker's algorithm</strong> is a classic example. An unsafe state is not necessarily already deadlocked; it lacks a guarantee that every process can finish.</p>
+          <h4 id="safe-and-unsafe-states">Safe State vs. Unsafe State</h4>
+          <p class="definition">A <strong>safe state</strong> is a state in which <strong>at least one safe sequence</strong> of processes exists. In that order, every process can obtain its remaining required resources, complete, and release its resources for the processes that follow.</p>
+          <p>A safe state therefore guarantees that deadlock can be avoided through proper resource allocation. It does not require enough resources for every process to receive its maximum demand simultaneously.</p>
+          <p class="definition">An <strong>unsafe state</strong> is a state in which <strong>no safe sequence exists</strong>. The OS cannot guarantee that every process will complete if processes request their maximum remaining resources.</p>
+          <p>Unsafe does not necessarily mean already deadlocked. Actual processes may request less than their declared maximum or release resources earlier, allowing progress. Deadlock is possible depending on subsequent requests and allocations.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">State</th><th scope="col">Safe sequence exists?</th><th scope="col">Meaning</th></tr></thead>
+              <tbody>
+                <tr><td>Safe</td><td>Yes</td><td>Proper allocation can guarantee completion, even for declared maximum demands.</td></tr>
+                <tr><td>Unsafe</td><td>No</td><td>Completion cannot be guaranteed; deadlock may or may not already exist.</td></tr>
+                <tr><td>Deadlocked</td><td>No</td><td>A set of processes is already blocked waiting for resources that cannot be released without intervention.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="equation">Safe State &rArr; No Deadlock &nbsp; | &nbsp; Deadlock &rArr; Unsafe State</p>
+          <p class="equation">Unsafe State &nrArr; Deadlock</p>
+          <p class="note"><strong>Every deadlocked state is unsafe, but an unsafe state is not necessarily deadlocked.</strong> Banker's algorithm rejects allocations that would enter an unsafe state, before deadlock can develop.</p>
+          <h4 id="bankers-algorithm">Banker's Algorithm</h4>
+          <p class="definition"><strong>Banker's algorithm</strong> grants a resource request only if a trial allocation leaves the system in a <strong>safe state</strong>. Like a banker keeping enough funds to meet commitments, the OS checks that every process can still finish in some order, assuming each may require its declared maximum.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Quantity</th><th scope="col">Meaning</th></tr></thead>
+              <tbody>
+                <tr><td>Available</td><td>Currently free resource instances.</td></tr>
+                <tr><td>Allocation</td><td>Instances currently held by each process.</td></tr>
+                <tr><td>Max</td><td>Each process's declared maximum total demand.</td></tr>
+                <tr><td>Need</td><td>Additional instances each process may still require: <strong>Need = Max &minus; Allocation</strong>.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>For multiple resource types, Available is a vector and Allocation, Max, and Need are matrices. Comparisons must hold for <strong>every resource type</strong>. This example uses one type, so each value is a single count.</p>
+          <h4 id="bankers-tape-drive-example">Example: 12 Tape Drives</h4>
+          <p>The system has <strong>12 interchangeable tape drives</strong>. Interpret the slide's &ldquo;current usage&rdquo; as Allocation and &ldquo;could ask for&rdquo; as <strong>remaining Need</strong>, not maximum total demand.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Process</th><th scope="col">Allocation: current usage</th><th scope="col">Need: could still ask for</th><th scope="col">Max = Allocation + Need</th></tr></thead>
+              <tbody>
+                <tr><td>P0</td><td>5</td><td>5</td><td>10</td></tr>
+                <tr><td>P1</td><td>2</td><td>2</td><td>4</td></tr>
+                <tr><td>P2</td><td>2</td><td>7</td><td>9</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="equation">Available = 12 &minus; (5 + 2 + 2) = <strong>3</strong></p>
+          <p><strong>Safety test:</strong> copy Available into a temporary variable <strong>Work</strong>. Repeatedly select an unfinished process with <strong>Need &le; Work</strong>, simulate its completion, add its current Allocation to Work, and mark it finished. If every process can finish, the state is safe.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <caption>Safety test; these are simulated completions, not immediate changes to the running system</caption>
+              <thead><tr><th scope="col">Chosen process</th><th scope="col">Work before</th><th scope="col">Need</th><th scope="col">Can finish?</th><th scope="col">Work after completion</th></tr></thead>
+              <tbody>
+                <tr><td>P1</td><td>3</td><td>2</td><td>Yes: 2 &le; 3</td><td>3 + 2 = <strong>5</strong></td></tr>
+                <tr><td>P0</td><td>5</td><td>5</td><td>Yes: 5 &le; 5</td><td>5 + 5 = <strong>10</strong></td></tr>
+                <tr><td>P2</td><td>10</td><td>7</td><td>Yes: 7 &le; 10</td><td>10 + 2 = <strong>12</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="equation">Safe sequence: P1 &rarr; P0 &rarr; P2 &nbsp; &rArr; &nbsp; <strong>The initial state is safe</strong></p>
+          <p><strong>Why add only Allocation?</strong> P1 temporarily receives 2 drives and releases all 4 when it finishes. The net free count is <strong>3 &minus; 2 + 4 = 5</strong>, equivalent to Work + its original Allocation. Adding Allocation + Need directly to Work would double-count the borrowed drives.</p>
+          <h4 id="bankers-request-check">Checking a New Resource Request</h4>
+          <ol>
+            <li>Check <strong>Request &le; Need</strong>; a request exceeding the declared remaining claim is invalid.</li>
+            <li>Check <strong>Request &le; Available</strong>; otherwise, the process must wait.</li>
+            <li>Try the allocation: subtract Request from Available, add it to the process's Allocation, and subtract it from its Need.</li>
+            <li>Run the safety test. Commit the allocation only if the result is safe; otherwise restore the original values and make the process wait.</li>
+          </ol>
+          <h4 id="bankers-p2-trial-allocation">Example: Should P2 Receive One More Tape Drive?</h4>
+          <p>Return to the <strong>12-drive snapshot</strong>. Its initial state is safe, with the sequence <strong>P1 &rarr; P0 &rarr; P2</strong>. Now P2 requests <strong>one additional drive</strong>. Its request is within its remaining claim of 7 and the 3 currently available drives, but we must still test the resulting state.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <caption>Before and after a tentative grant of one drive to P2</caption>
+              <thead><tr><th scope="col">Process</th><th scope="col">Allocation before</th><th scope="col">Need before</th><th scope="col">Allocation after trial</th><th scope="col">Need after trial</th></tr></thead>
+              <tbody>
+                <tr><td>P0</td><td>5</td><td>5</td><td>5</td><td>5</td></tr>
+                <tr><td>P1</td><td>2</td><td>2</td><td>2</td><td>2</td></tr>
+                <tr><td>P2</td><td>2</td><td>7</td><td><strong>3</strong></td><td><strong>6</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="equation">Available before = 12 &minus; (5 + 2 + 2) = 3 &nbsp; &rarr; &nbsp; Available after trial = <strong>2</strong></p>
+          <p>P2's maximum claim stays <strong>9</strong>: Allocation increases by 1 while Need decreases by 1. Test the trial state with Work = 2:</p>
+          <ol>
+            <li><strong>P1 can finish:</strong> its Need is 2. After simulated completion, Work becomes <strong>2 + 2 = 4</strong>.</li>
+            <li><strong>P0 cannot be marked finished:</strong> its Need is 5, but Work is only 4.</li>
+            <li><strong>P2 cannot be marked finished:</strong> its Need is 6, also greater than 4. No further process can be selected, so no safe sequence exists.</li>
+          </ol>
+          <p class="equation">Trial grant to P2 &rArr; Unsafe state &rArr; <strong>Defer the request</strong></p>
+          <p><strong>What happens next?</strong> Roll back the trial grant, restoring Available = 3, P2 Allocation = 2, and P2 Need = 7. P2 waits while the system permits requests that preserve safety.</p>
+          <p>For example, P1 can receive its remaining 2 drives, finish, and release all 4 it then holds. Available becomes <strong>3 &minus; 2 + 4 = 5</strong>. If P2's one-drive request is retried now, the trial state has Available = 4 and Need values (5, 6) for P0 and P2; it is <strong>still unsafe</strong>. Instead, P0 can receive its remaining 5 drives and finish, leaving <strong>10 drives free</strong> while P2 retains its original 2. P2's request can then be safely granted: Available becomes 9, enough to cover its remaining Need of 6.</p>
+          <p class="note"><strong>Retry the safety test when resources are released.</strong> Another process finishing does not automatically make a waiting request safe. Here, waiting for P1 and then P0 to finish makes P2's allocation safe. The unsafe trial state is not itself proof of an existing deadlock.</p>
+          <p class="note"><strong>Available does not automatically mean safe to allocate.</strong> Banker's algorithm preserves a possible completion order. An unsafe state need not already be deadlocked; it lacks the guarantee of completion if processes demand their full remaining claims.</p>
+          <div class="practice-question" id="gate-cse-2017-set-2-question-33">
+            <h4>Question: GATE CSE 2017 Set 2 &middot; Question 33</h4>
+            <p>A system shares <strong>9 tape drives</strong>. The current allocation and maximum requirement of tape drives for the processes are shown below. Which of the following best describes the current state of the system?</p>
+            <div class="table-wrap">
+              <table class="comparison-table">
+                <thead><tr><th scope="col">Process</th><th scope="col">Current Allocation</th><th scope="col">Maximum Requirement</th></tr></thead>
+                <tbody>
+                  <tr><td>P1</td><td>3</td><td>7</td></tr>
+                  <tr><td>P2</td><td>1</td><td>6</td></tr>
+                  <tr><td>P3</td><td>3</td><td>5</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <ol type="A">
+              <li>Safe, Deadlocked</li>
+              <li>Safe, Not Deadlocked</li>
+              <li>Not Safe, Deadlocked</li>
+              <li>Not Safe, Not Deadlocked</li>
+            </ol>
+            <p><strong>Solution:</strong> First calculate the remaining Need and the currently free drives:</p>
+            <p class="equation">Need = Max &minus; Allocation &nbsp; | &nbsp; Available = 9 &minus; (3 + 1 + 3) = <strong>2</strong></p>
+            <div class="table-wrap">
+              <table class="comparison-table">
+                <thead><tr><th scope="col">Process</th><th scope="col">Allocation</th><th scope="col">Max</th><th scope="col">Need</th></tr></thead>
+                <tbody>
+                  <tr><td>P1</td><td>3</td><td>7</td><td>7 &minus; 3 = <strong>4</strong></td></tr>
+                  <tr><td>P2</td><td>1</td><td>6</td><td>6 &minus; 1 = <strong>5</strong></td></tr>
+                  <tr><td>P3</td><td>3</td><td>5</td><td>5 &minus; 3 = <strong>2</strong></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>Initially, only <strong>P3</strong> has Need &le; Available. Simulate its completion, then continue the safety test:</p>
+            <div class="table-wrap">
+              <table class="comparison-table">
+                <caption>One valid safety-test order</caption>
+                <thead><tr><th scope="col">Process</th><th scope="col">Work before</th><th scope="col">Need &le; Work?</th><th scope="col">Work after simulated completion</th></tr></thead>
+                <tbody>
+                  <tr><td>P3</td><td>2</td><td>2 &le; 2: Yes</td><td>2 + 3 = <strong>5</strong></td></tr>
+                  <tr><td>P1</td><td>5</td><td>4 &le; 5: Yes</td><td>5 + 3 = <strong>8</strong></td></tr>
+                  <tr><td>P2</td><td>8</td><td>5 &le; 8: Yes</td><td>8 + 1 = <strong>9</strong></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>After P3 finishes, Work = 5, which satisfies either P1's Need of 4 or P2's Need of 5. Therefore, both sequences are valid:</p>
+            <p class="equation">P3 &rarr; P1 &rarr; P2 &nbsp; or &nbsp; P3 &rarr; P2 &rarr; P1</p>
+            <p class="note"><strong>Correct answer: B. Safe, Not Deadlocked.</strong> At least one safe sequence exists. In the safety test, Work increases by the process's original Allocation after simulated completion, not by its entire maximum requirement.</p>
+          </div>
+        </article>
+        <article class="subtopic practice-question" id="unique-safe-sequence-question">
+          <h3>Question: A System Has Only One Safe Sequence</h3>
+          <p>Let <strong>&lang;P1, P2, &hellip;, Pn&rang;</strong> be the <strong>only safe sequence</strong> of a system. Which of the following is/are always true?</p>
+          <ol type="A">
+            <li>If P2 is the first process to request some resources, P2 always has to wait.</li>
+            <li>P1's requests will always be satisfied without even checking whether the resulting state is safe.</li>
+            <li>Process requests will always be satisfied in the same order as the safe sequence; no out-of-order process request can be satisfied.</li>
+            <li>We can never satisfy any request from Pn without first satisfying a request from P1.</li>
+          </ol>
+          <p class="note"><strong>Terminology:</strong> The slide says &ldquo;only safe state&rdquo;, but the ordered list is a <strong>safe sequence</strong>. Assume requests are within declared remaining claims and processes do not increase their maximum claims. Under these standard assumptions, <strong>only B is always true</strong>.</p>
+          <h4>Why B Is True</h4>
+          <p>Because P1 is first in a safe sequence, <strong>Need(P1) &le; Available</strong> for every resource type. Any valid request r from P1 satisfies <strong>r &le; Need(P1)</strong>, so it is available and can be granted.</p>
+          <p>After the grant, P1's remaining Need and Available both decrease by r. P1 can still finish first. Its simulated completion leaves exactly the same free resources as completing it before the grant:</p>
+          <p class="equation">Work after P1 finishes = (Available &minus; r) + (Allocation(P1) + r)</p>
+          <p class="equation">= Available + Allocation(P1)</p>
+          <p>The rest of the original safe sequence remains feasible. Therefore, a separate safety test is unnecessary for this particular valid grant to P1. This property does not depend on the safe sequence being unique.</p>
+          <h4>One Counterexample Disproves A, C, and D</h4>
+          <p>Take <strong>two processes</strong> and <strong>4 instances of one resource type</strong>:</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Process</th><th scope="col">Allocation</th><th scope="col">Max</th><th scope="col">Need</th></tr></thead>
+              <tbody>
+                <tr><td>P1</td><td>1</td><td>2</td><td>1</td></tr>
+                <tr><td>P2</td><td>1</td><td>4</td><td>3</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Available = 4 &minus; (1 + 1) = 2.</strong> P1 can finish because its Need is 1. P2 cannot finish first because its Need is 3. After P1 finishes, Work becomes 3, allowing P2 to finish. Thus, <strong>&lang;P1, P2&rang; is the only safe sequence</strong>.</p>
+          <p>Now suppose <strong>P2 makes the first request, for just one instance</strong>. Granting it produces:</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Process</th><th scope="col">Allocation after grant</th><th scope="col">Need after grant</th></tr></thead>
+              <tbody>
+                <tr><td>P1</td><td>1</td><td>1</td></tr>
+                <tr><td>P2</td><td>2</td><td>2</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Available is now <strong>1</strong>. P1 can still finish, raising Work to <strong>1 + 1 = 2</strong>; then P2 can finish, raising Work to <strong>2 + 2 = 4</strong>. The grant is safe even though P2 requested before P1.</p>
+          <ul>
+            <li><strong>A is false:</strong> P2's first request can be granted immediately; it does not always have to wait.</li>
+            <li><strong>C is false:</strong> P2 can receive a partial allocation before P1, despite appearing later in the safe sequence.</li>
+            <li><strong>D is false:</strong> here n = 2, so Pn is P2. Its request was granted before any request from P1. A universal claim must also hold for this two-process case.</li>
+          </ul>
+          <p><strong>Not every P2 request is safe:</strong> from the original snapshot, granting P2 two instances would leave Available = 0 and both processes with Need = 1. Neither could finish, so that request must wait.</p>
+          <p class="note"><strong>Answer: B only.</strong> A safe sequence gives a feasible order of completion, not a compulsory order for every intermediate allocation. Later processes may receive resources earlier if the resulting state stays safe.</p>
+        </article>
+        <article class="subtopic practice-question" id="gate-cse-1996-question-22">
+          <h3>Question: GATE CSE 1996 &middot; Question 22</h3>
+          <p>A computer system uses <strong>Banker's Algorithm</strong> to deal with deadlocks. Its current state is shown below, where P0, P1, and P2 are processes and R0, R1, and R2 are resource types.</p>
+          <p>All vectors use the resource order <strong>(R0, R1, R2)</strong>.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Process</th><th scope="col">Maximum Need (total claim)</th><th scope="col">Current Allocation</th></tr></thead>
+              <tbody>
+                <tr><td>P0</td><td>(4, 1, 2)</td><td>(1, 0, 2)</td></tr>
+                <tr><td>P1</td><td>(1, 5, 1)</td><td>(0, 3, 1)</td></tr>
+                <tr><td>P2</td><td>(1, 2, 3)</td><td>(1, 0, 2)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="equation">Available = <strong>(2, 2, 0)</strong></p>
+          <ol type="A">
+            <li>Show that the system can be in this state.</li>
+            <li>What will the system do on a request by process P0 for one unit of resource type R1?</li>
+          </ol>
+          <h4>Part A: Show That the Current State Is Safe</h4>
+          <p>The question's heading <strong>Maximum Need</strong> means the maximum <em>total</em> claim, not the remaining Need used in the safety test. Calculate <strong>Need = Max &minus; Allocation</strong> component by component:</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Process</th><th scope="col">Remaining Need</th></tr></thead>
+              <tbody>
+                <tr><td>P0</td><td>(4, 1, 2) &minus; (1, 0, 2) = <strong>(3, 1, 0)</strong></td></tr>
+                <tr><td>P1</td><td>(1, 5, 1) &minus; (0, 3, 1) = <strong>(1, 2, 0)</strong></td></tr>
+                <tr><td>P2</td><td>(1, 2, 3) &minus; (1, 0, 2) = <strong>(0, 2, 1)</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Start with Work = Available = (2, 2, 0). A process can be marked finished only when <strong>every component</strong> of its Need is at most the corresponding component of Work.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Process selected</th><th scope="col">Work before</th><th scope="col">Need</th><th scope="col">Work after adding its Allocation</th></tr></thead>
+              <tbody>
+                <tr><td>P1</td><td>(2, 2, 0)</td><td>(1, 2, 0)</td><td>(2, 2, 0) + (0, 3, 1) = <strong>(2, 5, 1)</strong></td></tr>
+                <tr><td>P2</td><td>(2, 5, 1)</td><td>(0, 2, 1)</td><td>(2, 5, 1) + (1, 0, 2) = <strong>(3, 5, 3)</strong></td></tr>
+                <tr><td>P0</td><td>(3, 5, 3)</td><td>(3, 1, 0)</td><td>(3, 5, 3) + (1, 0, 2) = <strong>(4, 5, 5)</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="equation">Safe sequence: <strong>P1 &rarr; P2 &rarr; P0</strong></p>
+          <p>All processes can finish, so the state is safe and can be admitted by Banker's algorithm.</p>
+          <h4>Part B: Test P0's Request for One R1</h4>
+          <p>The request vector is <strong>(0, 1, 0)</strong>. It is within P0's remaining Need (3, 1, 0) and within Available (2, 2, 0), so the preliminary checks pass. Tentatively grant it:</p>
+          <ul>
+            <li><strong>Available:</strong> (2, 2, 0) &minus; (0, 1, 0) = <strong>(2, 1, 0)</strong>.</li>
+            <li><strong>P0 Allocation:</strong> (1, 0, 2) + (0, 1, 0) = <strong>(1, 1, 2)</strong>.</li>
+            <li><strong>P0 Need:</strong> (3, 1, 0) &minus; (0, 1, 0) = <strong>(3, 0, 0)</strong>.</li>
+          </ul>
+          <p>Run the safety test again with Work = (2, 1, 0):</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Process</th><th scope="col">Need after trial</th><th scope="col">Why it cannot finish first</th></tr></thead>
+              <tbody>
+                <tr><td>P0</td><td>(3, 0, 0)</td><td>Needs 3 units of R0, but only 2 are free.</td></tr>
+                <tr><td>P1</td><td>(1, 2, 0)</td><td>Needs 2 units of R1, but only 1 is free.</td></tr>
+                <tr><td>P2</td><td>(0, 2, 1)</td><td>Needs 2 units of R1 and 1 of R2, but only 1 and 0 are free, respectively.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="note"><strong>Defer P0's request.</strong> No process can be selected in the trial safety test, so the resulting state is unsafe. Roll back the tentative allocation and make P0 wait. The original state remains safe; the existence of a free R1 unit is not sufficient to approve the request.</p>
+        </article>
+        <article class="subtopic practice-question" id="bankers-independent-requests">
+          <h3>Question: Two Independent Resource Requests</h3>
+          <p>An operating system uses <strong>Banker's Algorithm</strong> for deadlock avoidance while managing three resource types <strong>X, Y, and Z</strong> for processes <strong>P0, P1, and P2</strong>. The current Allocation and Max matrices are:</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Process</th><th scope="col">Allocation (X, Y, Z)</th><th scope="col">Max (X, Y, Z)</th></tr></thead>
+              <tbody>
+                <tr><td>P0</td><td>(0, 0, 1)</td><td>(8, 4, 3)</td></tr>
+                <tr><td>P1</td><td>(3, 2, 0)</td><td>(6, 2, 0)</td></tr>
+                <tr><td>P2</td><td>(2, 1, 1)</td><td>(3, 3, 3)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="equation">Available = <strong>(3, 2, 2)</strong></p>
+          <p>The system is currently safe. Consider the following <strong>independent</strong> requests:</p>
+          <ul>
+            <li><strong>REQ1:</strong> P0 requests <strong>(0, 0, 2)</strong>.</li>
+            <li><strong>REQ2:</strong> P1 requests <strong>(2, 0, 0)</strong>.</li>
+          </ul>
+          <p><strong>Which one of the following is true?</strong></p>
+          <ol type="A">
+            <li>Only REQ1 can be permitted.</li>
+            <li>Only REQ2 can be permitted.</li>
+            <li>Both REQ1 and REQ2 can be permitted.</li>
+            <li>Neither REQ1 nor REQ2 can be permitted.</li>
+          </ol>
+          <h4>Solution: Calculate the Initial Need</h4>
+          <p>Use <strong>Need = Max &minus; Allocation</strong>. Every vector below follows the order <strong>(X, Y, Z)</strong>.</p>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <thead><tr><th scope="col">Process</th><th scope="col">Initial Need</th></tr></thead>
+              <tbody>
+                <tr><td>P0</td><td>(8, 4, 2)</td></tr>
+                <tr><td>P1</td><td>(3, 0, 0)</td></tr>
+                <tr><td>P2</td><td>(1, 2, 2)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>The original state has the safe sequence <strong>P1 &rarr; P2 &rarr; P0</strong>, with Work progressing from (3, 2, 2) to (6, 4, 2), then (8, 5, 3), and finally (8, 5, 4).</p>
+          <p class="note"><strong>Independent requests:</strong> evaluate each request from the original Allocation, Need, and Available values. Do not carry REQ1's trial changes into the test for REQ2.</p>
+          <h4>REQ1: P0 Requests (0, 0, 2)</h4>
+          <p>The request is within both P0's Need and Available, so the preliminary checks pass. After a trial grant:</p>
+          <ul>
+            <li><strong>Available:</strong> (3, 2, 0).</li>
+            <li><strong>P0 Allocation:</strong> (0, 0, 3).</li>
+            <li><strong>P0 Need:</strong> (8, 4, 0).</li>
+          </ul>
+          <p>Only P1 can be marked finished initially: its Need (3, 0, 0) fits Work (3, 2, 0). Adding P1's Allocation (3, 2, 0) gives <strong>Work = (6, 4, 0)</strong>.</p>
+          <ul>
+            <li><strong>P0 cannot finish:</strong> it needs 8 units of X, but only 6 are available.</li>
+            <li><strong>P2 cannot finish:</strong> it needs 2 units of Z, but none are available.</li>
+          </ul>
+          <p>No safe sequence exists after the trial grant. <strong>REQ1 must be deferred</strong>; restore the original state.</p>
+          <h4>REQ2: P1 Requests (2, 0, 0)</h4>
+          <p>Starting again from the original snapshot, this request also passes the Need and Available checks. After a trial grant:</p>
+          <ul>
+            <li><strong>Available:</strong> (1, 2, 2).</li>
+            <li><strong>P1 Allocation:</strong> (5, 2, 0).</li>
+            <li><strong>P1 Need:</strong> (1, 0, 0).</li>
+          </ul>
+          <div class="table-wrap">
+            <table class="comparison-table">
+              <caption>Safety test after tentatively granting REQ2</caption>
+              <thead><tr><th scope="col">Process selected</th><th scope="col">Work before</th><th scope="col">Remaining Need</th><th scope="col">Work after completion</th></tr></thead>
+              <tbody>
+                <tr><td>P1</td><td>(1, 2, 2)</td><td>(1, 0, 0)</td><td>(1, 2, 2) + (5, 2, 0) = <strong>(6, 4, 2)</strong></td></tr>
+                <tr><td>P2</td><td>(6, 4, 2)</td><td>(1, 2, 2)</td><td>(6, 4, 2) + (2, 1, 1) = <strong>(8, 5, 3)</strong></td></tr>
+                <tr><td>P0</td><td>(8, 5, 3)</td><td>(8, 4, 2)</td><td>(8, 5, 3) + (0, 0, 1) = <strong>(8, 5, 4)</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="equation">REQ2 preserves a safe sequence: <strong>P1 &rarr; P2 &rarr; P0</strong></p>
+          <p class="note"><strong>Correct answer: B. Only REQ2 can be permitted.</strong> Both requests fit the currently free resources, but only REQ2 preserves a safe state. REQ1 producing an unsafe state does not by itself prove that deadlock has already occurred.</p>
+        </article>
+        <article class="subtopic" id="deadlock-detection-strategy">
+          <h3>4. Deadlock Detection and Recovery</h3>
+          <p>Allow resource allocations that may lead to deadlock, then run a detection procedure to determine whether deadlock has occurred.</p>
+          <p>After detection, recover by terminating selected processes or reclaiming resources where preemption and rollback are possible. <strong>Detection identifies the problem; recovery breaks it.</strong></p>
+        </article>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

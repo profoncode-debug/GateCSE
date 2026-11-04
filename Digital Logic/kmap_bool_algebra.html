@@ -1,0 +1,1867 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Short GATE Digital Logic notes on Boolean algebra and Karnaugh maps.">
+  <title>Boolean Algebra and K Map Notes</title>
+  <style>
+    :root { --ink: #111; --muted: #555; --line: #d9dce1; --paper: #fff; --page: #f1f2f4; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--page); font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 15px; line-height: 1.68; }
+    a { color: inherit; }
+    .topbar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 58px; padding: 10px 24px; color: #fff; background: #111; }
+    .brand { font-size: 15px; font-weight: 750; letter-spacing: -0.2px; }
+    .topbar-meta { display: flex; align-items: center; gap: 12px; }
+    .author-credit { color: #bbb; font-size: 12px; }
+    .author-credit strong { color: #fff; }
+    .course-tag { padding: 3px 9px; border: 1px solid #666; border-radius: 999px; color: #ddd; font-size: 12px; letter-spacing: 0.08em; white-space: nowrap; }
+    .layout { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 24px; width: min(1280px, calc(100% - 40px)); margin: 24px auto; }
+    .sidebar { position: sticky; top: 74px; align-self: start; max-height: calc(100dvh - 90px); overflow-y: auto; padding: 4px 14px 12px 0; border-right: 1px solid var(--line); }
+    .sidebar-title { margin: 0 0 10px 10px; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+    .sidebar a { display: block; padding: 8px 10px; border-left: 3px solid transparent; font-size: 13.5px; font-weight: 650; text-decoration: none; }
+    .sidebar a:hover, .sidebar a:focus-visible { background: var(--paper); border-left-color: var(--ink); }
+    a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    main { min-width: 0; padding: clamp(24px, 4vw, 46px); background: var(--paper); border-radius: 3px; box-shadow: 0 3px 14px rgb(0 0 0 / 4%); }
+    .back-link { color: var(--muted); font-size: 13px; text-underline-offset: 4px; }
+    .page-heading { margin-top: 24px; }
+    .eyebrow { margin: 0 0 4px; color: var(--muted); font-size: 12px; font-weight: 750; letter-spacing: 0.12em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(26px, 3.4vw, 38px); line-height: 1.12; letter-spacing: -1.4px; }
+    .rule { margin-top: 28px; padding-top: 25px; border-top: 2px solid var(--ink); scroll-margin-top: 82px; }
+    .section-heading { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+    .section-number { color: var(--muted); font: 700 13px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    h2 { margin: 0; font-size: 22px; letter-spacing: -0.4px; }
+    p { margin: 0 0 12px; }
+    ul { margin: 0; padding-left: 22px; }
+    li + li { margin-top: 6px; }
+    .sidebar a.sub-link { padding-left: 25px; color: var(--muted); font-size: 12.5px; }
+    .subtopic { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); scroll-margin-top: 82px; }
+    h3 { margin: 0 0 12px; font-size: 18px; }
+    .gate-details { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 24px; margin-top: 18px; }
+    .grouping-examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; margin: 16px 0; }
+    .grouping-example { margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 4px; text-align: center; }
+    .grouping-example svg { display: block; width: 100%; max-width: 220px; height: auto; margin: auto; }
+    .grouping-example figcaption { color: #b42318; font-weight: 750; }
+    .adjacency-figure { margin: 18px 0; }
+    .adjacency-figure svg { display: block; width: 100%; height: auto; }
+    .adjacency-figure figcaption { color: var(--muted); font-size: 13px; }
+    .adjacency-legend { display: flex; flex-wrap: wrap; gap: 10px 20px; margin: 12px 0; padding: 0; list-style: none; font-size: 13px; }
+    .adjacency-legend li { margin: 0; padding-left: 9px; border-left: 4px solid var(--edge-color); }
+    .kmap-layouts { align-items: start; }
+    .kmap-layouts td { font-family: ui-monospace, Consolas, monospace; }
+    .table-wrap { overflow-x: auto; margin: 14px 0; }
+    .indexed-terms { min-width: 600px; }
+    .truth-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; }
+    .truth-table caption { margin-bottom: 8px; font-weight: 650; }
+    .truth-table th, .truth-table td { padding: 7px 12px; border: 1px solid var(--line); }
+    .truth-table th { background: var(--page); }
+    .gate-symbol { margin: 0; text-align: center; }
+    .gate-symbol svg { display: block; width: 100%; max-width: 320px; height: auto; margin: auto; }
+    .gate-symbol figcaption { color: var(--muted); font-size: 13px; }
+    .switch-diagram { margin: 22px 0 0; padding: 16px; border: 1px solid var(--line); border-radius: 3px; }
+    .switch-diagram h4 { margin: 0 0 8px; font-size: 15px; }
+    .switch-diagram svg { display: block; width: 100%; max-width: 560px; height: auto; margin: auto; }
+    .switch-diagram figcaption { color: var(--muted); font-size: 13px; }
+    .switch-diagram .wire { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .switch-diagram .contact { fill: var(--paper); stroke: currentColor; stroke-width: 2; }
+    .switch-diagram text { fill: currentColor; font: 15px sans-serif; }
+    @media (max-width: 760px) {
+      .topbar { padding: 10px 16px; }
+      .author-credit { display: none; }
+      .layout { grid-template-columns: 1fr; width: calc(100% - 24px); gap: 16px; margin: 12px auto; }
+      .sidebar { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 12px; }
+      main { padding: 24px 18px; }
+      .gate-details { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Digital Logic</div>
+    <div class="topbar-meta">
+      <span class="author-credit">By <strong>ProFonCoDe</strong></span>
+      <span class="course-tag">GATE &middot; DL</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Table of contents">
+      <p class="sidebar-title">Topic Index</p>
+      <nav aria-label="Sections">
+        <a href="#introduction">1. Introduction</a>
+        <a class="sub-link" href="#and-gate">1.1 AND Gate</a>
+        <a class="sub-link" href="#or-gate">1.2 OR Gate</a>
+        <a class="sub-link" href="#not-gate">1.3 NOT Gate (Inverter)</a>
+        <a class="sub-link" href="#nand-gate">1.4 NAND Gate</a>
+        <a class="sub-link" href="#xor-gate">1.5 XOR Gate</a>
+        <a class="sub-link" href="#xnor-gate">1.6 XNOR Gate</a>
+        <a class="sub-link" href="#truth-table-rows">1.7 Truth Table Rows</a>
+        <a class="sub-link" href="#boolean-equivalence">1.8 Equivalent Boolean Functions</a>
+        <a href="#algebraic-identities">2. Algebraic Identities</a>
+        <a class="sub-link" href="#basic-identities">2.1 Basic Identities</a>
+        <a class="sub-link" href="#complement-laws">2.2 Complement Laws</a>
+        <a class="sub-link" href="#commutative-law">2.3 Commutative Law</a>
+        <a class="sub-link" href="#associative-law">2.4 Associative Law</a>
+        <a class="sub-link" href="#distributive-laws">2.5 Distributive Laws</a>
+        <a class="sub-link" href="#absorption-law">2.6 Absorption Law</a>
+        <a class="sub-link" href="#de-morgan-laws">2.7 De Morgan&rsquo;s Laws</a>
+        <a href="#literal">3. Literal</a>
+        <a class="sub-link" href="#literal-count">3.1 Literal Count</a>
+        <a href="#complementing-expressions">4. Complementing Boolean Expressions</a>
+        <a class="sub-link" href="#complement-procedure">4.1 Procedure</a>
+        <a class="sub-link" href="#complement-example-1">4.2 Example 1</a>
+        <a class="sub-link" href="#complement-example-2">4.3 Example 2</a>
+        <a class="sub-link" href="#complement-example-3">4.4 Example 3: Simplification</a>
+        <a class="sub-link" href="#function-vs-complement">4.5 Can f = f&prime;?</a>
+        <a href="#dual-function">5. Dual of a Boolean Function</a>
+        <a class="sub-link" href="#duality-rules">5.1 Duality Rules</a>
+        <a class="sub-link" href="#dual-example-1">5.2 Example 1</a>
+        <a class="sub-link" href="#double-dual">5.3 Dual of the Dual</a>
+        <a class="sub-link" href="#dual-example-2">5.4 Example 2: Constants</a>
+        <a class="sub-link" href="#dual-truth-table">5.5 Dual from a Truth Table</a>
+        <a class="sub-link" href="#boolean-code-practice">5.6 Equivalence Practice</a>
+        <a href="#standard-forms">6. Standard Forms of Boolean Expressions</a>
+        <a class="sub-link" href="#product-sum-terms">6.1 Product and Sum Terms</a>
+        <a class="sub-link" href="#product-term-practice">6.2 Product Term Practice</a>
+        <a class="sub-link" href="#sum-term-practice">6.3 Sum Term Practice</a>
+        <a class="sub-link" href="#sop">6.4 SOP</a>
+        <a class="sub-link" href="#pos">6.5 POS</a>
+        <a class="sub-link" href="#sop-pos-practice">6.6 SOP/POS Classification</a>
+        <a class="sub-link" href="#single-term-forms">6.7 Single-Term Forms</a>
+        <a class="sub-link" href="#minterm">6.8 Minterm</a>
+        <a class="sub-link" href="#maxterm">6.9 Maxterm</a>
+        <a class="sub-link" href="#minterms-from-table">6.10 Minterms from Truth Tables</a>
+        <a class="sub-link" href="#maxterms-from-table">6.11 Maxterms from Truth Tables</a>
+        <a class="sub-link" href="#indexed-terms">6.12 Three-Variable Reference</a>
+        <a href="#function-terms">7. Maxterms and Minterms of a Function</a>
+        <a class="sub-link" href="#function-term-meaning">7.1 Meaning and Terminology</a>
+        <a class="sub-link" href="#function-term-table">7.2 Truth Table Example</a>
+        <a class="sub-link" href="#function-term-example">7.3 Expression Example</a>
+        <a class="sub-link" href="#canonical-function-complement">7.4 Function Complement</a>
+        <a class="sub-link" href="#canonical-vs-general">7.5 Canonical vs General Forms</a>
+        <a href="#kmap-introduction">8. Kmap Introduction</a>
+        <a class="sub-link" href="#kmap-minimum-forms">8.1 Minimum Forms</a>
+        <a class="sub-link" href="#kmap-layout">8.2 Cells and Adjacency</a>
+        <a class="sub-link" href="#two-variable-kmaps">8.3 Two-Variable K-Maps</a>
+        <a class="sub-link" href="#three-variable-kmaps">8.4 Three-Variable K-Maps</a>
+        <a class="sub-link" href="#four-variable-kmaps">8.5 Four-Variable K-Maps</a>
+        <a class="sub-link" href="#kmap-adjacency-diagram">8.6 Adjacency Diagram</a>
+        <a class="sub-link" href="#kmap-neighbor-examples">8.7 Neighbor Examples</a>
+        <a href="#cube-in-kmap">9. Cube in Kmap</a>
+        <a class="sub-link" href="#msop-grouping-rules">9.1 Finding mSOP: Grouping Rules</a>
+        <a class="sub-link" href="#two-variable-groups">9.2 Two-Variable Groupings</a>
+        <a class="sub-link" href="#msop-solving-steps">9.3 Steps to Find mSOP</a>
+        <a class="sub-link" href="#msop-worked-problems">9.4 Solved Three-Variable Maps</a>
+        <a class="sub-link" href="#msop-four-variable-example">9.5 Four-Variable Example</a>
+        <a class="sub-link" href="#pos-zero-group-rules">9.6 POS: Sum Terms from Zeros</a>
+        <a class="sub-link" href="#pos-zero-group-examples">9.7 Zero-Group Examples</a>
+        <a class="sub-link" href="#more-zero-cubes">9.8 More Zero Groups</a>
+        <a class="sub-link" href="#mpos-worked-maps">9.9 Solved mPOS Maps</a>
+      </nav>
+    </aside>
+    <main>
+      <a class="back-link" href="Digital_index.html">&larr; Digital Logic index</a>
+      <header class="page-heading">
+        <p class="eyebrow">GATE Study Notes</p>
+        <h1>Boolean Algebra and K Map</h1>
+      </header>
+      <section class="rule" id="introduction" aria-labelledby="introduction-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">01</span>
+          <h2 id="introduction-heading">Introduction</h2>
+        </div>
+        <p><strong>Boolean algebra</strong>, also called <strong>switching algebra</strong> or <strong>binary algebra</strong>, works with just two values: <strong>0 and 1</strong>.</p>
+        <ul>
+          <li><strong>Constants:</strong> 0 and 1.</li>
+          <li><strong>Variables:</strong> Boolean (switching) variables can take either 0 or 1.</li>
+          <li><strong>Binary operations:</strong> AND and OR (two inputs).</li>
+          <li><strong>Unary operation:</strong> NOT (one input).</li>
+        </ul>
+        <section class="subtopic" id="and-gate" aria-labelledby="and-gate-heading">
+          <h3 id="and-gate-heading">1.1 AND Gate</h3>
+          <p><strong>AND</strong> (logical product) is written as <strong>A &middot; B</strong> or <strong>A &and; B</strong>. Its output is <strong>1 only when all inputs are 1</strong>; otherwise, it is 0. This applies to any number of inputs.</p>
+          <p>An <strong>AND gate</strong> is the digital circuit that performs this operation: <strong>Y = A &middot; B</strong>.</p>
+          <div class="gate-details">
+            <table class="truth-table">
+              <caption>AND truth table</caption>
+              <thead><tr><th scope="col">A</th><th scope="col">B</th><th scope="col">Y = A &middot; B</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>0</td><td>0</td></tr>
+                <tr><td>0</td><td>1</td><td>0</td></tr>
+                <tr><td>1</td><td>0</td><td>0</td></tr>
+                <tr><td>1</td><td>1</td><td>1</td></tr>
+              </tbody>
+            </table>
+            <figure class="gate-symbol">
+              <svg viewBox="0 0 320 150" role="img" aria-labelledby="and-symbol-title">
+                <title id="and-symbol-title">AND gate symbol with inputs A and B and output Y</title>
+                <g fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M 55 55 H 110 M 55 95 H 110 M 110 30 H 160 A 45 45 0 0 1 160 120 H 110 Z M 205 75 H 250" />
+                </g>
+                <g fill="currentColor" font-family="sans-serif" font-size="16">
+                  <text x="32" y="61">A</text><text x="32" y="101">B</text><text x="260" y="81">Y</text>
+                </g>
+              </svg>
+              <figcaption>Logic symbol for a two-input AND gate.</figcaption>
+            </figure>
+          </div>
+
+          <figure class="switch-diagram">
+            <h4>Switch diagram: series connection</h4>
+            <svg viewBox="0 0 520 220" role="img" aria-labelledby="and-switch-title and-switch-caption">
+              <title id="and-switch-title">Switch diagram: series connection</title>
+              <g class="wire">
+                <path d="M 40 108 V 50 H 150 M 195 50 H 285 M 330 50 H 440 V 93 M 440 127 V 175 H 40 V 124 M 28 108 H 52 M 33 124 H 47" />
+                <circle cx="440" cy="110" r="17" />
+                <path d="M 428 98 L 452 122 M 428 122 L 452 98" />
+              </g>
+              <path class="wire" d="M 150 50 L 195 28" />
+                <circle class="contact" cx="150" cy="50" r="3" /><circle class="contact" cx="195" cy="50" r="3" />
+                <text x="168" y="18" text-anchor="middle">A</text><path class="wire" d="M 285 50 L 330 28" />
+                <circle class="contact" cx="285" cy="50" r="3" /><circle class="contact" cx="330" cy="50" r="3" />
+                <text x="303" y="18" text-anchor="middle">B</text>
+              <text x="12" y="104">+</text><text x="12" y="137">&#8722;</text>
+              <text x="62" y="122">Supply</text><text x="468" y="115">Y</text>
+            </svg>
+            <figcaption id="and-switch-caption">A and B: 1 = closed, 0 = open. The lamp (Y = 1) lights only when both switches are closed. Shown: A = B = 0, lamp OFF.</figcaption>
+          </figure>
+        </section>
+        <section class="subtopic" id="or-gate" aria-labelledby="or-gate-heading">
+          <h3 id="or-gate-heading">1.2 OR Gate</h3>
+          <p><strong>OR</strong> (logical sum) is written as <strong>A + B</strong> or <strong>A &or; B</strong>. Its output is <strong>1 when at least one input is 1</strong> (including when both are 1); it is 0 only when all inputs are 0. This applies to any number of inputs.</p>
+          <p>An <strong>OR gate</strong> is the digital circuit that performs this operation: <strong>Y = A + B</strong>.</p>
+          <div class="gate-details">
+            <table class="truth-table">
+              <caption>OR truth table</caption>
+              <thead><tr><th scope="col">A</th><th scope="col">B</th><th scope="col">Y = A + B</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>0</td><td>0</td></tr>
+                <tr><td>0</td><td>1</td><td>1</td></tr>
+                <tr><td>1</td><td>0</td><td>1</td></tr>
+                <tr><td>1</td><td>1</td><td>1</td></tr>
+              </tbody>
+            </table>
+            <figure class="gate-symbol">
+              <svg viewBox="0 0 320 150" role="img" aria-labelledby="or-symbol-title">
+                <title id="or-symbol-title">OR gate symbol with inputs A and B and output Y</title>
+                <g fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M 55 55 H 120 M 55 95 H 120 M 110 30 Q 145 75 110 120 C 170 120 205 100 215 75 C 205 50 170 30 110 30 Z M 215 75 H 250" />
+                </g>
+                <g fill="currentColor" font-family="sans-serif" font-size="16">
+                  <text x="32" y="61">A</text><text x="32" y="101">B</text><text x="260" y="81">Y</text>
+                </g>
+              </svg>
+              <figcaption>Logic symbol for a two-input OR gate.</figcaption>
+            </figure>
+          </div>
+
+          <figure class="switch-diagram">
+            <h4>Switch diagram: parallel connection</h4>
+            <svg viewBox="0 0 520 245" role="img" aria-labelledby="or-switch-title or-switch-caption">
+              <title id="or-switch-title">Switch diagram: parallel connection</title>
+              <g class="wire">
+                <path d="M 40 108 V 50 H 130 M 130 50 H 230 M 275 50 H 370 V 120 H 275 M 230 120 H 130 V 50 M 370 85 H 440 V 133 M 440 167 V 205 H 40 V 124 M 28 108 H 52 M 33 124 H 47" />
+                <circle cx="440" cy="150" r="17" />
+                <path d="M 428 138 L 452 162 M 428 162 L 452 138" />
+              </g>
+              <path class="wire" d="M 230 50 L 275 28" />
+                <circle class="contact" cx="230" cy="50" r="3" /><circle class="contact" cx="275" cy="50" r="3" />
+                <text x="248" y="18" text-anchor="middle">A</text><path class="wire" d="M 230 120 L 275 98" />
+                <circle class="contact" cx="230" cy="120" r="3" /><circle class="contact" cx="275" cy="120" r="3" />
+                <text x="248" y="88" text-anchor="middle">B</text>
+              <text x="12" y="104">+</text><text x="12" y="137">&#8722;</text>
+              <text x="62" y="122">Supply</text><text x="468" y="155">Y</text>
+            </svg>
+            <figcaption id="or-switch-caption">A and B: 1 = closed, 0 = open. Either closed switch completes a path, lighting the lamp (Y = 1). Shown: A = B = 0, lamp OFF.</figcaption>
+          </figure>
+        </section>
+        <section class="subtopic" id="not-gate" aria-labelledby="not-gate-heading">
+          <h3 id="not-gate-heading">1.3 NOT Gate (Inverter)</h3>
+          <p><strong>NOT</strong> (complement, negation, or inverse) flips a single input: <strong>0 becomes 1, and 1 becomes 0</strong>. It is written as <strong>A&prime;</strong> or <strong>~A</strong>.</p>
+          <p>A <strong>NOT gate</strong>, also called an <strong>inverter</strong>, performs this operation: <strong>Y = A&prime;</strong>. Thus, <strong>0&prime; = 1</strong> and <strong>1&prime; = 0</strong>.</p>
+          <div class="gate-details">
+            <table class="truth-table">
+              <caption>NOT truth table</caption>
+              <thead><tr><th scope="col">A</th><th scope="col">Y = A&prime;</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>1</td></tr>
+                <tr><td>1</td><td>0</td></tr>
+              </tbody>
+            </table>
+            <figure class="gate-symbol">
+              <svg viewBox="0 0 320 150" role="img" aria-labelledby="not-symbol-title">
+                <title id="not-symbol-title">NOT gate symbol with input A and inverted output Y</title>
+                <g fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M 55 75 H 110 M 110 30 L 190 75 L 110 120 Z M 210 75 H 250" />
+                  <circle cx="200" cy="75" r="10" />
+                </g>
+                <g fill="currentColor" font-family="sans-serif" font-size="16">
+                  <text x="32" y="81">A</text><text x="260" y="81">Y</text>
+                </g>
+              </svg>
+              <figcaption>NOT gate symbol; the output bubble indicates inversion.</figcaption>
+            </figure>
+          </div>
+
+          <figure class="switch-diagram">
+            <h4>Switch diagram: normally closed contact</h4>
+            <svg viewBox="0 0 520 220" role="img" aria-labelledby="not-switch-title not-switch-caption">
+              <title id="not-switch-title">Switch diagram: normally closed contact</title>
+              <g class="wire">
+                <path d="M 40 108 V 50 H 230 M 275 50 H 440 V 93 M 440 127 V 175 H 40 V 124 M 28 108 H 52 M 33 124 H 47" />
+                <circle cx="440" cy="110" r="17" />
+                <path d="M 428 98 L 452 122 M 428 122 L 452 98" />
+              </g>
+              <path class="wire" d="M 230 50 L 275 50" />
+                <circle class="contact" cx="230" cy="50" r="3" /><circle class="contact" cx="275" cy="50" r="3" />
+                <text x="248" y="18" text-anchor="middle">A (control)</text>
+              <text x="12" y="104">+</text><text x="12" y="137">&#8722;</text>
+              <text x="62" y="122">Supply</text><text x="468" y="115">Y</text>
+            </svg>
+            <figcaption id="not-switch-caption">The contact is controlled by A: closed at A = 0 (lamp ON, Y = 1), open at A = 1 (lamp OFF, Y = 0). Shown: A = 0. This normally closed contact gives the inverse of A.</figcaption>
+          </figure>
+        </section>
+        <section class="subtopic" id="nand-gate" aria-labelledby="nand-gate-heading">
+          <h3 id="nand-gate-heading">1.4 NAND Gate</h3>
+          <p><strong>NAND = NOT of AND.</strong> Written as <strong>A &uarr; B = (A &middot; B)&prime;</strong>, its output is <strong>0 only when all inputs are 1</strong>; otherwise, it is 1. This applies to any number of inputs.</p>
+          <p>A <strong>NAND gate</strong> performs AND followed by inversion: <strong>Y = (A &middot; B)&prime;</strong>. The output bubble represents NOT.</p>
+          <div class="gate-details">
+            <table class="truth-table">
+              <caption>NAND truth table</caption>
+              <thead><tr><th scope="col">A</th><th scope="col">B</th><th scope="col">Y = (A &middot; B)&prime;</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>0</td><td>1</td></tr>
+                <tr><td>0</td><td>1</td><td>1</td></tr>
+                <tr><td>1</td><td>0</td><td>1</td></tr>
+                <tr><td>1</td><td>1</td><td>0</td></tr>
+              </tbody>
+            </table>
+            <figure class="gate-symbol">
+              <svg viewBox="0 0 320 150" role="img" aria-labelledby="nand-symbol-title">
+                <title id="nand-symbol-title">NAND gate: AND symbol with an inversion bubble at the output</title>
+                <g fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M 55 55 H 110 M 55 95 H 110 M 110 30 H 160 A 45 45 0 0 1 160 120 H 110 Z M 225 75 H 250" />
+                  <circle cx="215" cy="75" r="10" />
+                </g>
+                <g fill="currentColor" font-family="sans-serif" font-size="16">
+                  <text x="32" y="61">A</text><text x="32" y="101">B</text><text x="260" y="81">Y</text>
+                </g>
+              </svg>
+              <figcaption>AND symbol + output bubble = NAND gate.</figcaption>
+            </figure>
+          </div>
+          <figure class="switch-diagram">
+            <h4>Switch diagram: parallel normally closed contacts</h4>
+            <svg viewBox="0 0 520 245" role="img" aria-labelledby="nand-switch-title nand-switch-caption">
+              <title id="nand-switch-title">Switch diagram: parallel normally closed contacts</title>
+              <g class="wire">
+                <path d="M 40 108 V 50 H 130 M 130 50 H 230 M 275 50 H 370 V 120 H 275 M 230 120 H 130 V 50 M 370 85 H 440 V 133 M 440 167 V 205 H 40 V 124 M 28 108 H 52 M 33 124 H 47" />
+                <circle cx="440" cy="150" r="17" />
+                <path d="M 428 138 L 452 162 M 428 162 L 452 138" />
+              </g>
+              <path class="wire" d="M 230 50 L 275 50" />
+                <circle class="contact" cx="230" cy="50" r="3" /><circle class="contact" cx="275" cy="50" r="3" />
+                <text x="248" y="18" text-anchor="middle">A (control)</text><path class="wire" d="M 230 120 L 275 120" />
+                <circle class="contact" cx="230" cy="120" r="3" /><circle class="contact" cx="275" cy="120" r="3" />
+                <text x="248" y="88" text-anchor="middle">B (control)</text>
+              <text x="12" y="104">+</text><text x="12" y="137">&#8722;</text>
+              <text x="62" y="122">Supply</text><text x="468" y="155">Y</text>
+            </svg>
+            <figcaption id="nand-switch-caption">Each contact is closed when its control input is 0 and opens when it is 1. Either closed branch lights the lamp: Y = A&prime; + B&prime; = (A &middot; B)&prime;. Shown: A = B = 0, lamp ON; both inputs must be 1 to turn it OFF.</figcaption>
+          </figure>
+        </section>
+        <section class="subtopic" id="xor-gate" aria-labelledby="xor-gate-heading">
+          <h3 id="xor-gate-heading">1.5 XOR Gate (Exclusive OR)</h3>
+          <p><strong>XOR</strong> is written as <strong>A &oplus; B = A &middot; B&prime; + A&prime; &middot; B</strong>. For two inputs, its output is <strong>1 when the inputs differ</strong> and 0 when they are equal.</p>
+          <p>For any number of inputs, XOR gives <strong>1 when an odd number of inputs are 1</strong>, so it is called an <strong>odd parity function</strong>. For example, 1 &oplus; 1 &oplus; 1 = 1, while 1 &oplus; 1 &oplus; 0 = 0.</p>
+          <div class="gate-details">
+            <table class="truth-table">
+              <caption>2-input XOR truth table</caption>
+              <thead><tr><th scope="col">A</th><th scope="col">B</th><th scope="col">Y = A &oplus; B</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>0</td><td>0</td></tr>
+                <tr><td>0</td><td>1</td><td>1</td></tr>
+                <tr><td>1</td><td>0</td><td>1</td></tr>
+                <tr><td>1</td><td>1</td><td>0</td></tr>
+              </tbody>
+            </table>
+            <figure class="gate-symbol">
+              <svg viewBox="0 0 320 150" role="img" aria-labelledby="xor-symbol-title">
+                <title id="xor-symbol-title">XOR gate: OR symbol with an extra curved line on the input side</title>
+                <g fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M 55 55 H 120 M 55 95 H 120 M 110 30 Q 145 75 110 120 C 170 120 205 100 215 75 C 205 50 170 30 110 30 Z M 98 30 Q 133 75 98 120 M 215 75 H 250" />
+                </g>
+                <g fill="currentColor" font-family="sans-serif" font-size="16">
+                  <text x="32" y="61">A</text><text x="32" y="101">B</text><text x="260" y="81">Y</text>
+                </g>
+              </svg>
+              <figcaption>OR symbol + extra input curve = XOR gate.</figcaption>
+            </figure>
+          </div>
+          <div class="gate-details">
+            <table class="truth-table">
+              <caption>3-input XOR truth table</caption>
+              <thead><tr><th scope="col">A</th><th scope="col">B</th><th scope="col">C</th><th scope="col">Y = A &oplus; B &oplus; C</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+                <tr><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+                <tr><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+                <tr><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+                <tr><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+                <tr><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+                <tr><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+                <tr><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+              </tbody>
+            </table>
+            <p><strong>Three-input XOR:</strong> Y = A &oplus; B &oplus; C. The output is 1 for exactly one or three inputs equal to 1.</p>
+          </div>
+          <figure class="switch-diagram">
+            <h4>Switch diagram: two parallel branches</h4>
+            <svg viewBox="0 0 600 260" role="img" aria-labelledby="xor-switch-title xor-switch-caption">
+              <title id="xor-switch-title">XOR switch circuit with branches A in series with B prime, and A prime in series with B</title>
+              <g class="wire">
+                <path d="M 40 120 V 60 H 175 M 220 60 H 345 M 390 60 H 470 V 140 H 390 M 345 140 H 220 M 175 140 H 110 V 60 M 470 100 H 530 V 143 M 530 177 V 220 H 40 V 136 M 28 120 H 52 M 33 136 H 47" />
+                <circle cx="530" cy="160" r="17" />
+                <path d="M 518 148 L 542 172 M 518 172 L 542 148" />
+              </g>
+              <path class="wire" d="M 175 60 L 220 40" />
+              <circle class="contact" cx="175" cy="60" r="3" /><circle class="contact" cx="220" cy="60" r="3" />
+              <text x="197" y="30" text-anchor="middle">A</text>
+              <path class="wire" d="M 345 60 L 390 60" />
+              <circle class="contact" cx="345" cy="60" r="3" /><circle class="contact" cx="390" cy="60" r="3" />
+              <text x="367" y="30" text-anchor="middle">B&#8242;</text>
+              <path class="wire" d="M 175 140 L 220 140" />
+              <circle class="contact" cx="175" cy="140" r="3" /><circle class="contact" cx="220" cy="140" r="3" />
+              <text x="197" y="110" text-anchor="middle">A&#8242;</text>
+              <path class="wire" d="M 345 140 L 390 120" />
+              <circle class="contact" cx="345" cy="140" r="3" /><circle class="contact" cx="390" cy="140" r="3" />
+              <text x="367" y="110" text-anchor="middle">B</text>
+              <text x="12" y="116">+</text><text x="12" y="149">&#8722;</text>
+              <text x="57" y="195">Supply</text><text x="558" y="165">Y</text>
+            </svg>
+            <figcaption id="xor-switch-caption">A or B contacts close at input 1; A&prime; or B&prime; contacts close at input 0. Contacts with the same input move together. The top branch conducts for A = 1, B = 0; the bottom for A = 0, B = 1. Shown: A = B = 0, lamp OFF.</figcaption>
+          </figure>
+        </section>
+        <section class="subtopic" id="xnor-gate" aria-labelledby="xnor-gate-heading">
+          <h3 id="xnor-gate-heading">1.6 XNOR Gate (Exclusive NOR)</h3>
+          <p><strong>XNOR = NOT of XOR.</strong> It is written as <strong>A &odot; B = (A &oplus; B)&prime; = A &middot; B + A&prime; &middot; B&prime;</strong>.</p>
+          <p>For two inputs, its output is <strong>1 when A = B</strong> and 0 when they differ. Hence, XNOR is also called the <strong>equivalence gate</strong>: <strong>A &hArr; B</strong>.</p>
+          <div class="gate-details">
+            <table class="truth-table">
+              <caption>2-input XNOR truth table</caption>
+              <thead><tr><th scope="col">A</th><th scope="col">B</th><th scope="col">Y = A &odot; B</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>0</td><td>1</td></tr>
+                <tr><td>0</td><td>1</td><td>0</td></tr>
+                <tr><td>1</td><td>0</td><td>0</td></tr>
+                <tr><td>1</td><td>1</td><td>1</td></tr>
+              </tbody>
+            </table>
+            <figure class="gate-symbol">
+              <svg viewBox="0 0 320 150" role="img" aria-labelledby="xnor-symbol-title">
+                <title id="xnor-symbol-title">XNOR gate: XOR symbol with an inversion bubble at the output</title>
+                <g fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M 55 55 H 120 M 55 95 H 120 M 110 30 Q 145 75 110 120 C 170 120 205 100 215 75 C 205 50 170 30 110 30 Z M 98 30 Q 133 75 98 120 M 235 75 H 250" />
+                  <circle cx="225" cy="75" r="10" />
+                </g>
+                <g fill="currentColor" font-family="sans-serif" font-size="16">
+                  <text x="32" y="61">A</text><text x="32" y="101">B</text><text x="260" y="81">Y</text>
+                </g>
+              </svg>
+              <figcaption>XOR symbol + output bubble = XNOR gate.</figcaption>
+            </figure>
+          </div>
+          <div class="gate-details">
+            <table class="truth-table">
+              <caption>3-input XNOR truth table</caption>
+              <thead><tr><th scope="col">A</th><th scope="col">B</th><th scope="col">C</th><th scope="col">Y = (A &oplus; B &oplus; C)&prime;</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+                <tr><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+                <tr><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+                <tr><td>0</td><td>1</td><td>1</td><td>1</td></tr>
+                <tr><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+                <tr><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+                <tr><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+                <tr><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+              </tbody>
+            </table>
+            <p><strong>Three-input XNOR:</strong> Y = (A &oplus; B &oplus; C)&prime;. As the complement of XOR, it outputs 1 for an even number of 1s (zero or two here). The two-input equality rule does not extend to three inputs.</p>
+          </div>
+          <figure class="switch-diagram">
+            <h4>Switch diagram: two parallel branches</h4>
+            <svg viewBox="0 0 600 260" role="img" aria-labelledby="xnor-switch-title xnor-switch-caption">
+              <title id="xnor-switch-title">XNOR switch circuit with branches A in series with B, and A prime in series with B prime</title>
+              <g class="wire">
+                <path d="M 40 120 V 60 H 175 M 220 60 H 345 M 390 60 H 470 V 140 H 390 M 345 140 H 220 M 175 140 H 110 V 60 M 470 100 H 530 V 143 M 530 177 V 220 H 40 V 136 M 28 120 H 52 M 33 136 H 47" />
+                <circle cx="530" cy="160" r="17" />
+                <path d="M 518 148 L 542 172 M 518 172 L 542 148" />
+              </g>
+              <path class="wire" d="M 175 60 L 220 40" />
+              <circle class="contact" cx="175" cy="60" r="3" /><circle class="contact" cx="220" cy="60" r="3" />
+              <text x="197" y="30" text-anchor="middle">A</text>
+              <path class="wire" d="M 345 60 L 390 40" />
+              <circle class="contact" cx="345" cy="60" r="3" /><circle class="contact" cx="390" cy="60" r="3" />
+              <text x="367" y="30" text-anchor="middle">B</text>
+              <path class="wire" d="M 175 140 L 220 140" />
+              <circle class="contact" cx="175" cy="140" r="3" /><circle class="contact" cx="220" cy="140" r="3" />
+              <text x="197" y="110" text-anchor="middle">A&#8242;</text>
+              <path class="wire" d="M 345 140 L 390 140" />
+              <circle class="contact" cx="345" cy="140" r="3" /><circle class="contact" cx="390" cy="140" r="3" />
+              <text x="367" y="110" text-anchor="middle">B&#8242;</text>
+              <text x="12" y="116">+</text><text x="12" y="149">&#8722;</text>
+              <text x="57" y="195">Supply</text><text x="558" y="165">Y</text>
+            </svg>
+            <figcaption id="xnor-switch-caption">A or B contacts close at input 1; A&prime; or B&prime; contacts close at input 0. Contacts with the same input move together. The top branch conducts when A = B = 1; the bottom when A = B = 0. Shown: A = B = 0, lamp ON.</figcaption>
+          </figure>
+        </section>
+        <section class="subtopic" id="truth-table-rows" aria-labelledby="truth-table-rows-heading">
+          <h3 id="truth-table-rows-heading">1.7 Number of Rows in a Truth Table</h3>
+          <p>Each Boolean input has two possible values: <strong>0 or 1</strong>. For <strong>n input variables</strong>, the number of possible input combinations is <strong>2<sup>n</sup></strong>.</p>
+          <p>Therefore, a complete truth table has <strong>2<sup>n</sup> data rows</strong>, one for each combination. For example: 2 inputs &rarr; 4 rows; 3 inputs &rarr; 8 rows; 4 inputs &rarr; 16 rows.</p>
+        </section>
+        <section class="subtopic" id="boolean-equivalence" aria-labelledby="boolean-equivalence-heading">
+          <h3 id="boolean-equivalence-heading">1.8 Equivalence of Boolean Functions</h3>
+          <p>Two Boolean functions are <strong>equivalent</strong> if they produce the <strong>same output for every possible input combination</strong>. Their truth-table outputs match, even if their expressions look different.</p>
+          <p><strong>Example (De Morgan&rsquo;s law): (X &middot; Y)&prime; = X&prime; + Y&prime;</strong>.</p>
+          <table class="truth-table">
+            <caption>Both expressions have identical outputs</caption>
+            <thead><tr><th scope="col">X</th><th scope="col">Y</th><th scope="col">(X &middot; Y)&prime;</th><th scope="col">X&prime; + Y&prime;</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+              <tr><td>0</td><td>1</td><td>1</td><td>1</td></tr>
+              <tr><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+              <tr><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+            </tbody>
+          </table>
+        </section>
+      </section>
+      <section class="rule" id="algebraic-identities" aria-labelledby="algebraic-identities-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">02</span>
+          <h2 id="algebraic-identities-heading">Algebraic Identities</h2>
+        </div>
+        <section class="subtopic" id="basic-identities" aria-labelledby="basic-identities-heading">
+          <h3 id="basic-identities-heading">2.1 Basic Identities</h3>
+          <p>For any Boolean variable <strong>A &isin; {0, 1}</strong>, these identities hold. Here, <strong>+</strong> means OR and <strong>&middot;</strong> means AND.</p>
+          <table class="truth-table">
+            <caption>Basic Boolean algebra laws</caption>
+            <thead><tr><th scope="col">Law</th><th scope="col">OR</th><th scope="col">AND</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Domination</th><td>A + 1 = 1</td><td>A &middot; 0 = 0</td></tr>
+              <tr><th scope="row">Identity</th><td>A + 0 = A</td><td>A &middot; 1 = A</td></tr>
+              <tr><th scope="row">Idempotent</th><td>A + A = A</td><td>A &middot; A = A</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="subtopic" id="complement-laws" aria-labelledby="complement-laws-heading">
+          <h3 id="complement-laws-heading">2.2 Complement Laws</h3>
+          <ul>
+            <li><strong>(A&prime;)&prime; = A</strong> &mdash; double negation restores the original value (involution).</li>
+            <li><strong>A + A&prime; = 1</strong></li>
+            <li><strong>A &middot; A&prime; = 0</strong></li>
+          </ul>
+        </section>
+        <section class="subtopic" id="commutative-law" aria-labelledby="commutative-law-heading">
+          <h3 id="commutative-law-heading">2.3 Commutative Law</h3>
+          <p>The order of inputs does not change the result.</p>
+          <ul>
+            <li><strong>A + B = B + A</strong></li>
+            <li><strong>A &middot; B = B &middot; A</strong></li>
+          </ul>
+        </section>
+        <section class="subtopic" id="associative-law" aria-labelledby="associative-law-heading">
+          <h3 id="associative-law-heading">2.4 Associative Law</h3>
+          <p>Grouping does not matter when using the same operation.</p>
+          <ul>
+            <li><strong>(A + B) + C = A + (B + C)</strong></li>
+            <li><strong>(A &middot; B) &middot; C = A &middot; (B &middot; C)</strong></li>
+          </ul>
+        </section>
+        <section class="subtopic" id="distributive-laws" aria-labelledby="distributive-laws-heading">
+          <h3 id="distributive-laws-heading">2.5 Distributive Laws</h3>
+          <ul>
+            <li><strong>A &middot; (B + C) = A &middot; B + A &middot; C</strong></li>
+            <li><strong>A + (B &middot; C) = (A + B) &middot; (A + C)</strong></li>
+          </ul>
+        </section>
+        <section class="subtopic" id="absorption-law" aria-labelledby="absorption-law-heading">
+          <h3 id="absorption-law-heading">2.6 Absorption Law</h3>
+          <p>A absorbs an extra term containing A.</p>
+          <ul>
+            <li><strong>A + A &middot; B = A</strong></li>
+            <li><strong>A &middot; (A + B) = A</strong></li>
+          </ul>
+          <p><strong>Example:</strong> A + A &middot; B + A &middot; B&prime; + A &middot; C&prime; + A &middot; D = <strong>A</strong>, by repeated absorption.</p>
+        </section>
+        <section class="subtopic" id="de-morgan-laws" aria-labelledby="de-morgan-laws-heading">
+          <h3 id="de-morgan-laws-heading">2.7 De Morgan&rsquo;s Laws</h3>
+          <p>To complement an expression, swap AND and OR and complement each input.</p>
+          <ul>
+            <li><strong>(A + B)&prime; = A&prime; &middot; B&prime;</strong></li>
+            <li><strong>(A &middot; B)&prime; = A&prime; + B&prime;</strong></li>
+          </ul>
+        </section>
+      </section>
+      <section class="rule" id="literal" aria-labelledby="literal-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">03</span>
+          <h2 id="literal-heading">Literal</h2>
+        </div>
+        <p>A <strong>literal</strong> is a single input variable or its complement, such as <strong>a</strong>, <strong>b&prime;</strong>, or <strong>c</strong>. A product such as <strong>a&prime;b</strong> is not a single literal; it contains two literals.</p>
+        <section class="subtopic" id="literal-count" aria-labelledby="literal-count-heading">
+          <h3 id="literal-count-heading">3.1 Literal Count</h3>
+          <p>Count <strong>each appearance</strong> of a variable or its complement, including repeated appearances.</p>
+          <p><strong>Example: ab&prime;c + a&prime;b + a&prime;bc&prime; + b&prime;c&prime;</strong></p>
+          <table class="truth-table">
+            <caption>Literal count in the expression as written</caption>
+            <thead><tr><th scope="col">Term</th><th scope="col">Literals</th><th scope="col">Count</th></tr></thead>
+            <tbody>
+              <tr><td>ab&prime;c</td><td>a, b&prime;, c</td><td>3</td></tr>
+              <tr><td>a&prime;b</td><td>a&prime;, b</td><td>2</td></tr>
+              <tr><td>a&prime;bc&prime;</td><td>a&prime;, b, c&prime;</td><td>3</td></tr>
+              <tr><td>b&prime;c&prime;</td><td>b&prime;, c&prime;</td><td>2</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Total: 3 + 2 + 3 + 2 = 10 literals</strong>, using <strong>3 distinct variables</strong>: a, b, and c.</p>
+          <table class="truth-table">
+            <caption>More examples: literals versus distinct variables</caption>
+            <thead><tr><th scope="col">Expression f(a, b)</th><th scope="col">Literals</th><th scope="col">Distinct variables</th></tr></thead>
+            <tbody>
+              <tr><td>a + b</td><td>2</td><td>2</td></tr>
+              <tr><td>a + a + b + bb</td><td>5</td><td>2</td></tr>
+              <tr><td>a + a&prime;b</td><td>3</td><td>2</td></tr>
+            </tbody>
+          </table>
+          <p>Count literals <strong>as written, before simplification</strong>. For example, <strong>a + a&prime;b = a + b</strong>: simplification reduces the literal count from 3 to 2, while the distinct variables remain a and b.</p>
+        </section>
+      </section>
+      <section class="rule" id="complementing-expressions" aria-labelledby="complementing-expressions-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">04</span>
+          <h2 id="complementing-expressions-heading">Complementing Boolean Expressions</h2>
+        </div>
+        <p>The complement <strong>F&prime;</strong> reverses the output of F for every input combination. Use <strong>De Morgan&rsquo;s laws</strong> for expressions built from AND, OR, NOT, and constants 0 and 1.</p>
+        <section class="subtopic" id="complement-procedure" aria-labelledby="complement-procedure-heading">
+          <h3 id="complement-procedure-heading">4.1 Procedure</h3>
+          <ul>
+            <li>Swap <strong>AND &harr; OR</strong>.</li>
+            <li>Swap <strong>0 &harr; 1</strong>.</li>
+            <li>Complement each literal: <strong>X &harr; X&prime;</strong>.</li>
+            <li>Preserve grouping; use parentheses to keep the original structure.</li>
+          </ul>
+          <p>Apply De Morgan&rsquo;s law through each level: <strong>(XY)&prime; = X&prime; + Y&prime;</strong> and <strong>(X + Y)&prime; = X&prime;Y&prime;</strong>. Remove double complements using <strong>(X&prime;)&prime; = X</strong>.</p>
+        </section>
+        <section class="subtopic" id="complement-example-1" aria-labelledby="complement-example-1-heading">
+          <h3 id="complement-example-1-heading">4.2 Example 1</h3>
+          <p><strong>Given: F = AB&prime; + A&prime;B</strong></p>
+          <ol>
+            <li>Complement the sum: F&prime; = (AB&prime;)&prime; &middot; (A&prime;B)&prime;.</li>
+            <li>Complement each product: <strong>F&prime; = (A&prime; + B)(A + B&prime;)</strong>.</li>
+          </ol>
+          <p>This also simplifies to <strong>AB + A&prime;B&prime;</strong> (XNOR), the complement of XOR.</p>
+        </section>
+        <section class="subtopic" id="complement-example-2" aria-labelledby="complement-example-2-heading">
+          <h3 id="complement-example-2-heading">4.3 Example 2</h3>
+          <p><strong>Given: F = (V&prime;W + X)Y + Z&prime;</strong></p>
+          <ol>
+            <li>Complement the outer sum: F&prime; = [(V&prime;W + X)Y]&prime; &middot; Z.</li>
+            <li>Complement the product: F&prime; = [(V&prime;W + X)&prime; + Y&prime;]Z.</li>
+            <li>Complement the inner sum and product: <strong>F&prime; = [(V + W&prime;)X&prime; + Y&prime;]Z</strong>.</li>
+          </ol>
+        </section>
+        <section class="subtopic" id="complement-example-3" aria-labelledby="complement-example-3-heading">
+          <h3 id="complement-example-3-heading">4.4 Example 3: Complement and Simplify</h3>
+          <p><strong>Given: F = (A + B&prime; + C)(A&prime; + B&prime;)</strong></p>
+          <ol>
+            <li>Complement the product: F&prime; = (A + B&prime; + C)&prime; + (A&prime; + B&prime;)&prime;.</li>
+            <li>Apply De Morgan&rsquo;s law: F&prime; = A&prime;BC&prime; + AB.</li>
+            <li>Factor B: F&prime; = B(A&prime;C&prime; + A).</li>
+            <li>Use A + A&prime;C&prime; = A + C&prime;: <strong>F&prime; = B(A + C&prime;) = AB + BC&prime;</strong>.</li>
+          </ol>
+        </section>
+        <section class="subtopic" id="function-vs-complement" aria-labelledby="function-vs-complement-heading">
+          <h3 id="function-vs-complement-heading">4.5 Can a Boolean Function Equal Its Complement?</h3>
+          <p><strong>No.</strong> For every input combination, F and F&prime; have opposite outputs: if F = 0, then F&prime; = 1, and vice versa. Therefore, <strong>F and F&prime; can never be equivalent</strong>.</p>
+        </section>
+      </section>
+      <section class="rule" id="dual-function" aria-labelledby="dual-function-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">05</span>
+          <h2 id="dual-function-heading">Dual of a Boolean Function</h2>
+        </div>
+        <p>For an expression built from AND, OR, NOT, and constants, its <strong>dual</strong>, written <strong>f<sup>d</sup></strong>, is obtained by swapping AND with OR and 0 with 1. <strong>Variables and their complements stay unchanged.</strong></p>
+        <section class="subtopic" id="duality-rules" aria-labelledby="duality-rules-heading">
+          <h3 id="duality-rules-heading">5.1 Duality Rules</h3>
+          <table class="truth-table">
+            <caption>Replacements when forming the dual</caption>
+            <thead><tr><th scope="col">In f</th><th scope="col">In f<sup>d</sup></th></tr></thead>
+            <tbody>
+              <tr><td>AND (&middot;)</td><td>OR (+)</td></tr>
+              <tr><td>OR (+)</td><td>AND (&middot;)</td></tr>
+              <tr><td>0</td><td>1</td></tr>
+              <tr><td>1</td><td>0</td></tr>
+              <tr><td>A, B, A&prime;, B&prime;</td><td>A, B, A&prime;, B&prime; (unchanged)</td></tr>
+            </tbody>
+          </table>
+          <p>Preserve grouping and all NOT operations. For example, <strong>(AB)&prime;</strong> becomes <strong>(A + B)&prime;</strong>. Unlike complementation, forming the dual does <strong>not</strong> flip each literal.</p>
+        </section>
+        <section class="subtopic" id="dual-example-1" aria-labelledby="dual-example-1-heading">
+          <h3 id="dual-example-1-heading">5.2 Example 1</h3>
+          <p><strong>Given: f = B&prime; + C + A&prime;(A&prime; + B&prime;) + B(A&prime; + B&prime;)</strong></p>
+          <ol>
+            <li>Replace the outer ORs with ANDs.</li>
+            <li>The term A&prime;(A&prime; + B&prime;) becomes A&prime; + A&prime;B&prime;.</li>
+            <li>The term B(A&prime; + B&prime;) becomes B + A&prime;B&prime;.</li>
+          </ol>
+          <p><strong>f<sup>d</sup> = B&prime;C(A&prime; + A&prime;B&prime;)(B + A&prime;B&prime;)</strong> &mdash; the third option in the slide.</p>
+          <p>Using absorption, A&prime; + A&prime;B&prime; = A&prime;. Then B&prime;(B + A&prime;B&prime;) = A&prime;B&prime;, so <strong>f<sup>d</sup> = A&prime;B&prime;C</strong>.</p>
+        </section>
+        <section class="subtopic" id="double-dual" aria-labelledby="double-dual-heading">
+          <h3 id="double-dual-heading">5.3 Dual of the Dual</h3>
+          <p>Applying duality twice reverses every swap and restores the original function: <strong>(f<sup>d</sup>)<sup>d</sup> = f</strong>.</p>
+        </section>
+        <section class="subtopic" id="dual-example-2" aria-labelledby="dual-example-2-heading">
+          <h3 id="dual-example-2-heading">5.4 Example 2: Constants and Complements</h3>
+          <p><strong>Given: f = (a &middot; 1)&prime; + (b&prime; + 0)&prime;</strong></p>
+          <ol>
+            <li>Swap AND/OR and 0/1, keeping each complement in place: <strong>f<sup>d</sup> = (a + 0)&prime; &middot; (b&prime; &middot; 1)&prime;</strong>.</li>
+            <li>Use a + 0 = a and b&prime; &middot; 1 = b&prime;: f<sup>d</sup> = a&prime; &middot; (b&prime;)&prime;.</li>
+            <li>Remove the double complement: <strong>f<sup>d</sup> = a&prime;b</strong> &mdash; the fourth option in the slide.</li>
+          </ol>
+        </section>
+        <section class="subtopic" id="dual-truth-table" aria-labelledby="dual-truth-table-heading">
+          <h3 id="dual-truth-table-heading">5.5 Finding the Dual from a Truth Table</h3>
+          <p>With inputs in <strong>standard binary order</strong> (000, 001, &hellip;, 111), <strong>complement the f column, then reverse that output column</strong> to obtain f<sup>d</sup>. Keep the input rows in their original order.</p>
+          <p><strong>Rule: f<sup>d</sup>(x, y, z) = [f(x&prime;, y&prime;, z&prime;)]&prime;</strong>. Reversing the rows selects the complemented input combination; complementing its output gives the dual.</p>
+          <table class="truth-table">
+            <caption>Worked example: reverse the f&prime; column</caption>
+            <thead><tr><th scope="col">x</th><th scope="col">y</th><th scope="col">z</th><th scope="col">f</th><th scope="col">f&prime;</th><th scope="col">f<sup>d</sup></th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>1</td><td>0</td><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+              <tr><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+              <tr><td>1</td><td>1</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+              <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>1</td></tr>
+            </tbody>
+          </table>
+          <p><strong>f&prime;:</strong> 1, 0, 1, 1, 0, 0, 0, 0 &rarr; <strong>f<sup>d</sup>:</strong> 0, 0, 0, 0, 1, 1, 0, 1.</p>
+        </section>
+        <section class="subtopic" id="boolean-code-practice" aria-labelledby="boolean-code-practice-heading">
+          <h3 id="boolean-code-practice-heading">5.6 Practice: Equivalent Boolean Expressions</h3>
+          <p>For Boolean inputs x and y, which expression is equivalent to <code>(x &amp;&amp; !y)</code>?</p>
+          <p><code>&amp;&amp;</code> means AND, <code>||</code> means OR, and <code>!</code> means NOT.</p>
+          <ol type="A">
+            <li><code>(!x || y)</code></li>
+            <li><code>(!x &amp;&amp; y)</code></li>
+            <li><code>!(!x || y)</code></li>
+            <li><code>!(!x &amp;&amp; y)</code></li>
+            <li><code>(x || !y)</code></li>
+          </ol>
+          <p><strong>Answer: C.</strong> By De Morgan&rsquo;s law, <strong>(x&prime; + y)&prime; = x &middot; y&prime;</strong>, which is exactly <code>x &amp;&amp; !y</code>.</p>
+        </section>
+      </section>
+      <section class="rule" id="standard-forms" aria-labelledby="standard-forms-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">06</span>
+          <h2 id="standard-forms-heading">Standard Forms of Boolean Expressions</h2>
+        </div>
+        <section class="subtopic" id="product-sum-terms" aria-labelledby="product-sum-terms-heading">
+          <h3 id="product-sum-terms-heading">6.1 Product and Sum Terms</h3>
+          <p>A <strong>product term</strong> is the AND of one or more literals. A <strong>sum term</strong> is the OR of one or more literals. In either form, <strong>no variable appears more than once</strong>, whether complemented or uncomplemented.</p>
+          <table class="truth-table">
+            <caption>Two-variable examples using both X and Y</caption>
+            <thead><tr><th scope="col">Product terms (AND)</th><th scope="col">Sum terms (OR)</th></tr></thead>
+            <tbody>
+              <tr><td>X&prime; &middot; Y&prime;</td><td>X&prime; + Y&prime;</td></tr>
+              <tr><td>X&prime; &middot; Y</td><td>X&prime; + Y</td></tr>
+              <tr><td>X &middot; Y&prime;</td><td>X + Y&prime;</td></tr>
+              <tr><td>X &middot; Y</td><td>X + Y</td></tr>
+            </tbody>
+          </table>
+          <p>A single literal, such as <strong>X&prime;</strong>, qualifies as both a product term and a sum term.</p>
+          <p><strong>Repeated variables:</strong> XXY&prime; simplifies to XY&prime; (XX = X), while XX&prime;Y simplifies to 0 (XX&prime; = 0). The repeated-variable forms are not counted as valid product terms as written.</p>
+          <p><strong>Watch the complement:</strong> X&prime;Y&prime; and XY are product terms, but <strong>(XY)&prime;</strong> is not a product term as written: the complement covers a whole product, not a single variable. Similarly, <strong>(A + B)(C + D)</strong> is a product of sums, not an AND of literals.</p>
+        </section>
+        <section class="subtopic" id="product-term-practice" aria-labelledby="product-term-practice-heading">
+          <h3 id="product-term-practice-heading">6.2 Product Term Practice</h3>
+          <p><strong>Q1.</strong> Which options are product terms?</p>
+          <ol type="A">
+            <li>AB</li>
+            <li>A + B</li>
+            <li>AB&prime;C</li>
+            <li>A&prime; + B&prime;</li>
+          </ol>
+          <p><strong>Answer: A and C.</strong> Both are ANDs of literals with no repeated variable.</p>
+          <p><strong>Q2.</strong> Which is a valid product term?</p>
+          <ol type="A">
+            <li>A + B + C</li>
+            <li>A &middot; B&prime; &middot; C</li>
+            <li>A &middot; B + C</li>
+            <li>(A + B)(C + D)</li>
+          </ol>
+          <p><strong>Answer: B.</strong> The other options contain sums or compound factors.</p>
+          <p><strong>Q3.</strong> Identify the product terms.</p>
+          <ol type="A">
+            <li>A&prime;B</li>
+            <li>AB + AC</li>
+            <li>A &middot; (B + C)</li>
+            <li>ABCD</li>
+          </ol>
+          <p><strong>Answer: A and D.</strong> B is a sum of products; C contains a sum as a factor.</p>
+        </section>
+        <section class="subtopic" id="sum-term-practice" aria-labelledby="sum-term-practice-heading">
+          <h3 id="sum-term-practice-heading">6.3 Sum Term Practice</h3>
+          <p><strong>Q1.</strong> Which options are sum terms?</p>
+          <ol type="A">
+            <li>A + B</li>
+            <li>AB</li>
+            <li>A&prime; + B</li>
+            <li>A&prime;B + AB&prime;</li>
+          </ol>
+          <p><strong>Answer: A and C.</strong> Both are ORs of literals; B and D contain products.</p>
+          <p><strong>Q2.</strong> Identify the sum terms.</p>
+          <ol type="A">
+            <li>A + B + C</li>
+            <li>AB + C</li>
+            <li>A + B&prime;</li>
+            <li>ABC</li>
+          </ol>
+          <p><strong>Answer: A and C.</strong> Each summand must be a literal; AB is not a literal.</p>
+          <p><strong>Q3.</strong> Identify the sum terms.</p>
+          <ol type="A">
+            <li>A&prime; + B&prime; + C</li>
+            <li>(A + B)(C + D)</li>
+            <li>A + B + CD</li>
+            <li>A + B + C + D</li>
+          </ol>
+          <p><strong>Answer: A and D.</strong> B is a product of sums, while C includes the product CD as a summand.</p>
+        </section>
+        <section class="subtopic" id="sop" aria-labelledby="sop-heading">
+          <h3 id="sop-heading">6.4 SOP (Sum of Products)</h3>
+          <p>An <strong>SOP expression</strong> is the logical <strong>OR of product terms</strong>: <strong>P<sub>1</sub> + P<sub>2</sub> + P<sub>3</sub> + &hellip;</strong>. Each product term is an AND of literals.</p>
+          <p><strong>Example: A&prime;BCD&prime; + AB&prime;D + CD&prime; + AD&prime;</strong></p>
+          <p>A single literal is also a product term, so <strong>A + B + C</strong> is SOP. Product terms need not contain every variable.</p>
+          <p><strong>Q1.</strong> Which expressions are in SOP form?</p>
+          <ol type="A">
+            <li>AB + A&prime;C</li>
+            <li>(A + B)(C + D)</li>
+            <li>A + B + C</li>
+            <li>A&prime;B + BC + AB&prime;C</li>
+          </ol>
+          <p><strong>Answer: A, C, and D.</strong> Each is an OR of product terms. B is a product of sums.</p>
+          <p><strong>Q2.</strong> Identify the SOP expressions.</p>
+          <ol type="A">
+            <li>AB + A + BC</li>
+            <li>A(B + C)</li>
+            <li>(A + B)(C + D)</li>
+            <li>A&prime;B&prime; + ABC + B&prime;C</li>
+          </ol>
+          <p><strong>Answer: A and D.</strong> A includes the single-literal product term A. B is not SOP as written, but expands to AB + AC; C is a product of sums.</p>
+        </section>
+        <section class="subtopic" id="pos" aria-labelledby="pos-heading">
+          <h3 id="pos-heading">6.5 POS (Product of Sums)</h3>
+          <p>A <strong>POS expression</strong> is the logical <strong>AND of sum terms</strong>: <strong>(S<sub>1</sub>) &middot; (S<sub>2</sub>) &middot; (S<sub>3</sub>) &middot; &hellip;</strong>. Each sum term is an OR of literals.</p>
+          <p><strong>Example: (A&prime; + B + C + D&prime;)(A + B&prime; + D)(C + D&prime;)(A + D&prime;)</strong></p>
+          <p>Sum terms need not contain every variable. A single sum term also qualifies as POS.</p>
+          <p><strong>Q1.</strong> Which expressions are in POS form?</p>
+          <ol type="A">
+            <li>(A + B)(C + D)</li>
+            <li>AB + CD</li>
+            <li>(A + B + C)(A&prime; + B&prime;)</li>
+            <li>A + B + C</li>
+          </ol>
+          <p><strong>Answer: A, C, and D.</strong> A and C are ANDs of sum terms; D is a single sum term. B is a sum of products.</p>
+          <p><strong>Q2.</strong> Identify the POS expressions.</p>
+          <ol type="A">
+            <li>(A + B)(A&prime; + C)</li>
+            <li>A + BC</li>
+            <li>(A + B + C)(D + E + F)</li>
+          </ol>
+          <p><strong>Answer: A and C.</strong> B is not POS as written, but can be converted to (A + B)(A + C).</p>
+          <p><strong>Both SOP and POS:</strong> f(a, b, c) = a + b + c is SOP as <strong>(a) + (b) + (c)</strong>, an OR of single-literal product terms, and POS as <strong>(a + b + c)</strong>, one sum term.</p>
+        </section>
+        <section class="subtopic" id="sop-pos-practice" aria-labelledby="sop-pos-practice-heading">
+          <h3 id="sop-pos-practice-heading">6.6 Practice: SOP/POS Classification</h3>
+          <p>Classify each expression <strong>as written</strong>, before expanding or simplifying.</p>
+          <table class="truth-table">
+            <caption>Classification answers</caption>
+            <thead><tr><th scope="col">Expression</th><th scope="col">SOP?</th><th scope="col">POS?</th></tr></thead>
+            <tbody>
+              <tr><td>X&prime;Y + XY&prime; + XYZ</td><td>Yes</td><td>No</td></tr>
+              <tr><td>(X + Y&prime;)(X&prime; + Y)(X&prime; + Z&prime;)</td><td>No</td><td>Yes</td></tr>
+              <tr><td>X&prime; + Y + Z</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>X(W&prime; + YZ)</td><td>No</td><td>No</td></tr>
+              <tr><td>XYZ&prime;</td><td>Yes</td><td>Yes</td></tr>
+              <tr><td>WX&prime;Y + V(XZ + W&prime;)</td><td>No</td><td>No</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Why neither?</strong> In X(W&prime; + YZ), the bracket is not a sum term because YZ is not a literal. In the last expression, V(XZ + W&prime;) is not a product term as written. Expanding may produce SOP, but does not change the classification of the original form.</p>
+        </section>
+        <section class="subtopic" id="single-term-forms" aria-labelledby="single-term-forms-heading">
+          <h3 id="single-term-forms-heading">6.7 Notes: Single-Term Forms</h3>
+          <ul>
+            <li><strong>A single sum term is both SOP and POS.</strong> Example: A + B + C is an OR of single-literal product terms (SOP), and one sum term (POS).</li>
+            <li><strong>A single product term is both SOP and POS.</strong> Example: ABC&prime; is one product term (SOP), and (A)(B)(C&prime;) is an AND of single-literal sum terms (POS).</li>
+          </ul>
+        </section>
+        <section class="subtopic" id="minterm" aria-labelledby="minterm-heading">
+          <h3 id="minterm-heading">6.8 Minterm</h3>
+          <p>A <strong>minterm</strong> is a product term containing <strong>every variable of the function exactly once</strong>, either complemented or uncomplemented.</p>
+          <p>For n variables, each variable has two possible forms, giving <strong>2<sup>n</sup> minterms</strong>. A minterm is 1 for exactly one input combination: use an uncomplemented literal for input 1 and a complemented literal for input 0.</p>
+          <table class="truth-table">
+            <caption>Minterms over 2 variables: a, b</caption>
+            <thead><tr><th scope="col">a</th><th scope="col">b</th><th scope="col">Minterm</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>a&prime;b&prime;</td></tr>
+              <tr><td>0</td><td>1</td><td>a&prime;b</td></tr>
+              <tr><td>1</td><td>0</td><td>ab&prime;</td></tr>
+              <tr><td>1</td><td>1</td><td>ab</td></tr>
+            </tbody>
+          </table>
+          <p>For a function of a and b, a alone or b&prime; alone is not a minterm because one variable is missing.</p>
+          <table class="truth-table">
+            <caption>Minterms over 3 variables: a, b, c</caption>
+            <thead><tr><th scope="col">a</th><th scope="col">b</th><th scope="col">c</th><th scope="col">Minterm</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td><td>a&prime;b&prime;c&prime;</td></tr>
+              <tr><td>0</td><td>0</td><td>1</td><td>a&prime;b&prime;c</td></tr>
+              <tr><td>0</td><td>1</td><td>0</td><td>a&prime;bc&prime;</td></tr>
+              <tr><td>0</td><td>1</td><td>1</td><td>a&prime;bc</td></tr>
+              <tr><td>1</td><td>0</td><td>0</td><td>ab&prime;c&prime;</td></tr>
+              <tr><td>1</td><td>0</td><td>1</td><td>ab&prime;c</td></tr>
+              <tr><td>1</td><td>1</td><td>0</td><td>abc&prime;</td></tr>
+              <tr><td>1</td><td>1</td><td>1</td><td>abc</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Practice:</strong> Which option is a minterm for f(x, y, z)?</p>
+          <ol type="A">
+            <li>xy</li>
+            <li>xyz</li>
+            <li>xy&prime;</li>
+            <li>x + y + z</li>
+          </ol>
+          <p><strong>Answer: B.</strong> xyz is a product containing all three variables. A and C omit z; D is a sum term, not a product term.</p>
+        </section>
+        <section class="subtopic" id="maxterm" aria-labelledby="maxterm-heading">
+          <h3 id="maxterm-heading">6.9 Maxterm</h3>
+          <p>A <strong>maxterm</strong> is a sum term containing <strong>every variable of the function exactly once</strong>, either complemented or uncomplemented.</p>
+          <p>For n variables, there are <strong>2<sup>n</sup> maxterms</strong>. Each maxterm is 0 for exactly one input combination: use an uncomplemented literal for input 0 and a complemented literal for input 1.</p>
+          <table class="truth-table">
+            <caption>All four maxterms over a and b</caption>
+            <thead><tr><th scope="col">a</th><th scope="col">b</th><th scope="col">Maxterm that equals 0</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>a + b</td></tr>
+              <tr><td>0</td><td>1</td><td>a + b&prime;</td></tr>
+              <tr><td>1</td><td>0</td><td>a&prime; + b</td></tr>
+              <tr><td>1</td><td>1</td><td>a&prime; + b&prime;</td></tr>
+            </tbody>
+          </table>
+          <p>For a function of a and b, <strong>a alone or b&prime; alone is not a maxterm</strong> because one variable is missing.</p>
+        </section>
+        <section class="subtopic" id="minterms-from-table" aria-labelledby="minterms-from-table-heading">
+          <h3 id="minterms-from-table-heading">6.10 Finding Minterms from a Truth Table</h3>
+          <p>Every input row corresponds to <strong>one unique minterm</strong>, and every minterm corresponds to one unique row. That minterm equals <strong>1 on that row only</strong>.</p>
+          <p><strong>Rule:</strong> input 1 &rarr; uncomplemented variable; input 0 &rarr; complemented variable. AND the resulting literals.</p>
+          <table class="truth-table">
+            <caption>Two-variable row-to-minterm mapping</caption>
+            <thead><tr><th scope="col">X</th><th scope="col">Y</th><th scope="col">Minterm</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>X&prime;Y&prime;</td></tr>
+              <tr><td>0</td><td>1</td><td>X&prime;Y</td></tr>
+              <tr><td>1</td><td>0</td><td>XY&prime;</td></tr>
+              <tr><td>1</td><td>1</td><td>XY</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="subtopic" id="maxterms-from-table" aria-labelledby="maxterms-from-table-heading">
+          <h3 id="maxterms-from-table-heading">6.11 Finding Maxterms from a Truth Table</h3>
+          <p>Every input row corresponds to <strong>one unique maxterm</strong>, and every maxterm corresponds to one unique row. That maxterm equals <strong>0 on that row only</strong>.</p>
+          <p><strong>Rule:</strong> input 0 &rarr; uncomplemented variable; input 1 &rarr; complemented variable. OR the resulting literals.</p>
+          <p><strong>Example:</strong> row 101 gives minterm <strong>xy&prime;z</strong> and maxterm <strong>x&prime; + y + z&prime;</strong>.</p>
+        </section>
+        <section class="subtopic" id="indexed-terms" aria-labelledby="indexed-terms-heading">
+          <h3 id="indexed-terms-heading">6.12 Minterms and Maxterms for Three Variables</h3>
+          <p>Use variable order <strong>x, y, z</strong>, with x as the most significant bit. The subscript is the row&rsquo;s binary value in decimal: for example, 101 &rarr; 5. Lowercase <strong>m<sub>i</sub></strong> denotes a minterm; uppercase <strong>M<sub>i</sub></strong> denotes a maxterm.</p>
+          <div class="table-wrap">
+            <table class="truth-table indexed-terms">
+              <caption>Standard binary order: 000 through 111</caption>
+              <thead><tr><th scope="col">x</th><th scope="col">y</th><th scope="col">z</th><th scope="col">Minterm</th><th scope="col">Label</th><th scope="col">Maxterm</th><th scope="col">Label</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>0</td><td>0</td><td>x&prime;y&prime;z&prime;</td><td>m<sub>0</sub></td><td>x + y + z</td><td>M<sub>0</sub></td></tr>
+                <tr><td>0</td><td>0</td><td>1</td><td>x&prime;y&prime;z</td><td>m<sub>1</sub></td><td>x + y + z&prime;</td><td>M<sub>1</sub></td></tr>
+                <tr><td>0</td><td>1</td><td>0</td><td>x&prime;yz&prime;</td><td>m<sub>2</sub></td><td>x + y&prime; + z</td><td>M<sub>2</sub></td></tr>
+                <tr><td>0</td><td>1</td><td>1</td><td>x&prime;yz</td><td>m<sub>3</sub></td><td>x + y&prime; + z&prime;</td><td>M<sub>3</sub></td></tr>
+                <tr><td>1</td><td>0</td><td>0</td><td>xy&prime;z&prime;</td><td>m<sub>4</sub></td><td>x&prime; + y + z</td><td>M<sub>4</sub></td></tr>
+                <tr><td>1</td><td>0</td><td>1</td><td>xy&prime;z</td><td>m<sub>5</sub></td><td>x&prime; + y + z&prime;</td><td>M<sub>5</sub></td></tr>
+                <tr><td>1</td><td>1</td><td>0</td><td>xyz&prime;</td><td>m<sub>6</sub></td><td>x&prime; + y&prime; + z</td><td>M<sub>6</sub></td></tr>
+                <tr><td>1</td><td>1</td><td>1</td><td>xyz</td><td>m<sub>7</sub></td><td>x&prime; + y&prime; + z&prime;</td><td>M<sub>7</sub></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h4>Minterm and maxterm complements</h4>
+          <p>For the <strong>same index and variable order</strong>, a minterm and maxterm are complements: <strong>(m<sub>i</sub>)&prime; = M<sub>i</sub></strong> and <strong>(M<sub>i</sub>)&prime; = m<sub>i</sub></strong>.</p>
+          <ul>
+            <li><strong>Example 1 (x, y, z):</strong> m<sub>1</sub> = x&prime;y&prime;z. By De Morgan&rsquo;s law, (m<sub>1</sub>)&prime; = (x&prime;y&prime;z)&prime; = x + y + z&prime; = <strong>M<sub>1</sub></strong>.</li>
+            <li><strong>Example 2 (a, b, c):</strong> m<sub>4</sub> = ab&prime;c&prime;. Thus, (m<sub>4</sub>)&prime; = (ab&prime;c&prime;)&prime; = a&prime; + b + c = <strong>M<sub>4</sub></strong>, and (M<sub>4</sub>)&prime; = m<sub>4</sub>.</li>
+          </ul>
+        </section>
+      </section>
+      <section class="rule" id="function-terms" aria-labelledby="function-terms-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">07</span>
+          <h2 id="function-terms-heading">Maxterms and Minterms of a Function</h2>
+        </div>
+        <section class="subtopic" id="function-term-meaning" aria-labelledby="function-term-meaning-heading">
+          <h3 id="function-term-meaning-heading">7.1 Meaning and Terminology</h3>
+          <p>For n variables, each row has a minterm m<sub>i</sub> and a maxterm M<sub>i</sub>, with <strong>0 &le; i &lt; 2<sup>n</sup></strong>.</p>
+          <ul>
+            <li><strong>1-minterms (true minterms):</strong> minterms corresponding to rows where F = 1. These are usually called the <strong>minterms of F</strong>.</li>
+            <li><strong>0-minterms (false minterms):</strong> minterms corresponding to rows where F = 0.</li>
+            <li><strong>0-maxterms (false maxterms):</strong> maxterms corresponding to rows where F = 0. These are usually called the <strong>maxterms of F</strong>.</li>
+            <li><strong>1-maxterms (true maxterms):</strong> maxterms corresponding to rows where F = 1.</li>
+          </ul>
+          <p>Here, &ldquo;true&rdquo; or &ldquo;false&rdquo; describes the <strong>function output on the associated row</strong>. Every m<sub>i</sub> itself equals 1 on row i, and every M<sub>i</sub> equals 0 on row i.</p>
+          <p><strong>Remember:</strong> use the 1-rows for the function&rsquo;s minterms and the 0-rows for its maxterms.</p>
+        </section>
+        <section class="subtopic" id="function-term-table" aria-labelledby="function-term-table-heading">
+          <h3 id="function-term-table-heading">7.2 Truth Table Example</h3>
+          <table class="truth-table">
+            <caption>Variable order: x, y, z</caption>
+            <thead><tr><th scope="col">Index i</th><th scope="col">x</th><th scope="col">y</th><th scope="col">z</th><th scope="col">f<sub>1</sub></th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+              <tr><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+              <tr><td>2</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+              <tr><td>3</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+              <tr><td>4</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+              <tr><td>5</td><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>6</td><td>1</td><td>1</td><td>0</td><td>0</td></tr>
+              <tr><td>7</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>
+            </tbody>
+          </table>
+          <ul>
+            <li><strong>Minterms of f<sub>1</sub>:</strong> m<sub>1</sub>, m<sub>4</sub>, m<sub>7</sub> &mdash; the rows with output 1.</li>
+            <li><strong>Maxterms of f<sub>1</sub>:</strong> M<sub>0</sub>, M<sub>2</sub>, M<sub>3</sub>, M<sub>5</sub>, M<sub>6</sub> &mdash; the rows with output 0.</li>
+            <li><strong>0-minterms:</strong> m<sub>0</sub>, m<sub>2</sub>, m<sub>3</sub>, m<sub>5</sub>, m<sub>6</sub>; <strong>1-maxterms:</strong> M<sub>1</sub>, M<sub>4</sub>, M<sub>7</sub>.</li>
+          </ul>
+          <p>OR the selected minterms to obtain <strong>f<sub>1</sub> = x&prime;y&prime;z + xy&prime;z&prime; + xyz</strong>. Equivalently, AND the selected maxterms: <strong>f<sub>1</sub> = M<sub>0</sub>M<sub>2</sub>M<sub>3</sub>M<sub>5</sub>M<sub>6</sub></strong>.</p>
+        </section>
+        <section class="subtopic" id="function-term-example" aria-labelledby="function-term-example-heading">
+          <h3 id="function-term-example-heading">7.3 Expression Example</h3>
+          <p><strong>Given: f(x, y, z) = x&prime;y + xyz</strong></p>
+          <p>Expand the missing variable: x&prime;y = x&prime;y(z&prime; + z). Thus, <strong>f = x&prime;yz&prime; + x&prime;yz + xyz</strong>.</p>
+          <ul>
+            <li><strong>True minterms:</strong> x&prime;yz&prime;, x&prime;yz, xyz &mdash; indices 2, 3, 7.</li>
+            <li><strong>Maxterms of f:</strong> M<sub>0</sub>, M<sub>1</sub>, M<sub>4</sub>, M<sub>5</sub>, M<sub>6</sub>.</li>
+          </ul>
+        </section>
+        <section class="subtopic" id="canonical-function-complement" aria-labelledby="canonical-function-complement-heading">
+          <h3 id="canonical-function-complement-heading">7.4 Function Complement</h3>
+          <p>In canonical notation, <strong>&Sigma;m</strong> means a sum of minterms and <strong>&Pi;M</strong> means a product of maxterms. To complement a function, <strong>swap &Sigma;m and &Pi;M, keeping the same indices</strong>. This follows from De Morgan&rsquo;s law and (m<sub>i</sub>)&prime; = M<sub>i</sub>.</p>
+          <p><strong>Given: f(x, y, z) = &Sigma;m(0, 2, 3, 5, 7) = &Pi;M(1, 4, 6)</strong></p>
+          <p><strong>Complement: f&prime;(x, y, z) = &Pi;M(0, 2, 3, 5, 7) = &Sigma;m(1, 4, 6)</strong></p>
+          <table class="truth-table">
+            <caption>The complement flips every output</caption>
+            <thead><tr><th scope="col">x</th><th scope="col">y</th><th scope="col">z</th><th scope="col">f</th><th scope="col">f&prime;</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>0</td><td>0</td><td>1</td><td>0</td><td>1</td></tr>
+              <tr><td>0</td><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+              <tr><td>1</td><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+              <tr><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+              <tr><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>
+              <tr><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Conversion versus complement:</strong> to rewrite the same function in the other canonical form, swap &Sigma;m/&Pi;M and use the missing indices from 0 through 7. To obtain its complement, swap the symbols and keep the indices.</p>
+        </section>
+        <section class="subtopic" id="canonical-vs-general" aria-labelledby="canonical-vs-general-heading">
+          <h3 id="canonical-vs-general-heading">7.5 Canonical SOP/POS vs General SOP/POS</h3>
+          <p><strong>Every canonical SOP is SOP</strong>, and <strong>every canonical POS is POS</strong>. The reverse need not hold: canonical forms require every term to contain every variable exactly once.</p>
+          <table class="truth-table">
+            <caption>Canonical forms are special cases of general forms</caption>
+            <thead><tr><th scope="col">Form</th><th scope="col">Structure</th><th scope="col">Unique?</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">CSOP</th><td>Sum of minterms (minterm expansion)</td><td>Yes</td></tr>
+              <tr><th scope="row">CPOS</th><td>Product of maxterms (maxterm expansion)</td><td>Yes</td></tr>
+              <tr><th scope="row">General SOP</th><td>Sum of product terms; variables may be omitted</td><td>Not in general</td></tr>
+              <tr><th scope="row">General POS</th><td>Product of sum terms; variables may be omitted</td><td>Not in general</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Uniqueness assumes a fixed variable set and order</strong>, with each selected minterm or maxterm listed once. Reordering terms does not produce a different canonical expansion.</p>
+          <p><strong>Example: f(A, B) = A.</strong> Its CSOP is <strong>AB&prime; + AB</strong>, and its CPOS is <strong>(A + B)(A + B&prime;)</strong>. General forms can differ: <strong>A</strong> and <strong>A + AB</strong> are equivalent SOP expressions; <strong>A</strong> and <strong>A(A + B)</strong> are equivalent POS expressions.</p>
+        </section>
+      </section>
+      <section class="rule" id="kmap-introduction" aria-labelledby="kmap-introduction-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">08</span>
+          <h2 id="kmap-introduction-heading">Kmap Introduction</h2>
+        </div>
+        <p>A <strong>Karnaugh map (K-map)</strong> is a graphical arrangement of a truth table used to simplify Boolean functions. It helps obtain a <strong>minimum SOP (mSOP)</strong> or <strong>minimum POS (mPOS)</strong> expression.</p>
+        <section class="subtopic" id="kmap-minimum-forms" aria-labelledby="kmap-minimum-forms-heading">
+          <h3 id="kmap-minimum-forms-heading">8.1 Minimum Forms</h3>
+          <ul>
+            <li><strong>mSOP:</strong> an equivalent SOP with the fewest product terms and, among those, the fewest total literals.</li>
+            <li><strong>mPOS:</strong> an equivalent POS with the fewest sum terms and, among those, the fewest total literals.</li>
+          </ul>
+          <p><strong>A minimum form is not necessarily unique.</strong> A function may have different minimum expressions with the same number of terms and literals. Its canonical expansion remains unique for a fixed variable set and order.</p>
+        </section>
+        <section class="subtopic" id="kmap-layout" aria-labelledby="kmap-layout-heading">
+          <h3 id="kmap-layout-heading">8.2 Cells and Adjacency</h3>
+          <p>Each cell represents <strong>one truth-table row</strong>; n variables give <strong>2<sup>n</sup> cells</strong>. Enter the function&rsquo;s output for that input combination in the corresponding cell.</p>
+          <p>Adjacent cells differ in <strong>exactly one input variable</strong>. Horizontal and vertical neighbors are adjacent, including across opposite edges; diagonal neighbors are not.</p>
+          <table class="truth-table">
+            <caption>Two-variable layout: columns a, rows b (labels show ab)</caption>
+            <thead><tr><th scope="col">b &bsol; a</th><th scope="col">0</th><th scope="col">1</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">0</th><td>00 (m<sub>0</sub>)</td><td>10 (m<sub>2</sub>)</td></tr>
+              <tr><th scope="row">1</th><td>01 (m<sub>1</sub>)</td><td>11 (m<sub>3</sub>)</td></tr>
+            </tbody>
+          </table>
+          <p>The labels above identify input combinations, not output values. For example, 00 and 10 differ only in a; 00 and 01 differ only in b.</p>
+        </section>
+        <section class="subtopic" id="two-variable-kmaps" aria-labelledby="two-variable-kmaps-heading">
+          <h3 id="two-variable-kmaps-heading">8.3 Two-Variable K-Maps</h3>
+          <p>For <strong>f(a, b)</strong>, a is the most significant bit and b the least significant: <strong>i = 2a + b</strong>. Both layouts are valid; we will usually use <strong>a as rows and b as columns</strong>.</p>
+          <div class="gate-details kmap-layouts">
+            <table class="truth-table">
+              <caption>Rows b; columns a</caption>
+              <thead><tr><th scope="col">b &bsol; a</th><th scope="col">0</th><th scope="col">1</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">0</th><td>0</td><td>2</td></tr>
+                <tr><th scope="row">1</th><td>1</td><td>3</td></tr>
+              </tbody>
+            </table>
+            <table class="truth-table">
+              <caption>Rows a; columns b</caption>
+              <thead><tr><th scope="col">a &bsol; b</th><th scope="col">0</th><th scope="col">1</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">0</th><td>0</td><td>1</td></tr>
+                <tr><th scope="row">1</th><td>2</td><td>3</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Each number is the <strong>cell index</strong> (0 means m<sub>0</sub>, etc.), not the function output.</p>
+        </section>
+        <section class="subtopic" id="three-variable-kmaps" aria-labelledby="three-variable-kmaps-heading">
+          <h3 id="three-variable-kmaps-heading">8.4 Three-Variable K-Maps</h3>
+          <p>For <strong>f(a, b, c)</strong>, <strong>i = 4a + 2b + c</strong>: a is most significant and c least significant. Two-bit axes follow <strong>Gray-code order 00, 01, 11, 10</strong>, so neighboring cells differ in one bit, including across the edges.</p>
+          <div class="gate-details kmap-layouts">
+            <table class="truth-table">
+              <caption>Rows c; columns ab</caption>
+              <thead><tr><th scope="col">c &bsol; ab</th><th scope="col">00</th><th scope="col">01</th><th scope="col">11</th><th scope="col">10</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">0</th><td>0</td><td>2</td><td>6</td><td>4</td></tr>
+                <tr><th scope="row">1</th><td>1</td><td>3</td><td>7</td><td>5</td></tr>
+              </tbody>
+            </table>
+            <table class="truth-table">
+              <caption>Rows a; columns bc</caption>
+              <thead><tr><th scope="col">a &bsol; bc</th><th scope="col">00</th><th scope="col">01</th><th scope="col">11</th><th scope="col">10</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">0</th><td>0</td><td>1</td><td>3</td><td>2</td></tr>
+                <tr><th scope="row">1</th><td>4</td><td>5</td><td>7</td><td>6</td></tr>
+              </tbody>
+            </table>
+            <table class="truth-table">
+              <caption>Rows bc; columns a</caption>
+              <thead><tr><th scope="col">bc &bsol; a</th><th scope="col">0</th><th scope="col">1</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">00</th><td>0</td><td>4</td></tr>
+                <tr><th scope="row">01</th><td>1</td><td>5</td></tr>
+                <tr><th scope="row">11</th><td>3</td><td>7</td></tr>
+                <tr><th scope="row">10</th><td>2</td><td>6</td></tr>
+              </tbody>
+            </table>
+            <table class="truth-table">
+              <caption>Rows ab; columns c</caption>
+              <thead><tr><th scope="col">ab &bsol; c</th><th scope="col">0</th><th scope="col">1</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">00</th><td>0</td><td>1</td></tr>
+                <tr><th scope="row">01</th><td>2</td><td>3</td></tr>
+                <tr><th scope="row">11</th><td>6</td><td>7</td></tr>
+                <tr><th scope="row">10</th><td>4</td><td>5</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Examples:</strong> cell 1 represents abc = 001, cell 4 is 100, cell 5 is 101, and cell 7 is 111, regardless of the axis arrangement.</p>
+        </section>
+        <section class="subtopic" id="four-variable-kmaps" aria-labelledby="four-variable-kmaps-heading">
+          <h3 id="four-variable-kmaps-heading">8.5 Four-Variable K-Maps</h3>
+          <p>For <strong>f(a, b, c, d)</strong>, <strong>i = 8a + 4b + 2c + d</strong>. There are 16 cells, with both axes in <strong>00, 01, 11, 10</strong> order.</p>
+          <div class="gate-details kmap-layouts">
+            <table class="truth-table">
+              <caption>Rows cd; columns ab</caption>
+              <thead><tr><th scope="col">cd &bsol; ab</th><th scope="col">00</th><th scope="col">01</th><th scope="col">11</th><th scope="col">10</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">00</th><td>0</td><td>4</td><td>12</td><td>8</td></tr>
+                <tr><th scope="row">01</th><td>1</td><td>5</td><td>13</td><td>9</td></tr>
+                <tr><th scope="row">11</th><td>3</td><td>7</td><td>15</td><td>11</td></tr>
+                <tr><th scope="row">10</th><td>2</td><td>6</td><td>14</td><td>10</td></tr>
+              </tbody>
+            </table>
+            <table class="truth-table">
+              <caption>Rows ab; columns cd</caption>
+              <thead><tr><th scope="col">ab &bsol; cd</th><th scope="col">00</th><th scope="col">01</th><th scope="col">11</th><th scope="col">10</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">00</th><td>0</td><td>1</td><td>3</td><td>2</td></tr>
+                <tr><th scope="row">01</th><td>4</td><td>5</td><td>7</td><td>6</td></tr>
+                <tr><th scope="row">11</th><td>12</td><td>13</td><td>15</td><td>14</td></tr>
+                <tr><th scope="row">10</th><td>8</td><td>9</td><td>11</td><td>10</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Examples:</strong> cell 6 represents abcd = 0110; cell 13 represents 1101; cell 14 represents 1110.</p>
+          <p><strong>Always read the axis labels.</strong> Swapping axes changes where a cell appears, but its index still comes from the function&rsquo;s variable order. Opposite edges remain adjacent; diagonals do not.</p>
+        </section>
+        <section class="subtopic" id="kmap-adjacency-diagram" aria-labelledby="kmap-adjacency-diagram-heading">
+          <h3 id="kmap-adjacency-diagram-heading">8.6 Adjacent Cells and Wraparound Edges</h3>
+          <p>Adjacent cells differ in <strong>exactly one variable</strong>. The colored arrows below show example neighbor pairs in a three-variable map.</p>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 760 410" role="img" aria-labelledby="adjacency-svg-title adjacency-svg-desc">
+              <title id="adjacency-svg-title">Three-variable K-map with colored adjacency arrows</title>
+              <desc id="adjacency-svg-desc">Columns ab are 00, 01, 11, 10; rows c are 0 and 1. Blue connects horizontal neighbors 0 and 2. Teal connects vertical neighbors 6 and 7. Pink connects edge cells 0 and 4 across the top. Purple connects edge cells 1 and 5 across the bottom. Orange connects the top and bottom cells 4 and 5 around the right edge.</desc>
+              <defs>
+                <marker id="adj-blue" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 1 1 L 9 5 L 1 9" fill="none" stroke="#175cd3" stroke-width="1.6" /></marker>
+                <marker id="adj-teal" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 1 1 L 9 5 L 1 9" fill="none" stroke="#087e8b" stroke-width="1.6" /></marker>
+                <marker id="adj-pink" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 1 1 L 9 5 L 1 9" fill="none" stroke="#c11574" stroke-width="1.6" /></marker>
+                <marker id="adj-purple" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 1 1 L 9 5 L 1 9" fill="none" stroke="#6938bf" stroke-width="1.6" /></marker>
+                <marker id="adj-orange" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 1 1 L 9 5 L 1 9" fill="none" stroke="#b54708" stroke-width="1.6" /></marker>
+              </defs>
+              <rect x="160" y="130" width="400" height="160" fill="#f8fafc" />
+              <path d="M 160 130 H 560 V 290 H 160 Z M 160 210 H 560 M 260 130 V 290 M 360 130 V 290 M 460 130 V 290" fill="none" stroke="#555" stroke-width="1.5" />
+              <g fill="#111" font-family="sans-serif" font-size="18" text-anchor="middle">
+                <text x="210" y="116">00</text><text x="310" y="116">01</text><text x="410" y="116">11</text><text x="510" y="116">10</text>
+                <text x="140" y="178">0</text><text x="140" y="258">1</text>
+                <text x="360" y="91">ab</text><text x="112" y="217">c</text>
+                <text x="210" y="159">0</text><text x="310" y="159">2</text><text x="410" y="159">6</text><text x="510" y="159">4</text>
+                <text x="210" y="279">1</text><text x="310" y="279">3</text><text x="410" y="279">7</text><text x="510" y="279">5</text>
+              </g>
+              <g fill="none" stroke-width="3" stroke-linecap="round">
+                <path d="M 235 183 H 290" stroke="#175cd3" marker-start="url(#adj-blue)" marker-end="url(#adj-blue)" />
+                <path d="M 420 181 V 250" stroke="#087e8b" marker-start="url(#adj-teal)" marker-end="url(#adj-teal)" />
+                <path d="M 185 176 C 65 176 65 45 210 45 H 510 C 635 45 635 176 535 176" stroke="#c11574" marker-start="url(#adj-pink)" marker-end="url(#adj-pink)" />
+                <path d="M 185 246 C 65 246 65 350 210 350 H 510 C 635 350 635 246 535 246" stroke="#6938bf" marker-start="url(#adj-purple)" marker-end="url(#adj-purple)" />
+                <path d="M 545 150 C 710 120 710 290 545 270" stroke="#b54708" stroke-dasharray="7 5" marker-start="url(#adj-orange)" marker-end="url(#adj-orange)" />
+              </g>
+              <g font-family="sans-serif" font-size="15" text-anchor="middle">
+                <text x="360" y="29" fill="#c11574">Left/right wrap: 0 &#8596; 4</text>
+                <text x="360" y="380" fill="#6938bf">Left/right wrap: 1 &#8596; 5</text>
+              </g>
+            </svg>
+            <figcaption>Numbers are cell indices. With two rows, ordinary vertical adjacency and top/bottom wraparound reach the same neighbor; the dashed orange route shows that wraparound.</figcaption>
+          </figure>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #175cd3">Blue: horizontal (0, 2)</li>
+            <li style="--edge-color: #087e8b">Teal: vertical (6, 7)</li>
+            <li style="--edge-color: #c11574">Pink: left/right wrap (0, 4)</li>
+            <li style="--edge-color: #6938bf">Purple: left/right wrap (1, 5)</li>
+            <li style="--edge-color: #b54708">Orange dashed: top/bottom wrap (4, 5)</li>
+          </ul>
+          <ul>
+            <li>The <strong>leftmost and rightmost columns</strong> are adjacent.</li>
+            <li>The <strong>top and bottom rows</strong> are adjacent.</li>
+            <li><strong>Diagonal cells are not adjacent.</strong></li>
+            <li>Each cell in an n-variable K-map has <strong>n distinct adjacent neighbors</strong>, one for each possible single-bit change.</li>
+          </ul>
+        </section>
+        <section class="subtopic" id="kmap-neighbor-examples" aria-labelledby="kmap-neighbor-examples-heading">
+          <h3 id="kmap-neighbor-examples-heading">8.7 Neighbor Examples: Three- and Four-Variable Maps</h3>
+          <p>The shaded cell is the reference cell; arrows point to its adjacent cells. Numbers are <strong>cell indices</strong>. Blue shows ordinary neighbors; pink and orange show wraparound neighbors.</p>
+          <p>For three variables, rows are a and columns bc; for four variables, rows are ab and columns cd. Two-bit axes use 00, 01, 11, 10.</p>
+          <div class="gate-details kmap-layouts">
+            <figure class="adjacency-figure">
+              <svg viewBox="0 0 360 300" role="img" aria-labelledby="neighbors-three-interior-title neighbors-three-interior-caption">
+                <title id="neighbors-three-interior-title">Three variables: ordinary neighbors</title>
+                <g font-family="sans-serif" font-size="14" fill="#111" text-anchor="middle"><text x="95" y="90">0</text><text x="145" y="90">1</text><text x="195" y="90">3</text><text x="245" y="90">2</text><text x="95" y="140">4</text><text x="145" y="140">5</text><rect x="171" y="111" width="48" height="48" fill="#e0eaff" /><text x="195" y="140">7</text><text x="245" y="140">6</text></g>
+                <path d="M 70 60 H 270 V 160 H 70 Z M 120 60 V 160 M 170 60 V 160 M 220 60 V 160 M 70 110 H 270" fill="none" stroke="#aaa" stroke-width="1.3" />
+                <g fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M 182 135 H 158" stroke="#175cd3" marker-end="url(#adj-blue)" /><path d="M 208 135 H 232" stroke="#175cd3" marker-end="url(#adj-blue)" /><path d="M 195 122 V 98" stroke="#175cd3" marker-end="url(#adj-blue)" /></g>
+              </svg>
+              <figcaption id="neighbors-three-interior-caption"><strong>Three variables: ordinary neighbors.</strong> Cell 7 has three neighbors: 3, 5, and 6.</figcaption>
+            </figure>
+            <figure class="adjacency-figure">
+              <svg viewBox="0 0 360 300" role="img" aria-labelledby="neighbors-three-edge-title neighbors-three-edge-caption">
+                <title id="neighbors-three-edge-title">Three variables: edge wraparound</title>
+                <g font-family="sans-serif" font-size="14" fill="#111" text-anchor="middle"><text x="95" y="90">0</text><text x="145" y="90">1</text><text x="195" y="90">3</text><text x="245" y="90">2</text><text x="95" y="140">4</text><text x="145" y="140">5</text><text x="195" y="140">7</text><rect x="221" y="111" width="48" height="48" fill="#e0eaff" /><text x="245" y="140">6</text></g>
+                <path d="M 70 60 H 270 V 160 H 70 Z M 120 60 V 160 M 170 60 V 160 M 220 60 V 160 M 70 110 H 270" fill="none" stroke="#aaa" stroke-width="1.3" />
+                <g fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M 232 135 H 208" stroke="#175cd3" marker-end="url(#adj-blue)" /><path d="M 245 122 V 98" stroke="#175cd3" marker-end="url(#adj-blue)" /><path d="M 258 135 H 295 V 195 H 45 V 135 H 82" stroke="#c11574" marker-end="url(#adj-pink)" /></g>
+              </svg>
+              <figcaption id="neighbors-three-edge-caption"><strong>Three variables: edge wraparound.</strong> Cell 6 has neighbors 2, 7, and 4. The pink route connects the rightmost and leftmost cells.</figcaption>
+            </figure>
+            <figure class="adjacency-figure">
+              <svg viewBox="0 0 360 300" role="img" aria-labelledby="neighbors-four-interior-title neighbors-four-interior-caption">
+                <title id="neighbors-four-interior-title">Four variables: ordinary neighbors</title>
+                <g font-family="sans-serif" font-size="14" fill="#111" text-anchor="middle"><text x="95" y="90">0</text><text x="145" y="90">1</text><text x="195" y="90">3</text><text x="245" y="90">2</text><text x="95" y="140">4</text><text x="145" y="140">5</text><text x="195" y="140">7</text><text x="245" y="140">6</text><text x="95" y="190">12</text><text x="145" y="190">13</text><rect x="171" y="161" width="48" height="48" fill="#e0eaff" /><text x="195" y="190">15</text><text x="245" y="190">14</text><text x="95" y="240">8</text><text x="145" y="240">9</text><text x="195" y="240">11</text><text x="245" y="240">10</text></g>
+                <path d="M 70 60 H 270 V 260 H 70 Z M 120 60 V 260 M 170 60 V 260 M 220 60 V 260 M 70 110 H 270 M 70 160 H 270 M 70 210 H 270" fill="none" stroke="#aaa" stroke-width="1.3" />
+                <g fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M 182 185 H 158" stroke="#175cd3" marker-end="url(#adj-blue)" /><path d="M 208 185 H 232" stroke="#175cd3" marker-end="url(#adj-blue)" /><path d="M 195 172 V 148" stroke="#175cd3" marker-end="url(#adj-blue)" /><path d="M 195 198 V 222" stroke="#175cd3" marker-end="url(#adj-blue)" /></g>
+              </svg>
+              <figcaption id="neighbors-four-interior-caption"><strong>Four variables: ordinary neighbors.</strong> Cell 15 has four neighbors: 7, 13, 14, and 11.</figcaption>
+            </figure>
+            <figure class="adjacency-figure">
+              <svg viewBox="0 0 360 300" role="img" aria-labelledby="neighbors-four-corner-title neighbors-four-corner-caption">
+                <title id="neighbors-four-corner-title">Four variables: corner wraparound</title>
+                <g font-family="sans-serif" font-size="14" fill="#111" text-anchor="middle"><rect x="71" y="61" width="48" height="48" fill="#e0eaff" /><text x="95" y="90">0</text><text x="145" y="90">1</text><text x="195" y="90">3</text><text x="245" y="90">2</text><text x="95" y="140">4</text><text x="145" y="140">5</text><text x="195" y="140">7</text><text x="245" y="140">6</text><text x="95" y="190">12</text><text x="145" y="190">13</text><text x="195" y="190">15</text><text x="245" y="190">14</text><text x="95" y="240">8</text><text x="145" y="240">9</text><text x="195" y="240">11</text><text x="245" y="240">10</text></g>
+                <path d="M 70 60 H 270 V 260 H 70 Z M 120 60 V 260 M 170 60 V 260 M 220 60 V 260 M 70 110 H 270 M 70 160 H 270 M 70 210 H 270" fill="none" stroke="#aaa" stroke-width="1.3" />
+                <g fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M 108 85 H 132" stroke="#175cd3" marker-end="url(#adj-blue)" /><path d="M 95 98 V 122" stroke="#175cd3" marker-end="url(#adj-blue)" /><path d="M 82 85 H 45 V 40 H 295 V 85 H 258" stroke="#c11574" marker-end="url(#adj-pink)" /><path d="M 95 72 V 20 H 320 V 270 H 95 V 248" stroke="#b54708" marker-end="url(#adj-orange)" /></g>
+              </svg>
+              <figcaption id="neighbors-four-corner-caption"><strong>Four variables: corner wraparound.</strong> Cell 0 has neighbors 1 and 4 directly, plus 2 across the left/right edge and 8 across the top/bottom edge.</figcaption>
+            </figure>
+          </div>
+          <p>Boundary cells have the <strong>same number of distinct neighbors</strong> as interior cells: 3 in a three-variable map and 4 in a four-variable map.</p>
+        </section>
+      </section>
+      <section class="rule" id="cube-in-kmap" aria-labelledby="cube-in-kmap-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">09</span>
+          <h2 id="cube-in-kmap-heading">Cube in Kmap</h2>
+        </div>
+        <section class="subtopic" id="msop-grouping-rules" aria-labelledby="msop-grouping-rules-heading">
+          <h3 id="msop-grouping-rules-heading">9.1 Finding mSOP Using a K-Map</h3>
+          <ol>
+            <li><strong>No zeros:</strong> groups must not contain any 0-cell.</li>
+            <li><strong>No diagonals:</strong> group horizontally or vertically adjacent cells.</li>
+            <li><strong>Power-of-two sizes:</strong> use rectangular groups of 1, 2, 4, 8, &hellip; cells.</li>
+            <li><strong>Make groups as large as possible</strong> to eliminate more literals.</li>
+            <li><strong>Cover every 1</strong> with at least one group.</li>
+            <li><strong>Overlapping is allowed:</strong> a cell may belong to multiple groups.</li>
+            <li><strong>Wraparound is allowed:</strong> groups may cross opposite edges.</li>
+            <li><strong>Use the fewest groups</strong> needed to cover all 1s; among such covers, choose the fewest total literals.</li>
+          </ol>
+          <p>Each selected group contributes one product term to the final SOP expression.</p>
+        </section>
+        <section class="subtopic" id="two-variable-groups" aria-labelledby="two-variable-groups-heading">
+          <h3 id="two-variable-groups-heading">9.2 Valid Two-Variable Groupings</h3>
+          <p>Columns are x<sub>1</sub> and rows are x<sub>2</sub>. Red outlines mark groups of 1s. <strong>Keep variables that stay fixed; remove variables that change.</strong> A fixed 0 gives a complemented literal; a fixed 1 gives an uncomplemented literal.</p>
+          <h4>Single-cell groups: two literals remain</h4>
+          <div class="grouping-examples">
+            <figure class="grouping-example">
+              <svg viewBox="0 0 210 180" role="img" aria-labelledby="single-group-0-title single-group-0-caption">
+                <title id="single-group-0-title">Two-variable K-map grouping of 1 cells</title>
+                <rect x="65" y="55" width="100" height="100" fill="#fff" />
+                <path d="M 65 55 H 165 V 155 H 65 Z M 115 55 V 155 M 65 105 H 165 M 65 55 L 32 22" fill="none" stroke="#555" stroke-width="1.5" />
+                <g fill="#111" font-family="sans-serif" font-size="16" text-anchor="middle">
+                  <text x="90" y="45">0</text><text x="140" y="45">1</text>
+                  <text x="51" y="86">0</text><text x="51" y="136">1</text>
+                  <text x="59" y="25">x&#8321;</text><text x="25" y="51">x&#8322;</text>
+                  <text x="90" y="86">1</text><text x="140" y="86">0</text><text x="90" y="136">0</text><text x="140" y="136">0</text>
+                </g>
+                <rect x="69" y="59" width="42" height="42" rx="9" fill="none" stroke="#d92d20" stroke-width="2.5" />
+              </svg>
+              <figcaption id="single-group-0-caption">x<sub>1</sub>&prime;x<sub>2</sub>&prime;</figcaption>
+            </figure>
+            <figure class="grouping-example">
+              <svg viewBox="0 0 210 180" role="img" aria-labelledby="single-group-1-title single-group-1-caption">
+                <title id="single-group-1-title">Two-variable K-map grouping of 1 cells</title>
+                <rect x="65" y="55" width="100" height="100" fill="#fff" />
+                <path d="M 65 55 H 165 V 155 H 65 Z M 115 55 V 155 M 65 105 H 165 M 65 55 L 32 22" fill="none" stroke="#555" stroke-width="1.5" />
+                <g fill="#111" font-family="sans-serif" font-size="16" text-anchor="middle">
+                  <text x="90" y="45">0</text><text x="140" y="45">1</text>
+                  <text x="51" y="86">0</text><text x="51" y="136">1</text>
+                  <text x="59" y="25">x&#8321;</text><text x="25" y="51">x&#8322;</text>
+                  <text x="90" y="86">0</text><text x="140" y="86">0</text><text x="90" y="136">1</text><text x="140" y="136">0</text>
+                </g>
+                <rect x="69" y="109" width="42" height="42" rx="9" fill="none" stroke="#d92d20" stroke-width="2.5" />
+              </svg>
+              <figcaption id="single-group-1-caption">x<sub>1</sub>&prime;x<sub>2</sub></figcaption>
+            </figure>
+            <figure class="grouping-example">
+              <svg viewBox="0 0 210 180" role="img" aria-labelledby="single-group-2-title single-group-2-caption">
+                <title id="single-group-2-title">Two-variable K-map grouping of 1 cells</title>
+                <rect x="65" y="55" width="100" height="100" fill="#fff" />
+                <path d="M 65 55 H 165 V 155 H 65 Z M 115 55 V 155 M 65 105 H 165 M 65 55 L 32 22" fill="none" stroke="#555" stroke-width="1.5" />
+                <g fill="#111" font-family="sans-serif" font-size="16" text-anchor="middle">
+                  <text x="90" y="45">0</text><text x="140" y="45">1</text>
+                  <text x="51" y="86">0</text><text x="51" y="136">1</text>
+                  <text x="59" y="25">x&#8321;</text><text x="25" y="51">x&#8322;</text>
+                  <text x="90" y="86">0</text><text x="140" y="86">1</text><text x="90" y="136">0</text><text x="140" y="136">0</text>
+                </g>
+                <rect x="119" y="59" width="42" height="42" rx="9" fill="none" stroke="#d92d20" stroke-width="2.5" />
+              </svg>
+              <figcaption id="single-group-2-caption">x<sub>1</sub>x<sub>2</sub>&prime;</figcaption>
+            </figure>
+            <figure class="grouping-example">
+              <svg viewBox="0 0 210 180" role="img" aria-labelledby="single-group-3-title single-group-3-caption">
+                <title id="single-group-3-title">Two-variable K-map grouping of 1 cells</title>
+                <rect x="65" y="55" width="100" height="100" fill="#fff" />
+                <path d="M 65 55 H 165 V 155 H 65 Z M 115 55 V 155 M 65 105 H 165 M 65 55 L 32 22" fill="none" stroke="#555" stroke-width="1.5" />
+                <g fill="#111" font-family="sans-serif" font-size="16" text-anchor="middle">
+                  <text x="90" y="45">0</text><text x="140" y="45">1</text>
+                  <text x="51" y="86">0</text><text x="51" y="136">1</text>
+                  <text x="59" y="25">x&#8321;</text><text x="25" y="51">x&#8322;</text>
+                  <text x="90" y="86">0</text><text x="140" y="86">0</text><text x="90" y="136">0</text><text x="140" y="136">1</text>
+                </g>
+                <rect x="119" y="109" width="42" height="42" rx="9" fill="none" stroke="#d92d20" stroke-width="2.5" />
+              </svg>
+              <figcaption id="single-group-3-caption">x<sub>1</sub>x<sub>2</sub></figcaption>
+            </figure>
+          </div>
+          <h4>Two-cell groups: one literal remains</h4>
+          <div class="grouping-examples">
+            <figure class="grouping-example">
+              <svg viewBox="0 0 210 180" role="img" aria-labelledby="pair-group-left-title pair-group-left-caption">
+                <title id="pair-group-left-title">Two-variable K-map grouping of 2 cells</title>
+                <rect x="65" y="55" width="100" height="100" fill="#fff" />
+                <path d="M 65 55 H 165 V 155 H 65 Z M 115 55 V 155 M 65 105 H 165 M 65 55 L 32 22" fill="none" stroke="#555" stroke-width="1.5" />
+                <g fill="#111" font-family="sans-serif" font-size="16" text-anchor="middle">
+                  <text x="90" y="45">0</text><text x="140" y="45">1</text>
+                  <text x="51" y="86">0</text><text x="51" y="136">1</text>
+                  <text x="59" y="25">x&#8321;</text><text x="25" y="51">x&#8322;</text>
+                  <text x="90" y="86">1</text><text x="140" y="86">0</text><text x="90" y="136">1</text><text x="140" y="136">0</text>
+                </g>
+                <rect x="69" y="59" width="42" height="92" rx="9" fill="none" stroke="#d92d20" stroke-width="2.5" />
+              </svg>
+              <figcaption id="pair-group-left-caption">x<sub>1</sub>&prime;</figcaption>
+            </figure>
+            <figure class="grouping-example">
+              <svg viewBox="0 0 210 180" role="img" aria-labelledby="pair-group-right-title pair-group-right-caption">
+                <title id="pair-group-right-title">Two-variable K-map grouping of 2 cells</title>
+                <rect x="65" y="55" width="100" height="100" fill="#fff" />
+                <path d="M 65 55 H 165 V 155 H 65 Z M 115 55 V 155 M 65 105 H 165 M 65 55 L 32 22" fill="none" stroke="#555" stroke-width="1.5" />
+                <g fill="#111" font-family="sans-serif" font-size="16" text-anchor="middle">
+                  <text x="90" y="45">0</text><text x="140" y="45">1</text>
+                  <text x="51" y="86">0</text><text x="51" y="136">1</text>
+                  <text x="59" y="25">x&#8321;</text><text x="25" y="51">x&#8322;</text>
+                  <text x="90" y="86">0</text><text x="140" y="86">1</text><text x="90" y="136">0</text><text x="140" y="136">1</text>
+                </g>
+                <rect x="119" y="59" width="42" height="92" rx="9" fill="none" stroke="#d92d20" stroke-width="2.5" />
+              </svg>
+              <figcaption id="pair-group-right-caption">x<sub>1</sub></figcaption>
+            </figure>
+            <figure class="grouping-example">
+              <svg viewBox="0 0 210 180" role="img" aria-labelledby="pair-group-top-title pair-group-top-caption">
+                <title id="pair-group-top-title">Two-variable K-map grouping of 2 cells</title>
+                <rect x="65" y="55" width="100" height="100" fill="#fff" />
+                <path d="M 65 55 H 165 V 155 H 65 Z M 115 55 V 155 M 65 105 H 165 M 65 55 L 32 22" fill="none" stroke="#555" stroke-width="1.5" />
+                <g fill="#111" font-family="sans-serif" font-size="16" text-anchor="middle">
+                  <text x="90" y="45">0</text><text x="140" y="45">1</text>
+                  <text x="51" y="86">0</text><text x="51" y="136">1</text>
+                  <text x="59" y="25">x&#8321;</text><text x="25" y="51">x&#8322;</text>
+                  <text x="90" y="86">1</text><text x="140" y="86">1</text><text x="90" y="136">0</text><text x="140" y="136">0</text>
+                </g>
+                <rect x="69" y="59" width="92" height="42" rx="9" fill="none" stroke="#d92d20" stroke-width="2.5" />
+              </svg>
+              <figcaption id="pair-group-top-caption">x<sub>2</sub>&prime;</figcaption>
+            </figure>
+            <figure class="grouping-example">
+              <svg viewBox="0 0 210 180" role="img" aria-labelledby="pair-group-bottom-title pair-group-bottom-caption">
+                <title id="pair-group-bottom-title">Two-variable K-map grouping of 2 cells</title>
+                <rect x="65" y="55" width="100" height="100" fill="#fff" />
+                <path d="M 65 55 H 165 V 155 H 65 Z M 115 55 V 155 M 65 105 H 165 M 65 55 L 32 22" fill="none" stroke="#555" stroke-width="1.5" />
+                <g fill="#111" font-family="sans-serif" font-size="16" text-anchor="middle">
+                  <text x="90" y="45">0</text><text x="140" y="45">1</text>
+                  <text x="51" y="86">0</text><text x="51" y="136">1</text>
+                  <text x="59" y="25">x&#8321;</text><text x="25" y="51">x&#8322;</text>
+                  <text x="90" y="86">0</text><text x="140" y="86">0</text><text x="90" y="136">1</text><text x="140" y="136">1</text>
+                </g>
+                <rect x="69" y="109" width="92" height="42" rx="9" fill="none" stroke="#d92d20" stroke-width="2.5" />
+              </svg>
+              <figcaption id="pair-group-bottom-caption">x<sub>2</sub></figcaption>
+            </figure>
+          </div>
+          <h4>Four-cell group: no literals remain</h4>
+          <div class="grouping-examples">
+            <figure class="grouping-example">
+              <svg viewBox="0 0 210 180" role="img" aria-labelledby="whole-map-group-title whole-map-group-caption">
+                <title id="whole-map-group-title">Two-variable K-map grouping of 4 cells</title>
+                <rect x="65" y="55" width="100" height="100" fill="#fff" />
+                <path d="M 65 55 H 165 V 155 H 65 Z M 115 55 V 155 M 65 105 H 165 M 65 55 L 32 22" fill="none" stroke="#555" stroke-width="1.5" />
+                <g fill="#111" font-family="sans-serif" font-size="16" text-anchor="middle">
+                  <text x="90" y="45">0</text><text x="140" y="45">1</text>
+                  <text x="51" y="86">0</text><text x="51" y="136">1</text>
+                  <text x="59" y="25">x&#8321;</text><text x="25" y="51">x&#8322;</text>
+                  <text x="90" y="86">1</text><text x="140" y="86">1</text><text x="90" y="136">1</text><text x="140" y="136">1</text>
+                </g>
+                <rect x="69" y="59" width="92" height="92" rx="9" fill="none" stroke="#d92d20" stroke-width="2.5" />
+              </svg>
+              <figcaption id="whole-map-group-caption">1</figcaption>
+            </figure>
+          </div>
+          <p>Both inputs vary across the whole map, so they are eliminated. The result is the <strong>constant function 1</strong>.</p>
+        </section>
+        <section class="subtopic" id="msop-solving-steps" aria-labelledby="msop-solving-steps-heading">
+          <h3 id="msop-solving-steps-heading">9.3 Steps to Find mSOP Using a K-Map</h3>
+          <ol>
+            <li>Draw the map for the number of variables and label the axes in Gray-code order.</li>
+            <li>Enter 1 in the listed minterm cells; the remaining cells are 0 (they may be left blank while working).</li>
+            <li>Cover all 1s using the fewest valid cubes, making groups as large as possible. Include no 0s; overlap and wraparound are allowed.</li>
+            <li>For each group, keep only fixed variables: use the complemented literal for fixed 0 and the uncomplemented literal for fixed 1.</li>
+            <li>OR the group terms. Among covers with the fewest terms, choose the fewest total literals.</li>
+          </ol>
+        </section>
+        <section class="subtopic" id="msop-worked-problems" aria-labelledby="msop-worked-problems-heading">
+          <h3 id="msop-worked-problems-heading">9.4 Solved Three-Variable K-Maps</h3>
+          <p>All four functions are given as sums of minterms. The first variable is the most significant bit.</p>
+          <h4>(a) F(x, y, z) = &Sigma;m(0, 2, 6, 7)</h4>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 440 205" role="img" aria-labelledby="msop-a-svg-title msop-a-svg-caption">
+              <title id="msop-a-svg-title">Problem A: colored K-map groups</title>
+              <rect x="70" y="55" width="320" height="120" fill="#fff" />
+              <path d="M 70 55 H 390 V 175 H 70 Z M 150 55 V 175 M 230 55 V 175 M 310 55 V 175 M 70 115 H 390" fill="none" stroke="#bbb" stroke-width="1.3" />
+              <g font-family="sans-serif" text-anchor="middle">
+                <g font-size="15" fill="#111">
+                  <text x="110" y="45">00</text><text x="190" y="45">01</text><text x="270" y="45">11</text><text x="350" y="45">10</text>
+                  <text x="230" y="22">xy</text><text x="26" y="119">z</text>
+                  <text x="53" y="94">0</text><text x="53" y="154">1</text>
+                </g>
+                <text x="84" y="73" font-size="11" fill="#667085">0</text><text x="110" y="94" font-size="20" fill="#111">1</text><text x="164" y="73" font-size="11" fill="#667085">2</text><text x="190" y="94" font-size="20" fill="#111">1</text><text x="244" y="73" font-size="11" fill="#667085">6</text><text x="270" y="94" font-size="20" fill="#111">1</text><text x="324" y="73" font-size="11" fill="#667085">4</text><text x="350" y="94" font-size="20" fill="#111">0</text><text x="84" y="133" font-size="11" fill="#667085">1</text><text x="110" y="154" font-size="20" fill="#111">0</text><text x="164" y="133" font-size="11" fill="#667085">3</text><text x="190" y="154" font-size="20" fill="#111">0</text><text x="244" y="133" font-size="11" fill="#667085">7</text><text x="270" y="154" font-size="20" fill="#111">1</text><text x="324" y="133" font-size="11" fill="#667085">5</text><text x="350" y="154" font-size="20" fill="#111">0</text>
+              </g>
+              <rect x="75" y="60" width="150" height="50" rx="11" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="239" y="64" width="62" height="102" rx="11" fill="none" stroke="#175cd3" stroke-width="2.5" />
+            </svg>
+            <figcaption id="msop-a-svg-caption">Columns xy in Gray-code order; rows z. Small gray numbers are cell indices; large numbers are outputs.</figcaption>
+          </figure>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #c11574">Group {0, 2}: x = 0, z = 0 &rarr; <strong>x&prime;z&prime;</strong></li>
+            <li style="--edge-color: #175cd3">Group {6, 7}: x = 1, y = 1 &rarr; <strong>xy</strong></li>
+          </ul>
+          <p>Both pairs are essential: cell 0 requires the first group and cell 7 requires the second.</p>
+          <p><strong>Minimum SOP: F = x&prime;z&prime; + xy</strong> (2 terms, 4 literals).</p>
+          <h4>(b) F(A, B, C) = &Sigma;m(0, 2, 3, 4, 6)</h4>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 440 205" role="img" aria-labelledby="msop-b-svg-title msop-b-svg-caption">
+              <title id="msop-b-svg-title">Problem B: colored K-map groups</title>
+              <rect x="70" y="55" width="320" height="120" fill="#fff" />
+              <path d="M 70 55 H 390 V 175 H 70 Z M 150 55 V 175 M 230 55 V 175 M 310 55 V 175 M 70 115 H 390" fill="none" stroke="#bbb" stroke-width="1.3" />
+              <g font-family="sans-serif" text-anchor="middle">
+                <g font-size="15" fill="#111">
+                  <text x="110" y="45">00</text><text x="190" y="45">01</text><text x="270" y="45">11</text><text x="350" y="45">10</text>
+                  <text x="230" y="22">AB</text><text x="26" y="119">C</text>
+                  <text x="53" y="94">0</text><text x="53" y="154">1</text>
+                </g>
+                <text x="84" y="73" font-size="11" fill="#667085">0</text><text x="110" y="94" font-size="20" fill="#111">1</text><text x="164" y="73" font-size="11" fill="#667085">2</text><text x="190" y="94" font-size="20" fill="#111">1</text><text x="244" y="73" font-size="11" fill="#667085">6</text><text x="270" y="94" font-size="20" fill="#111">1</text><text x="324" y="73" font-size="11" fill="#667085">4</text><text x="350" y="94" font-size="20" fill="#111">1</text><text x="84" y="133" font-size="11" fill="#667085">1</text><text x="110" y="154" font-size="20" fill="#111">0</text><text x="164" y="133" font-size="11" fill="#667085">3</text><text x="190" y="154" font-size="20" fill="#111">1</text><text x="244" y="133" font-size="11" fill="#667085">7</text><text x="270" y="154" font-size="20" fill="#111">0</text><text x="324" y="133" font-size="11" fill="#667085">5</text><text x="350" y="154" font-size="20" fill="#111">0</text>
+              </g>
+              <rect x="75" y="60" width="310" height="50" rx="11" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="159" y="64" width="62" height="102" rx="11" fill="none" stroke="#175cd3" stroke-width="2.5" />
+            </svg>
+            <figcaption id="msop-b-svg-caption">Columns AB in Gray-code order; rows C. Small gray numbers are cell indices; large numbers are outputs.</figcaption>
+          </figure>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #c11574">Group {0, 2, 4, 6}: C = 0 &rarr; <strong>C&prime;</strong></li>
+            <li style="--edge-color: #175cd3">Group {2, 3}: A = 0, B = 1 &rarr; <strong>A&prime;B</strong></li>
+          </ul>
+          <p>The four-cell top row gives C&prime;. Cell 3 requires the vertical pair, giving A&prime;B. Cell 2 is shared by both groups.</p>
+          <p><strong>Minimum SOP: F = C&prime; + A&prime;B</strong> (2 terms, 3 literals).</p>
+          <h4>(c) F(a, b, c) = &Sigma;m(0, 1, 2, 3, 7)</h4>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 440 205" role="img" aria-labelledby="msop-c-svg-title msop-c-svg-caption">
+              <title id="msop-c-svg-title">Problem C: colored K-map groups</title>
+              <rect x="70" y="55" width="320" height="120" fill="#fff" />
+              <path d="M 70 55 H 390 V 175 H 70 Z M 150 55 V 175 M 230 55 V 175 M 310 55 V 175 M 70 115 H 390" fill="none" stroke="#bbb" stroke-width="1.3" />
+              <g font-family="sans-serif" text-anchor="middle">
+                <g font-size="15" fill="#111">
+                  <text x="110" y="45">00</text><text x="190" y="45">01</text><text x="270" y="45">11</text><text x="350" y="45">10</text>
+                  <text x="230" y="22">ab</text><text x="26" y="119">c</text>
+                  <text x="53" y="94">0</text><text x="53" y="154">1</text>
+                </g>
+                <text x="84" y="73" font-size="11" fill="#667085">0</text><text x="110" y="94" font-size="20" fill="#111">1</text><text x="164" y="73" font-size="11" fill="#667085">2</text><text x="190" y="94" font-size="20" fill="#111">1</text><text x="244" y="73" font-size="11" fill="#667085">6</text><text x="270" y="94" font-size="20" fill="#111">0</text><text x="324" y="73" font-size="11" fill="#667085">4</text><text x="350" y="94" font-size="20" fill="#111">0</text><text x="84" y="133" font-size="11" fill="#667085">1</text><text x="110" y="154" font-size="20" fill="#111">1</text><text x="164" y="133" font-size="11" fill="#667085">3</text><text x="190" y="154" font-size="20" fill="#111">1</text><text x="244" y="133" font-size="11" fill="#667085">7</text><text x="270" y="154" font-size="20" fill="#111">1</text><text x="324" y="133" font-size="11" fill="#667085">5</text><text x="350" y="154" font-size="20" fill="#111">0</text>
+              </g>
+              <rect x="75" y="60" width="150" height="110" rx="11" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="159" y="124" width="142" height="42" rx="11" fill="none" stroke="#175cd3" stroke-width="2.5" />
+            </svg>
+            <figcaption id="msop-c-svg-caption">Columns ab in Gray-code order; rows c. Small gray numbers are cell indices; large numbers are outputs.</figcaption>
+          </figure>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #c11574">Group {0, 1, 2, 3}: a = 0 &rarr; <strong>a&prime;</strong></li>
+            <li style="--edge-color: #175cd3">Group {3, 7}: b = 1, c = 1 &rarr; <strong>bc</strong></li>
+          </ul>
+          <p>The left four-cell block gives a&prime;. Pair cell 7 with cell 3 to obtain bc; overlap at cell 3 is allowed.</p>
+          <p><strong>Minimum SOP: F = a&prime; + bc</strong> (2 terms, 3 literals).</p>
+          <h4>(d) F(x, y, z) = &Sigma;m(3, 5, 6, 7)</h4>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 440 205" role="img" aria-labelledby="msop-d-svg-title msop-d-svg-caption">
+              <title id="msop-d-svg-title">Problem D: colored K-map groups</title>
+              <rect x="70" y="55" width="320" height="120" fill="#fff" />
+              <path d="M 70 55 H 390 V 175 H 70 Z M 150 55 V 175 M 230 55 V 175 M 310 55 V 175 M 70 115 H 390" fill="none" stroke="#bbb" stroke-width="1.3" />
+              <g font-family="sans-serif" text-anchor="middle">
+                <g font-size="15" fill="#111">
+                  <text x="110" y="45">00</text><text x="190" y="45">01</text><text x="270" y="45">11</text><text x="350" y="45">10</text>
+                  <text x="230" y="22">xy</text><text x="26" y="119">z</text>
+                  <text x="53" y="94">0</text><text x="53" y="154">1</text>
+                </g>
+                <text x="84" y="73" font-size="11" fill="#667085">0</text><text x="110" y="94" font-size="20" fill="#111">0</text><text x="164" y="73" font-size="11" fill="#667085">2</text><text x="190" y="94" font-size="20" fill="#111">0</text><text x="244" y="73" font-size="11" fill="#667085">6</text><text x="270" y="94" font-size="20" fill="#111">1</text><text x="324" y="73" font-size="11" fill="#667085">4</text><text x="350" y="94" font-size="20" fill="#111">0</text><text x="84" y="133" font-size="11" fill="#667085">1</text><text x="110" y="154" font-size="20" fill="#111">0</text><text x="164" y="133" font-size="11" fill="#667085">3</text><text x="190" y="154" font-size="20" fill="#111">1</text><text x="244" y="133" font-size="11" fill="#667085">7</text><text x="270" y="154" font-size="20" fill="#111">1</text><text x="324" y="133" font-size="11" fill="#667085">5</text><text x="350" y="154" font-size="20" fill="#111">1</text>
+              </g>
+              <rect x="155" y="120" width="150" height="50" rx="11" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="239" y="124" width="142" height="42" rx="11" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="243" y="68" width="54" height="94" rx="11" fill="none" stroke="#087e8b" stroke-width="2.5" />
+            </svg>
+            <figcaption id="msop-d-svg-caption">Columns xy in Gray-code order; rows z. Small gray numbers are cell indices; large numbers are outputs.</figcaption>
+          </figure>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #c11574">Group {3, 7}: y = 1, z = 1 &rarr; <strong>yz</strong></li>
+            <li style="--edge-color: #175cd3">Group {5, 7}: x = 1, z = 1 &rarr; <strong>xz</strong></li>
+            <li style="--edge-color: #087e8b">Group {6, 7}: x = 1, y = 1 &rarr; <strong>xy</strong></li>
+          </ul>
+          <p>Cells 3, 5, and 6 each have only cell 7 as an adjacent 1. All three pairs are essential, and cell 7 is reused.</p>
+          <p><strong>Minimum SOP: F = yz + xz + xy</strong> (3 terms, 6 literals).</p>
+        </section>
+        <section class="subtopic" id="msop-four-variable-example" aria-labelledby="msop-four-variable-example-heading">
+          <h3 id="msop-four-variable-example-heading">9.5 Four-Variable Example: Writing mSOP</h3>
+          <p>Rows are <strong>A<sub>1</sub>A<sub>0</sub></strong> and columns are <strong>B<sub>1</sub>B<sub>0</sub></strong>, both in Gray-code order 00, 01, 11, 10. Blank cells in the given map represent 0.</p>
+          <p>Using variable order <strong>A<sub>1</sub>, A<sub>0</sub>, B<sub>1</sub>, B<sub>0</sub></strong>, <strong>F = &Sigma;m(7, 10, 11, 13, 14, 15)</strong>.</p>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 460 380" role="img" aria-labelledby="four-msop-title four-msop-caption">
+              <title id="four-msop-title">Four-variable K-map with a blue pair, green pair, and orange four-cell group</title>
+              <rect x="100" y="60" width="280" height="280" fill="#fff" />
+              <path d="M 100 60 H 380 V 340 H 100 Z M 170 60 V 340 M 240 60 V 340 M 310 60 V 340 M 100 130 H 380 M 100 200 H 380 M 100 270 H 380" fill="none" stroke="#aaa" stroke-width="1.5" />
+              <g font-family="sans-serif" text-anchor="middle">
+                <g fill="#111" font-size="16">
+                  <text x="240" y="22">B&#8321;B&#8320;</text><text x="42" y="44">A&#8321;A&#8320;</text>
+<text x="135" y="48">00</text><text x="81" y="104">00</text><text x="205" y="48">01</text><text x="81" y="174">01</text><text x="275" y="48">11</text><text x="81" y="244">11</text><text x="345" y="48">10</text><text x="81" y="314">10</text>
+                </g>
+<text x="113" y="78" font-size="11" fill="#667085">0</text><text x="183" y="78" font-size="11" fill="#667085">1</text><text x="253" y="78" font-size="11" fill="#667085">3</text><text x="323" y="78" font-size="11" fill="#667085">2</text><text x="113" y="148" font-size="11" fill="#667085">4</text><text x="183" y="148" font-size="11" fill="#667085">5</text><text x="253" y="148" font-size="11" fill="#667085">7</text><text x="275" y="175" font-size="23" fill="#111">1</text><text x="323" y="148" font-size="11" fill="#667085">6</text><text x="113" y="218" font-size="11" fill="#667085">12</text><text x="183" y="218" font-size="11" fill="#667085">13</text><text x="205" y="245" font-size="23" fill="#111">1</text><text x="253" y="218" font-size="11" fill="#667085">15</text><text x="275" y="245" font-size="23" fill="#111">1</text><text x="323" y="218" font-size="11" fill="#667085">14</text><text x="345" y="245" font-size="23" fill="#111">1</text><text x="113" y="288" font-size="11" fill="#667085">8</text><text x="183" y="288" font-size="11" fill="#667085">9</text><text x="253" y="288" font-size="11" fill="#667085">11</text><text x="275" y="315" font-size="23" fill="#111">1</text><text x="323" y="288" font-size="11" fill="#667085">10</text><text x="345" y="315" font-size="23" fill="#111">1</text>
+              </g>
+              <rect x="251" y="135" width="48" height="130" rx="20" fill="none" stroke="#175cd3" stroke-width="3" />
+              <rect x="175" y="214" width="130" height="43" rx="20" fill="none" stroke="#067647" stroke-width="3" />
+              <rect x="245" y="205" width="130" height="130" rx="25" fill="none" stroke="#b54708" stroke-width="3" />
+            </svg>
+            <figcaption id="four-msop-caption">Small gray numbers show indices. The blue and green pairs overlap the orange four-cell group at cell 15.</figcaption>
+          </figure>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #175cd3"><strong>Blue {7, 15}:</strong> A<sub>1</sub> changes; A<sub>0</sub> = B<sub>1</sub> = B<sub>0</sub> = 1 &rarr; <strong>A<sub>0</sub>B<sub>1</sub>B<sub>0</sub></strong>.</li>
+            <li style="--edge-color: #067647"><strong>Green {13, 15}:</strong> B<sub>1</sub> changes; A<sub>1</sub> = A<sub>0</sub> = B<sub>0</sub> = 1 &rarr; <strong>A<sub>1</sub>A<sub>0</sub>B<sub>0</sub></strong>.</li>
+            <li style="--edge-color: #b54708"><strong>Orange {10, 11, 14, 15}:</strong> A<sub>0</sub> and B<sub>0</sub> change; A<sub>1</sub> = B<sub>1</sub> = 1 &rarr; <strong>A<sub>1</sub>B<sub>1</sub></strong>.</li>
+          </ul>
+          <p><strong>Minimum SOP: F = A<sub>0</sub>B<sub>1</sub>B<sub>0</sub> + A<sub>1</sub>A<sub>0</sub>B<sub>0</sub> + A<sub>1</sub>B<sub>1</sub></strong> (3 terms, 8 literals).</p>
+          <p>All three groups are essential: cell 7 needs the blue pair, cell 13 needs the green pair, and cell 10 needs the orange group.</p>
+        </section>
+        <section class="subtopic" id="pos-zero-group-rules" aria-labelledby="pos-zero-group-rules-heading">
+          <h3 id="pos-zero-group-rules-heading">9.6 POS: Writing Sum Terms from Groups of 0s</h3>
+          <p>For <strong>POS</strong>, group the <strong>0-cells</strong>. Each group gives one <strong>sum term</strong>; AND the selected sum terms to obtain the expression.</p>
+          <ol>
+            <li>Eliminate variables that change within the group.</li>
+            <li>Keep only variables that remain fixed in every cell.</li>
+            <li>For a fixed <strong>0</strong>, write the variable <strong>uncomplemented</strong>; for a fixed <strong>1</strong>, write it <strong>complemented</strong>.</li>
+            <li>OR the remaining literals to form the group&rsquo;s sum term.</li>
+          </ol>
+          <p><strong>Group size:</strong> in an n-variable map, a valid cube of <strong>2<sup>m</sup> cells</strong> eliminates <strong>m variables</strong>, leaving <strong>n &minus; m literals</strong> in its term.</p>
+          <p>For minimum POS, cover every 0 using the fewest valid groups, then minimize total literals. Groups contain no 1s; use power-of-two rectangles, with overlap and wraparound allowed.</p>
+          <table class="truth-table">
+            <caption>Fixed-variable rules for SOP versus POS</caption>
+            <thead><tr><th scope="col">Fixed value</th><th scope="col">SOP: group 1s</th><th scope="col">POS: group 0s</th></tr></thead>
+            <tbody><tr><td>0</td><td>x&prime;</td><td>x</td></tr><tr><td>1</td><td>x</td><td>x&prime;</td></tr></tbody>
+          </table>
+        </section>
+        <section class="subtopic" id="pos-zero-group-examples" aria-labelledby="pos-zero-group-examples-heading">
+          <h3 id="pos-zero-group-examples-heading">9.7 Examples: Sum Terms from Zero Groups</h3>
+          <p>These diagrams isolate the indicated zero group. Unmarked cells are omitted from the illustration; no don&rsquo;t-care values are specified. Except for the all-zero map, the captions give a <strong>group term</strong>, not necessarily the complete function.</p>
+          <div class="gate-details kmap-layouts">
+            <figure class="grouping-example">
+              <svg viewBox="0 0 220 225" role="img" aria-labelledby="pos-single-two-title pos-single-two-caption">
+                <title id="pos-single-two-title">a = 1, b = 0: keep both variables, giving a prime plus b.</title>
+                <rect x="65" y="60" width="120" height="120" fill="#fff" />
+                <path d="M 65 60 H 185 V 180 H 65 Z M 65 120 H 185 M 125 60 V 180" fill="none" stroke="#aaa" stroke-width="1.4" />
+                <g font-family="sans-serif" fill="#111" text-anchor="middle" font-size="15">
+                  <text x="95" y="48">0</text><text x="155" y="48">1</text><text x="125.0" y="22">a</text><text x="25" y="119">b</text>
+                  <text x="50" y="97">0</text><text x="50" y="157">1</text><text x="155" y="97" font-size="20">0</text>
+                </g>
+                <g fill="none" stroke="#175cd3" stroke-width="2.5"><rect x="130" y="65" width="50" height="50" rx="14" /></g>
+              </svg>
+              <figcaption id="pos-single-two-caption">a&prime; + b</figcaption>
+              <p>a = 1, b = 0: keep both variables, giving a prime plus b.</p>
+            </figure>
+            <figure class="grouping-example">
+              <svg viewBox="0 0 220 225" role="img" aria-labelledby="pos-whole-two-title pos-whole-two-caption">
+                <title id="pos-whole-two-title">All four cells are 0. Both variables change, so the complete function is F = 0.</title>
+                <rect x="65" y="60" width="120" height="120" fill="#fff" />
+                <path d="M 65 60 H 185 V 180 H 65 Z M 65 120 H 185 M 125 60 V 180" fill="none" stroke="#aaa" stroke-width="1.4" />
+                <g font-family="sans-serif" fill="#111" text-anchor="middle" font-size="15">
+                  <text x="95" y="48">0</text><text x="155" y="48">1</text><text x="125.0" y="22">a</text><text x="25" y="119">b</text>
+                  <text x="50" y="97">0</text><text x="50" y="157">1</text><text x="95" y="97" font-size="20">0</text><text x="155" y="97" font-size="20">0</text><text x="95" y="157" font-size="20">0</text><text x="155" y="157" font-size="20">0</text>
+                </g>
+                <g fill="none" stroke="#175cd3" stroke-width="2.5"><rect x="70" y="65" width="110" height="110" rx="14" /></g>
+              </svg>
+              <figcaption id="pos-whole-two-caption">0</figcaption>
+              <p>All four cells are 0. Both variables change, so the complete function is F = 0.</p>
+            </figure>
+            <figure class="grouping-example">
+              <svg viewBox="0 0 340 225" role="img" aria-labelledby="pos-single-three-title pos-single-three-caption">
+                <title id="pos-single-three-title">A = B = 1, C = 0: all three variables remain.</title>
+                <rect x="65" y="60" width="240" height="120" fill="#fff" />
+                <path d="M 65 60 H 305 V 180 H 65 Z M 65 120 H 305 M 125 60 V 180 M 185 60 V 180 M 245 60 V 180" fill="none" stroke="#aaa" stroke-width="1.4" />
+                <g font-family="sans-serif" fill="#111" text-anchor="middle" font-size="15">
+                  <text x="95" y="48">00</text><text x="155" y="48">01</text><text x="215" y="48">11</text><text x="275" y="48">10</text><text x="185.0" y="22">AB</text><text x="25" y="119">C</text>
+                  <text x="50" y="97">0</text><text x="50" y="157">1</text><text x="215" y="97" font-size="20">0</text>
+                </g>
+                <g fill="none" stroke="#175cd3" stroke-width="2.5"><rect x="190" y="65" width="50" height="50" rx="14" /></g>
+              </svg>
+              <figcaption id="pos-single-three-caption">A&prime; + B&prime; + C</figcaption>
+              <p>A = B = 1, C = 0: all three variables remain.</p>
+            </figure>
+            <figure class="grouping-example">
+              <svg viewBox="0 0 340 225" role="img" aria-labelledby="pos-pair-three-title pos-pair-three-caption">
+                <title id="pos-pair-three-title">C changes between 0 and 1. Eliminate C; A and B remain fixed at 1.</title>
+                <rect x="65" y="60" width="240" height="120" fill="#fff" />
+                <path d="M 65 60 H 305 V 180 H 65 Z M 65 120 H 305 M 125 60 V 180 M 185 60 V 180 M 245 60 V 180" fill="none" stroke="#aaa" stroke-width="1.4" />
+                <g font-family="sans-serif" fill="#111" text-anchor="middle" font-size="15">
+                  <text x="95" y="48">00</text><text x="155" y="48">01</text><text x="215" y="48">11</text><text x="275" y="48">10</text><text x="185.0" y="22">AB</text><text x="25" y="119">C</text>
+                  <text x="50" y="97">0</text><text x="50" y="157">1</text><text x="215" y="97" font-size="20">0</text><text x="215" y="157" font-size="20">0</text>
+                </g>
+                <g fill="none" stroke="#175cd3" stroke-width="2.5"><rect x="190" y="65" width="50" height="110" rx="14" /></g>
+              </svg>
+              <figcaption id="pos-pair-three-caption">A&prime; + B&prime;</figcaption>
+              <p>C changes between 0 and 1. Eliminate C; A and B remain fixed at 1.</p>
+            </figure>
+            <figure class="grouping-example">
+              <svg viewBox="0 0 340 225" role="img" aria-labelledby="pos-wrap-three-title pos-wrap-three-caption">
+                <title id="pos-wrap-three-title">One four-cell wraparound group: columns AB = 00 and 10 are adjacent. A and C change; B stays 0.</title>
+                <rect x="65" y="60" width="240" height="120" fill="#fff" />
+                <path d="M 65 60 H 305 V 180 H 65 Z M 65 120 H 305 M 125 60 V 180 M 185 60 V 180 M 245 60 V 180" fill="none" stroke="#aaa" stroke-width="1.4" />
+                <g font-family="sans-serif" fill="#111" text-anchor="middle" font-size="15">
+                  <text x="95" y="48">00</text><text x="155" y="48">01</text><text x="215" y="48">11</text><text x="275" y="48">10</text><text x="185.0" y="22">AB</text><text x="25" y="119">C</text>
+                  <text x="50" y="97">0</text><text x="50" y="157">1</text><text x="95" y="97" font-size="20">0</text><text x="275" y="97" font-size="20">0</text><text x="95" y="157" font-size="20">0</text><text x="275" y="157" font-size="20">0</text>
+                </g>
+                <g fill="none" stroke="#175cd3" stroke-width="2.5"><rect x="70" y="65" width="50" height="110" rx="14" /><rect x="250" y="65" width="50" height="110" rx="14" /><path d="M 80 181 V 203 H 290 V 181" stroke-dasharray="5 4" /></g>
+              </svg>
+              <figcaption id="pos-wrap-three-caption">B</figcaption>
+              <p>One four-cell wraparound group: columns AB = 00 and 10 are adjacent. A and C change; B stays 0.</p>
+            </figure>
+            <figure class="grouping-example">
+              <svg viewBox="0 0 340 225" role="img" aria-labelledby="pos-row-three-title pos-row-three-caption">
+                <title id="pos-row-three-title">Four zeros in the C = 0 row: A and B change, so only C remains.</title>
+                <rect x="65" y="60" width="240" height="120" fill="#fff" />
+                <path d="M 65 60 H 305 V 180 H 65 Z M 65 120 H 305 M 125 60 V 180 M 185 60 V 180 M 245 60 V 180" fill="none" stroke="#aaa" stroke-width="1.4" />
+                <g font-family="sans-serif" fill="#111" text-anchor="middle" font-size="15">
+                  <text x="95" y="48">00</text><text x="155" y="48">01</text><text x="215" y="48">11</text><text x="275" y="48">10</text><text x="185.0" y="22">AB</text><text x="25" y="119">C</text>
+                  <text x="50" y="97">0</text><text x="50" y="157">1</text><text x="95" y="97" font-size="20">0</text><text x="155" y="97" font-size="20">0</text><text x="215" y="97" font-size="20">0</text><text x="275" y="97" font-size="20">0</text>
+                </g>
+                <g fill="none" stroke="#175cd3" stroke-width="2.5"><rect x="70" y="65" width="230" height="50" rx="14" /></g>
+              </svg>
+              <figcaption id="pos-row-three-caption">C</figcaption>
+              <p>Four zeros in the C = 0 row: A and B change, so only C remains.</p>
+            </figure>
+          </div>
+        </section>
+        <section class="subtopic" id="more-zero-cubes" aria-labelledby="more-zero-cubes-heading">
+          <h3 id="more-zero-cubes-heading">9.8 More Examples: Zero Cubes</h3>
+          <p>As before, blank cells are omitted from these group illustrations. Only the all-zero map specifies the entire function.</p>
+          <h4>A stays 1 while B and C change: the sum term is A&prime;.</h4>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 350 205" role="img" aria-labelledby="fixed-a-title fixed-a-caption">
+              <title id="fixed-a-title">Zero groups for fixed a</title>
+              <rect x="70" y="60" width="240" height="120" fill="#fff" />
+              <path d="M 70 60 H 310 V 180 H 70 Z M 130 60 V 180 M 190 60 V 180 M 250 60 V 180 M 70 120 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
+              <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">0</text><text x="53" y="158">1</text><text x="190.0" y="22">AB</text><text x="22" y="120.0">C</text></g><text x="81" y="76" fill="#667085" font-size="10">0</text><text x="141" y="76" fill="#667085" font-size="10">2</text><text x="201" y="76" fill="#667085" font-size="10">6</text><text x="220" y="98" fill="#111" font-size="21">0</text><text x="261" y="76" fill="#667085" font-size="10">4</text><text x="280" y="98" fill="#111" font-size="21">0</text><text x="81" y="136" fill="#667085" font-size="10">1</text><text x="141" y="136" fill="#667085" font-size="10">3</text><text x="201" y="136" fill="#667085" font-size="10">7</text><text x="220" y="158" fill="#111" font-size="21">0</text><text x="261" y="136" fill="#667085" font-size="10">5</text><text x="280" y="158" fill="#111" font-size="21">0</text></g>
+              <rect x="195" y="65" width="110" height="110" rx="12" fill="none" stroke="#c11574" stroke-width="2.5" />
+            </svg>
+            <figcaption id="fixed-a-caption">Rows C; columns AB. Gray numbers are indices. Same-colored outlines across opposite edges form one wraparound group.</figcaption>
+          </figure>
+          <p><strong>Sum term: A&prime;</strong>.</p>
+          <h4>All eight cells are 0. Three variables are eliminated, giving F = 0.</h4>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 350 205" role="img" aria-labelledby="all-zero-three-title all-zero-three-caption">
+              <title id="all-zero-three-title">Zero groups for all zero three</title>
+              <rect x="70" y="60" width="240" height="120" fill="#fff" />
+              <path d="M 70 60 H 310 V 180 H 70 Z M 130 60 V 180 M 190 60 V 180 M 250 60 V 180 M 70 120 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
+              <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">0</text><text x="53" y="158">1</text><text x="190.0" y="22">AB</text><text x="22" y="120.0">C</text></g><text x="81" y="76" fill="#667085" font-size="10">0</text><text x="100" y="98" fill="#111" font-size="21">0</text><text x="141" y="76" fill="#667085" font-size="10">2</text><text x="160" y="98" fill="#111" font-size="21">0</text><text x="201" y="76" fill="#667085" font-size="10">6</text><text x="220" y="98" fill="#111" font-size="21">0</text><text x="261" y="76" fill="#667085" font-size="10">4</text><text x="280" y="98" fill="#111" font-size="21">0</text><text x="81" y="136" fill="#667085" font-size="10">1</text><text x="100" y="158" fill="#111" font-size="21">0</text><text x="141" y="136" fill="#667085" font-size="10">3</text><text x="160" y="158" fill="#111" font-size="21">0</text><text x="201" y="136" fill="#667085" font-size="10">7</text><text x="220" y="158" fill="#111" font-size="21">0</text><text x="261" y="136" fill="#667085" font-size="10">5</text><text x="280" y="158" fill="#111" font-size="21">0</text></g>
+              <rect x="75" y="65" width="230" height="110" rx="12" fill="none" stroke="#c11574" stroke-width="2.5" />
+            </svg>
+            <figcaption id="all-zero-three-caption">Rows C; columns AB. Gray numbers are indices. Same-colored outlines across opposite edges form one wraparound group.</figcaption>
+          </figure>
+          <p><strong>Sum term: 0</strong>.</p>
+          <h4>The four corners form one group through both edge wraps. A and C change; B = D = 0 gives B + D.</h4>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 350 325" role="img" aria-labelledby="four-corners-title four-corners-caption">
+              <title id="four-corners-title">Zero groups for four corners</title>
+              <rect x="70" y="60" width="240" height="240" fill="#fff" />
+              <path d="M 70 60 H 310 V 300 H 70 Z M 130 60 V 300 M 190 60 V 300 M 250 60 V 300 M 70 120 H 310 M 70 180 H 310 M 70 240 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
+              <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">00</text><text x="53" y="158">01</text><text x="53" y="218">11</text><text x="53" y="278">10</text><text x="190.0" y="22">AB</text><text x="22" y="180.0">CD</text></g><text x="81" y="76" fill="#667085" font-size="10">0</text><text x="100" y="98" fill="#111" font-size="21">0</text><text x="141" y="76" fill="#667085" font-size="10">4</text><text x="201" y="76" fill="#667085" font-size="10">12</text><text x="261" y="76" fill="#667085" font-size="10">8</text><text x="280" y="98" fill="#111" font-size="21">0</text><text x="81" y="136" fill="#667085" font-size="10">1</text><text x="141" y="136" fill="#667085" font-size="10">5</text><text x="201" y="136" fill="#667085" font-size="10">13</text><text x="261" y="136" fill="#667085" font-size="10">9</text><text x="81" y="196" fill="#667085" font-size="10">3</text><text x="141" y="196" fill="#667085" font-size="10">7</text><text x="201" y="196" fill="#667085" font-size="10">15</text><text x="261" y="196" fill="#667085" font-size="10">11</text><text x="81" y="256" fill="#667085" font-size="10">2</text><text x="100" y="278" fill="#111" font-size="21">0</text><text x="141" y="256" fill="#667085" font-size="10">6</text><text x="201" y="256" fill="#667085" font-size="10">14</text><text x="261" y="256" fill="#667085" font-size="10">10</text><text x="280" y="278" fill="#111" font-size="21">0</text></g>
+              <rect x="75" y="65" width="50" height="50" rx="12" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="255" y="65" width="50" height="50" rx="12" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="75" y="245" width="50" height="50" rx="12" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="255" y="245" width="50" height="50" rx="12" fill="none" stroke="#c11574" stroke-width="2.5" />
+            </svg>
+            <figcaption id="four-corners-caption">Rows CD; columns AB. Gray numbers are indices. Same-colored outlines across opposite edges form one wraparound group.</figcaption>
+          </figure>
+          <p><strong>Sum term: B + D</strong>.</p>
+          <h4>The CD = 11 row is one four-cell group. A and B change; C = D = 1 gives C&prime; + D&prime;.</h4>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 350 325" role="img" aria-labelledby="fixed-cd-title fixed-cd-caption">
+              <title id="fixed-cd-title">Zero groups for fixed cd</title>
+              <rect x="70" y="60" width="240" height="240" fill="#fff" />
+              <path d="M 70 60 H 310 V 300 H 70 Z M 130 60 V 300 M 190 60 V 300 M 250 60 V 300 M 70 120 H 310 M 70 180 H 310 M 70 240 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
+              <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">00</text><text x="53" y="158">01</text><text x="53" y="218">11</text><text x="53" y="278">10</text><text x="190.0" y="22">AB</text><text x="22" y="180.0">CD</text></g><text x="81" y="76" fill="#667085" font-size="10">0</text><text x="141" y="76" fill="#667085" font-size="10">4</text><text x="201" y="76" fill="#667085" font-size="10">12</text><text x="261" y="76" fill="#667085" font-size="10">8</text><text x="81" y="136" fill="#667085" font-size="10">1</text><text x="141" y="136" fill="#667085" font-size="10">5</text><text x="201" y="136" fill="#667085" font-size="10">13</text><text x="261" y="136" fill="#667085" font-size="10">9</text><text x="81" y="196" fill="#667085" font-size="10">3</text><text x="100" y="218" fill="#111" font-size="21">0</text><text x="141" y="196" fill="#667085" font-size="10">7</text><text x="160" y="218" fill="#111" font-size="21">0</text><text x="201" y="196" fill="#667085" font-size="10">15</text><text x="220" y="218" fill="#111" font-size="21">0</text><text x="261" y="196" fill="#667085" font-size="10">11</text><text x="280" y="218" fill="#111" font-size="21">0</text><text x="81" y="256" fill="#667085" font-size="10">2</text><text x="141" y="256" fill="#667085" font-size="10">6</text><text x="201" y="256" fill="#667085" font-size="10">14</text><text x="261" y="256" fill="#667085" font-size="10">10</text></g>
+              <rect x="75" y="185" width="230" height="50" rx="12" fill="none" stroke="#c11574" stroke-width="2.5" />
+            </svg>
+            <figcaption id="fixed-cd-caption">Rows CD; columns AB. Gray numbers are indices. Same-colored outlines across opposite edges form one wraparound group.</figcaption>
+          </figure>
+          <p><strong>Sum term: C&prime; + D&prime;</strong>.</p>
+        </section>
+        <section class="subtopic" id="mpos-worked-maps" aria-labelledby="mpos-worked-maps-heading">
+          <h3 id="mpos-worked-maps-heading">9.9 Solved Examples: Writing mPOS</h3>
+          <p>In these complete maps, every cell outside the listed zero groups is 1. Each group gives a sum term; AND the terms to obtain mPOS.</p>
+          <h4>Example 1: Two isolated zeros</h4>
+          <p><strong>Given:</strong> F(A, B) = &Pi;M(0, 3).</p>
+          <p>The zeros are diagonal, so they cannot be grouped together. Keep two single-cell groups.</p>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 230 205" role="img" aria-labelledby="mpos-two-title mpos-two-caption">
+              <title id="mpos-two-title">Zero groups for mpos two</title>
+              <rect x="70" y="60" width="120" height="120" fill="#fff" />
+              <path d="M 70 60 H 190 V 180 H 70 Z M 130 60 V 180 M 70 120 H 190" fill="none" stroke="#aaa" stroke-width="1.4" />
+              <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">0</text><text x="160" y="48">1</text><text x="53" y="98">0</text><text x="53" y="158">1</text><text x="130.0" y="22">B</text><text x="22" y="120.0">A</text></g><text x="81" y="76" fill="#667085" font-size="10">0</text><text x="100" y="98" fill="#111" font-size="21">0</text><text x="141" y="76" fill="#667085" font-size="10">1</text><text x="160" y="98" fill="#111" font-size="21">1</text><text x="81" y="136" fill="#667085" font-size="10">2</text><text x="100" y="158" fill="#111" font-size="21">1</text><text x="141" y="136" fill="#667085" font-size="10">3</text><text x="160" y="158" fill="#111" font-size="21">0</text></g>
+              <rect x="75" y="65" width="50" height="50" rx="12" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="138" y="128" width="44" height="44" rx="12" fill="none" stroke="#175cd3" stroke-width="2.5" />
+            </svg>
+            <figcaption id="mpos-two-caption">Rows A; columns B. Gray numbers are indices. Same-colored outlines across opposite edges form one wraparound group.</figcaption>
+          </figure>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #c11574">Zero group {0} &rarr; <strong>A + B</strong></li>
+            <li style="--edge-color: #175cd3">Zero group {3} &rarr; <strong>A&prime; + B&prime;</strong></li>
+          </ul>
+          <p><strong>Minimum POS: F = (A + B)(A&prime; + B&prime;)</strong> (2 sum terms, 4 literals).</p>
+          <h4>Example 2: One zero pair</h4>
+          <p><strong>Given:</strong> F(A, B, C) = &Pi;M(6, 7).</p>
+          <p>C changes; A and B remain 1. The single sum term is A&prime; + B&prime;.</p>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 350 205" role="img" aria-labelledby="mpos-three-title mpos-three-caption">
+              <title id="mpos-three-title">Zero groups for mpos three</title>
+              <rect x="70" y="60" width="240" height="120" fill="#fff" />
+              <path d="M 70 60 H 310 V 180 H 70 Z M 130 60 V 180 M 190 60 V 180 M 250 60 V 180 M 70 120 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
+              <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">0</text><text x="53" y="158">1</text><text x="190.0" y="22">BC</text><text x="22" y="120.0">A</text></g><text x="81" y="76" fill="#667085" font-size="10">0</text><text x="100" y="98" fill="#111" font-size="21">1</text><text x="141" y="76" fill="#667085" font-size="10">1</text><text x="160" y="98" fill="#111" font-size="21">1</text><text x="201" y="76" fill="#667085" font-size="10">3</text><text x="220" y="98" fill="#111" font-size="21">1</text><text x="261" y="76" fill="#667085" font-size="10">2</text><text x="280" y="98" fill="#111" font-size="21">1</text><text x="81" y="136" fill="#667085" font-size="10">4</text><text x="100" y="158" fill="#111" font-size="21">1</text><text x="141" y="136" fill="#667085" font-size="10">5</text><text x="160" y="158" fill="#111" font-size="21">1</text><text x="201" y="136" fill="#667085" font-size="10">7</text><text x="220" y="158" fill="#111" font-size="21">0</text><text x="261" y="136" fill="#667085" font-size="10">6</text><text x="280" y="158" fill="#111" font-size="21">0</text></g>
+              <rect x="195" y="125" width="110" height="50" rx="12" fill="none" stroke="#c11574" stroke-width="2.5" />
+            </svg>
+            <figcaption id="mpos-three-caption">Rows A; columns BC. Gray numbers are indices. Same-colored outlines across opposite edges form one wraparound group.</figcaption>
+          </figure>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #c11574">Zero group {6, 7} &rarr; <strong>A&prime; + B&prime;</strong></li>
+          </ul>
+          <p><strong>Minimum POS: F = A&prime; + B&prime;</strong> (1 sum terms, 2 literals).</p>
+          <h4>Example 3: Mapping a canonical POS</h4>
+          <p><strong>Given:</strong> F = (A&prime; + B&prime; + C + D)(A&prime; + B + C&prime; + D&prime;)(A + B + C&prime; + D)(A&prime; + B&prime; + C&prime; + D&prime;)(A + B + C&prime; + D&prime;).</p>
+          <p>The five factors are M<sub>12</sub>, M<sub>11</sub>, M<sub>2</sub>, M<sub>15</sub>, M<sub>3</sub>. Thus F = &Pi;M(2, 3, 11, 12, 15). Cell 12 is isolated, so its four-literal term must remain.</p>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 350 325" role="img" aria-labelledby="mpos-standard-four-title mpos-standard-four-caption">
+              <title id="mpos-standard-four-title">Zero groups for mpos standard four</title>
+              <rect x="70" y="60" width="240" height="240" fill="#fff" />
+              <path d="M 70 60 H 310 V 300 H 70 Z M 130 60 V 300 M 190 60 V 300 M 250 60 V 300 M 70 120 H 310 M 70 180 H 310 M 70 240 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
+              <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">00</text><text x="53" y="158">01</text><text x="53" y="218">11</text><text x="53" y="278">10</text><text x="190.0" y="22">AB</text><text x="22" y="180.0">CD</text></g><text x="81" y="76" fill="#667085" font-size="10">0</text><text x="100" y="98" fill="#111" font-size="21">1</text><text x="141" y="76" fill="#667085" font-size="10">4</text><text x="160" y="98" fill="#111" font-size="21">1</text><text x="201" y="76" fill="#667085" font-size="10">12</text><text x="220" y="98" fill="#111" font-size="21">0</text><text x="261" y="76" fill="#667085" font-size="10">8</text><text x="280" y="98" fill="#111" font-size="21">1</text><text x="81" y="136" fill="#667085" font-size="10">1</text><text x="100" y="158" fill="#111" font-size="21">1</text><text x="141" y="136" fill="#667085" font-size="10">5</text><text x="160" y="158" fill="#111" font-size="21">1</text><text x="201" y="136" fill="#667085" font-size="10">13</text><text x="220" y="158" fill="#111" font-size="21">1</text><text x="261" y="136" fill="#667085" font-size="10">9</text><text x="280" y="158" fill="#111" font-size="21">1</text><text x="81" y="196" fill="#667085" font-size="10">3</text><text x="100" y="218" fill="#111" font-size="21">0</text><text x="141" y="196" fill="#667085" font-size="10">7</text><text x="160" y="218" fill="#111" font-size="21">1</text><text x="201" y="196" fill="#667085" font-size="10">15</text><text x="220" y="218" fill="#111" font-size="21">0</text><text x="261" y="196" fill="#667085" font-size="10">11</text><text x="280" y="218" fill="#111" font-size="21">0</text><text x="81" y="256" fill="#667085" font-size="10">2</text><text x="100" y="278" fill="#111" font-size="21">0</text><text x="141" y="256" fill="#667085" font-size="10">6</text><text x="160" y="278" fill="#111" font-size="21">1</text><text x="201" y="256" fill="#667085" font-size="10">14</text><text x="220" y="278" fill="#111" font-size="21">1</text><text x="261" y="256" fill="#667085" font-size="10">10</text><text x="280" y="278" fill="#111" font-size="21">1</text></g>
+              <rect x="75" y="185" width="50" height="110" rx="12" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="198" y="188" width="104" height="44" rx="12" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="201" y="71" width="38" height="38" rx="12" fill="none" stroke="#087e8b" stroke-width="2.5" />
+            </svg>
+            <figcaption id="mpos-standard-four-caption">Rows CD; columns AB. Gray numbers are indices. Same-colored outlines across opposite edges form one wraparound group.</figcaption>
+          </figure>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #c11574">Zero group {2, 3} &rarr; <strong>A + B + C&prime;</strong></li>
+            <li style="--edge-color: #175cd3">Zero group {11, 15} &rarr; <strong>A&prime; + C&prime; + D&prime;</strong></li>
+            <li style="--edge-color: #087e8b">Zero group {12} &rarr; <strong>A&prime; + B&prime; + C + D</strong></li>
+          </ul>
+          <p><strong>Minimum POS: F = (A + B + C&prime;)(A&prime; + C&prime; + D&prime;)(A&prime; + B&prime; + C + D)</strong> (3 sum terms, 10 literals).</p>
+          <h4>Example 4: Mapping a noncanonical POS</h4>
+          <p><strong>Given:</strong> F = (B + C + D)(A + B + C&prime; + D)(A&prime; + B + C + D&prime;)(A + B&prime; + C + D)(A&prime; + B&prime; + C + D).</p>
+          <p>B + C + D omits A, so it is 0 for both A = 0 and A = 1, giving cells 0 and 8. The other factors give cells 2, 9, 4, and 12. Hence F = &Pi;M(0, 2, 4, 8, 9, 12).</p>
+          <figure class="adjacency-figure">
+            <svg viewBox="0 0 350 325" role="img" aria-labelledby="mpos-general-four-title mpos-general-four-caption">
+              <title id="mpos-general-four-title">Zero groups for mpos general four</title>
+              <rect x="70" y="60" width="240" height="240" fill="#fff" />
+              <path d="M 70 60 H 310 V 300 H 70 Z M 130 60 V 300 M 190 60 V 300 M 250 60 V 300 M 70 120 H 310 M 70 180 H 310 M 70 240 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
+              <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">00</text><text x="53" y="158">01</text><text x="53" y="218">11</text><text x="53" y="278">10</text><text x="190.0" y="22">AB</text><text x="22" y="180.0">CD</text></g><text x="81" y="76" fill="#667085" font-size="10">0</text><text x="100" y="98" fill="#111" font-size="21">0</text><text x="141" y="76" fill="#667085" font-size="10">4</text><text x="160" y="98" fill="#111" font-size="21">0</text><text x="201" y="76" fill="#667085" font-size="10">12</text><text x="220" y="98" fill="#111" font-size="21">0</text><text x="261" y="76" fill="#667085" font-size="10">8</text><text x="280" y="98" fill="#111" font-size="21">0</text><text x="81" y="136" fill="#667085" font-size="10">1</text><text x="100" y="158" fill="#111" font-size="21">1</text><text x="141" y="136" fill="#667085" font-size="10">5</text><text x="160" y="158" fill="#111" font-size="21">1</text><text x="201" y="136" fill="#667085" font-size="10">13</text><text x="220" y="158" fill="#111" font-size="21">1</text><text x="261" y="136" fill="#667085" font-size="10">9</text><text x="280" y="158" fill="#111" font-size="21">0</text><text x="81" y="196" fill="#667085" font-size="10">3</text><text x="100" y="218" fill="#111" font-size="21">1</text><text x="141" y="196" fill="#667085" font-size="10">7</text><text x="160" y="218" fill="#111" font-size="21">1</text><text x="201" y="196" fill="#667085" font-size="10">15</text><text x="220" y="218" fill="#111" font-size="21">1</text><text x="261" y="196" fill="#667085" font-size="10">11</text><text x="280" y="218" fill="#111" font-size="21">1</text><text x="81" y="256" fill="#667085" font-size="10">2</text><text x="100" y="278" fill="#111" font-size="21">0</text><text x="141" y="256" fill="#667085" font-size="10">6</text><text x="160" y="278" fill="#111" font-size="21">1</text><text x="201" y="256" fill="#667085" font-size="10">14</text><text x="220" y="278" fill="#111" font-size="21">1</text><text x="261" y="256" fill="#667085" font-size="10">10</text><text x="280" y="278" fill="#111" font-size="21">1</text></g>
+              <rect x="75" y="65" width="230" height="50" rx="12" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="78" y="68" width="44" height="44" rx="12" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="78" y="248" width="44" height="44" rx="12" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="261" y="71" width="38" height="98" rx="12" fill="none" stroke="#087e8b" stroke-width="2.5" />
+            </svg>
+            <figcaption id="mpos-general-four-caption">Rows CD; columns AB. Gray numbers are indices. Same-colored outlines across opposite edges form one wraparound group.</figcaption>
+          </figure>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #c11574">Zero group {0, 4, 8, 12} &rarr; <strong>C + D</strong></li>
+            <li style="--edge-color: #175cd3">Zero group {0, 2} &rarr; <strong>A + B + D</strong></li>
+            <li style="--edge-color: #087e8b">Zero group {8, 9} &rarr; <strong>A&prime; + B + C</strong></li>
+          </ul>
+          <p><strong>Minimum POS: F = (C + D)(A + B + D)(A&prime; + B + C)</strong> (3 sum terms, 8 literals).</p>
+        </section>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
