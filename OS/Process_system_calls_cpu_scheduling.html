@@ -127,6 +127,8 @@
       outline: none;
     }
 
+    main [id] { scroll-margin-top: 130px; }
+
     main {
       min-width: 0;
       padding: clamp(24px, 4vw, 46px);
@@ -185,7 +187,7 @@
     }
 
     .definition {
-      max-width: 880px;
+      max-width: 900px;
       margin: 0 0 16px;
       font-family: Georgia, "Times New Roman", serif;
       font-size: 16px;
@@ -398,6 +400,22 @@
       font-size: 15px;
       line-height: 1.35;
     }
+
+    .practice-question {
+      margin-top: 24px;
+      padding: clamp(16px, 3vw, 24px);
+      border: 0;
+      border-radius: 8px;
+      background: #edf3fa;
+    }
+
+    .practice-question > :first-child { margin-top: 0; }
+    .practice-question > :last-child { margin-bottom: 0; }
+    .practice-question .equation,
+    .practice-question .note,
+    .practice-question .panel,
+    .practice-question .comparison-table th { background: #f8fafd; }
+    .practice-question .comparison-table td { background: #fff; }
 
     .derivation {
       display: grid;
@@ -848,7 +866,7 @@ int main(int argc, char *argv[]) {
         <p>The key idea to remember is:</p>
         <p class="note"><strong><code>fork()</code> creates a new independent process logically; Copy-on-Write makes that creation memory-efficient physically.</strong></p>
 
-        <div class="subtopic" id="fork-question-1">
+        <div class="subtopic practice-question" id="fork-question-1">
           <h3>Question 1: Predict the Output</h3>
           <pre class="code-sample"><code>int main()
 {
@@ -863,7 +881,7 @@ int main(int argc, char *argv[]) {
           <p>Therefore, the output will be two lines: <code>0</code> printed by the child and a non-zero integer printed by the parent. Either line may appear first.</p>
         </div>
 
-        <div class="subtopic" id="fork-question-2">
+        <div class="subtopic practice-question" id="fork-question-2">
           <h3>Question 2: Output Printed by Parent and Child</h3>
           <pre class="code-sample"><code>int main()
 {
@@ -877,7 +895,7 @@ int main(int argc, char *argv[]) {
           <p><strong>Solution:</strong> The parent prints <code>B</code> and the child prints <code>A</code>. Their execution order is not guaranteed, so the combined output may be <code>AB</code> or <code>BA</code>.</p>
         </div>
 
-        <div class="subtopic" id="fork-question-3">
+        <div class="subtopic practice-question" id="fork-question-3">
           <h3>Question 3: Address Printed by Parent and Child</h3>
           <p><strong>Question:</strong> What is the output of the following code?</p>
           <pre class="code-sample"><code>#include &lt;stdio.h&gt;
@@ -929,7 +947,7 @@ int main() {
           <p>This source code is first compiled into an executable program, and that executable is stored in secondary memory. When you run the executable, the operating system creates a parent process. That process gets a PID, its own virtual address space, stack, heap, program counter, register state, page table, and other process-related information. The variable <code>a</code> may appear to the parent at a virtual address such as <code>1000</code>. That <code>1000</code> is not an actual RAM location; it is simply the address the parent process uses inside its own virtual address space. The MMU translates that virtual address using the parent's page table to some real physical RAM location, for example <code>5000</code>, and the actual bytes representing the value of <code>a</code> are stored there. When <code>fork()</code> is executed, the operating system creates a child process. The child gets a different PID and its own process context, page table, virtual address space, stack, heap, and register state, but it initially inherits the same virtual memory layout as the parent. Therefore, the child may also see <code>a</code> at virtual address <code>1000</code>. Initially, because of copy-on-write, the parent and child may even share the same physical RAM page. If either one modifies that memory, the operating system creates a separate physical copy for the process that writes. So after the parent changes <code>a</code> to <code>30</code> and the child changes <code>a</code> to <code>20</code>, both may still see <code>a</code> at virtual address <code>1000</code>, but the parent's <code>1000</code> may map to physical RAM location <code>5000</code>, while the child's <code>1000</code> may map to physical RAM location <code>9000</code>. Therefore, <code>1000</code> is not where the data physically sits in RAM; it is the process-visible virtual address, while <code>5000</code> and <code>9000</code> are example physical locations in RAM where the actual bytes are stored. If <code>printf("%p", &amp;a)</code> is used, both processes can print the same virtual address because each process has its own separate virtual address space.</p>
         </div>
 
-        <div class="subtopic" id="fork-question-4">
+        <div class="subtopic practice-question" id="fork-question-4">
           <h3>Question 4: Values and Addresses After <code>fork()</code></h3>
           <p><strong>Consider the following code fragment:</strong></p>
           <pre class="code-sample"><code>if (fork() == 0) {
@@ -950,7 +968,7 @@ else {
           <p><strong>Solution:</strong> Suppose <code>a</code> has the value <code>k</code> before <code>fork()</code>. The parent prints <code>u = k - 5</code>, while the child prints <code>x = k + 5</code>. Thus, <code>u + 10 = x</code>. Parent and child have separate virtual address spaces with the same layout immediately after <code>fork()</code>, so the process-visible address of <code>a</code> is the same in both: <code>v = y</code>. <strong>Option C is correct.</strong> The order of the two printed lines can vary.</p>
         </div>
 
-        <div class="subtopic" id="fork-question-5">
+        <div class="subtopic practice-question" id="fork-question-5">
           <h3>Question 5: Two Consecutive <code>fork()</code> Calls</h3>
           <pre class="code-sample"><code>int main() {
     fork();
@@ -961,7 +979,7 @@ else {
           <p><strong>Solution:</strong> The first <code>fork()</code> creates one child, giving 2 processes. Both execute the second <code>fork()</code>, giving <code>2<sup>2</sup> = 4</code> total processes. Each process eventually executes <code>printf("hello\n")</code>, so <code>hello</code> is printed four times.</p>
         </div>
 
-        <div class="subtopic" id="fork-question-6">
+        <div class="subtopic practice-question" id="fork-question-6">
           <h3>Question 6: Possible Output with <code>waitpid()</code></h3>
           <pre class="code-sample"><code>int main() {
     if (fork() == 0) {
@@ -982,7 +1000,7 @@ else {
           <p>The child's <code>a</code> comes before its <code>c</code>. The parent's final <code>c</code> comes after the child has finished because the parent calls <code>waitpid()</code>. The two processes can otherwise be scheduled in different orders.</p>
         </div>
 
-        <div class="subtopic" id="fork-question-7">
+        <div class="subtopic practice-question" id="fork-question-7">
           <h3>Question 7: Child Processes from Three <code>fork()</code> Calls</h3>
           <p><strong>How many child process will create?</strong></p>
           <pre class="code-sample"><code>for (i = 1; i &lt;= 3; i++) {
@@ -991,7 +1009,7 @@ else {
           <p><strong>Solution:</strong> Three rounds of <code>fork()</code> result in <code>2<sup>3</sup> = 8</code> total processes, including the original process. Therefore, <code>2<sup>3</sup> - 1 = 7</code> child processes are created.</p>
         </div>
 
-        <div class="subtopic" id="fork-question-8">
+        <div class="subtopic practice-question" id="fork-question-8">
           <h3>Question 8: Two <code>fork()</code> Calls in Each Iteration</h3>
           <p><strong>How many child process will create?</strong></p>
           <pre class="code-sample"><code>for (i = 1; i &lt;= 3; i++)
@@ -1002,7 +1020,7 @@ else {
           <p><strong>Solution:</strong> There are 6 total fork calls along each process path (2 forks per iteration for 3 iterations). The total number of processes is <code>2<sup>6</sup> = 64</code>. The number of child processes is <code>2<sup>6</sup> - 1 = 63</code>.</p>
         </div>
 
-        <div class="subtopic" id="fork-question-9">
+        <div class="subtopic practice-question" id="fork-question-9">
           <h3>Question 9: Child Processes After <code>n</code> Iterations</h3>
           <p>A process executes the following code. The total number of child processes created is:</p>
           <pre class="code-sample"><code>for (i = 0; i &lt; n; i++)
@@ -1016,13 +1034,13 @@ else {
           <p><strong>Solution:</strong> Each iteration doubles the number of processes. Starting with one process, after <code>n</code> iterations there are <code>2<sup>n</sup></code> processes in total. Excluding the original process gives <code>2<sup>n</sup> - 1</code> child processes. <strong>Option B is correct.</strong></p>
         </div>
 
-        <div class="subtopic" id="fork-question-10">
+        <div class="subtopic practice-question" id="fork-question-10">
           <h3>Question 10: Negative Return Value of <code>fork()</code></h3>
           <p><strong>Statement:</strong> When <code>fork()</code> returns a negative integer, an error has occurred that must be dealt with in both the parent and child process.</p>
           <p><strong>Answer: False.</strong> When <code>fork()</code> returns a negative integer, an error has occurred, but no child process is actually created. Therefore, only the original process can handle the error.</p>
         </div>
 
-        <div class="subtopic" id="fork-question-11">
+        <div class="subtopic practice-question" id="fork-question-11">
           <h3>Question 11: Conditional <code>fork()</code> Calls</h3>
           <p>Find the total number of processes created by the following code:</p>
           <pre class="code-sample"><code>pid_t pid1, pid2;
@@ -1035,7 +1053,7 @@ if (pid1 &gt; 0 &amp;&amp; pid2 == 0) {
           <p><strong>Solution:</strong> The first two <code>fork()</code> calls leave 4 processes. Only one of them—the child created by the second <code>fork()</code> in the original parent—has <code>pid1 &gt; 0</code> and <code>pid2 == 0</code>. That process executes <code>if (fork())</code>, creating one more child. The parent of that new child receives a nonzero return value and executes the final <code>fork()</code>, creating one more child. Thus, there are <code>4 + 1 + 1 = 6</code> processes in total, of which <code>5</code> are newly created child processes.</p>
         </div>
 
-        <div class="subtopic" id="fork-question-12">
+        <div class="subtopic practice-question" id="fork-question-12">
           <h3>Question 12: <code>printf()</code> Before <code>fork()</code></h3>
           <p>For the first code,</p>
           <pre class="code-sample"><code>for (i = 1; i &lt;= 3; i++) {
@@ -1045,7 +1063,7 @@ if (pid1 &gt; 0 &amp;&amp; pid2 == 0) {
           <p><code>printf("Hello")</code> executes <strong>before</strong> each <code>fork()</code>. In the first iteration only 1 process exists, so <code>Hello</code> is printed once; after the fork there are 2 processes. In the second iteration, those 2 processes each print <code>Hello</code>, giving 2 more prints, and then both fork to make 4 processes. In the third iteration, the 4 processes each print <code>Hello</code>, giving 4 more prints. Therefore, the total number of prints is <strong>1 + 2 + 4 = 7</strong>.</p>
         </div>
 
-        <div class="subtopic" id="fork-question-13">
+        <div class="subtopic practice-question" id="fork-question-13">
           <h3>Question 13: <code>printf()</code> After <code>fork()</code></h3>
           <p>For the second code,</p>
           <pre class="code-sample"><code>for (i = 1; i &lt;= 3; i++) {
@@ -1055,7 +1073,7 @@ if (pid1 &gt; 0 &amp;&amp; pid2 == 0) {
           <p>the <code>fork()</code> happens <strong>before</strong> the <code>printf()</code>. In the first iteration, 1 process forks into 2, so <code>Hello</code> is printed 2 times; in the second iteration, 2 processes fork into 4, so it is printed 4 times; in the third iteration, 4 processes fork into 8, so it is printed 8 times. Therefore, the total number of prints is <strong>2 + 4 + 8 = 14</strong>. The key idea is that when <code>printf()</code> comes before <code>fork()</code>, it is executed by the processes that already exist at the start of that iteration, whereas when <code>printf()</code> comes after <code>fork()</code>, both the parent and newly created child execute it.</p>
         </div>
 
-        <div class="subtopic" id="fork-question-14">
+        <div class="subtopic practice-question" id="fork-question-14">
           <h3>Question 14: <code>continue</code> and <code>break</code> After <code>fork()</code></h3>
           <p>Consider the following program snippet. Assume that the program compiles and runs successfully. Further, assume that the <code>fork()</code> system call is always successful in creating a process.</p>
           <pre class="code-sample"><code>int main() {
@@ -1274,19 +1292,19 @@ Return to User Mode</code></pre>
           <p>So the core idea of <strong>mapping</strong> is simply: <strong>which kernel thread is used to carry the execution of a user thread to the CPU</strong>. In many-to-one, the kernel sees only one thread; in one-to-one, each user thread has its own kernel thread; and in many-to-many, many user threads share a pool of multiple kernel threads.</p>
         </div>
 
-        <div class="subtopic" id="threads-question-1">
+        <div class="subtopic practice-question" id="threads-question-1">
           <h3>Question 1</h3>
           <p>The OS provides the illusion to each thread that it has its own address space.</p>
           <p><strong>Solution: False</strong> - Each process has its own address space, but threads in the same address space share the same address space (e.g., they use the same code and heap).</p>
         </div>
 
-        <div class="subtopic" id="threads-question-2">
+        <div class="subtopic practice-question" id="threads-question-2">
           <h3>Question 2</h3>
           <p>With kernel-level threads, multiple threads from the same process can be scheduled on multiple CPUs simultaneously.</p>
           <p><strong>Solution: True</strong> - this is the benefit of kernel-level threads (true thread support from OS). User-level threads mapped many-to-one onto a single kernel thread cannot run on multiple CPUs simultaneously; a many-to-many mapping can do so through multiple kernel threads.</p>
         </div>
 
-        <div class="subtopic" id="threads-question-3">
+        <div class="subtopic practice-question" id="threads-question-3">
           <h3>Question 3: GATE CSE 2011, Question 16 / UGC NET June 2013, Question 65</h3>
           <p><strong>Question:</strong> A thread is usually defined as a "light weight process" because an Operating System (OS) maintains smaller data structure for a thread than for a process. In relation to this, which of the following statement is TRUE?</p>
           <ol type="A">
@@ -1306,7 +1324,7 @@ Return to User Mode</code></pre>
           <p>This is why options A, B, and D are incorrect. In particular, the word <strong>only</strong> makes A and D false: the OS maintains more than just registers or just scheduling and accounting information for a kernel-supported thread. The virtual memory mappings and page tables belong to the shared process address space.</p>
         </div>
 
-        <div class="subtopic" id="threads-question-4">
+        <div class="subtopic practice-question" id="threads-question-4">
           <h3>Question 4: User-Level and Kernel-Supported Threads</h3>
           <p>Consider the following statements with respect to user-level threads and kernel-supported threads:</p>
           <ol type="I">
@@ -1325,7 +1343,7 @@ Return to User Mode</code></pre>
           <p><strong>Answer: A.</strong> A user-level thread switch is generally faster than a kernel-supported thread switch because the thread library can perform it without entering the kernel, so I is false. In a many-to-one model, a blocking system call can block the sole kernel thread and thereby the entire process, so II is true. The kernel schedules kernel-supported threads independently, so III is true. In a many-to-one model, the kernel sees the kernel thread but is unaware of the individual user-level threads, so IV is true.</p>
         </div>
 
-        <div class="subtopic" id="threads-question-5">
+        <div class="subtopic practice-question" id="threads-question-5">
           <h3>Question 5: Resource Not Shared by Threads</h3>
           <p>Which of the following is <strong>NOT</strong> shared by threads of the same process?</p>
           <ol type="A">
@@ -1337,7 +1355,7 @@ Return to User Mode</code></pre>
           <p><strong>Answer: A. Stack.</strong> Each thread needs its own stack to manage function calls and local variables independently. Threads of the same process share the address space and process-level resources such as the file descriptor table.</p>
         </div>
 
-        <div class="subtopic" id="threads-question-6">
+        <div class="subtopic practice-question" id="threads-question-6">
           <h3>Question 6: GATE CSE 2007, Question 17</h3>
           <p>Which statement about user-level and kernel-level threads is <strong>FALSE</strong>?</p>
           <ol type="A">
@@ -1349,7 +1367,7 @@ Return to User Mode</code></pre>
           <p><strong>Answer: D.</strong> Kernel-level thread switches usually cost more because the kernel participates, so A is true. User-level threading can be implemented by a library without special kernel threading support, so B is true. Different kernel threads of one process can run on different processors, so C is true. If one kernel-level thread blocks, other kernel-level threads of the process can still run; therefore D is false. Blocking all threads is the concern for a <strong>many-to-one</strong> mapping when its sole kernel thread blocks, not for independently scheduled kernel threads.</p>
         </div>
 
-        <div class="subtopic" id="threads-question-7">
+        <div class="subtopic practice-question" id="threads-question-7">
           <h3>Question 7: Which Statement Is False?</h3>
           <p>Which one of the following is <strong>FALSE</strong>?</p>
           <ol type="A">
@@ -1361,7 +1379,7 @@ Return to User Mode</code></pre>
           <p><strong>Answer: D.</strong> Threads in the same process share the code segment, whether they are managed at user level or kernel level. In the standard many-to-one model assumed by B, a blocking system call that blocks the only kernel thread prevents the other user-level threads from running; B does not describe a user-level thread merely waiting in the thread library or a many-to-many mapping. User-level thread switches are generally faster because they avoid a kernel transition, although the library still saves and restores the threads' execution state.</p>
         </div>
 
-        <div class="subtopic" id="threads-question-8">
+        <div class="subtopic practice-question" id="threads-question-8">
           <h3>Question 8: State Shared by All Threads</h3>
           <p>Which of the following is/are shared by all the threads in a process?</p>
           <ol type="I">
@@ -1379,7 +1397,7 @@ Return to User Mode</code></pre>
           <p><strong>Answer: B.</strong> All threads in a process share its address space. Each thread has its own program counter, stack, and register state.</p>
         </div>
 
-        <div class="subtopic" id="threads-question-9">
+        <div class="subtopic practice-question" id="threads-question-9">
           <h3>Question 9: Protection Between Threads</h3>
           <p>Which of the following statements about threads is/are <strong>TRUE</strong>?</p>
           <ol type="A">
@@ -1532,7 +1550,7 @@ Return to User Mode</code></pre>
         <p><strong>Starvation: NO</strong> &mdash; every process eventually gets the CPU.</p>
         <p>This is an important GATE point: <strong>FCFS may have poor waiting time because of convoy effect, but it is starvation-free.</strong></p>
 
-        <div class="subtopic" id="fcfs-question-1">
+        <div class="subtopic practice-question" id="fcfs-question-1">
           <h3>Question 1: Calculate CT, TAT, and WT</h3>
           <p>Three processes have the following arrival and burst times. Schedule them using FCFS and find their completion time, turnaround time, waiting time, average turnaround time, and average waiting time.</p>
 
@@ -1615,7 +1633,7 @@ Return to User Mode</code></pre>
         <p><strong>Convoy effect:</strong> SJF reduces the usual FCFS convoy effect by choosing short jobs ahead of a long job when all are waiting in the ready queue. However, non-preemptive SJF cannot interrupt a long job that has already started, so short jobs arriving afterward may still be stuck behind it. Thus, long-job blocking is still possible.</p>
         <p><strong>Starvation:</strong> SJF can cause starvation of a long job if shorter jobs keep arriving and are always selected first.</p>
 
-        <div class="subtopic" id="sjf-question-1">
+        <div class="subtopic practice-question" id="sjf-question-1">
           <h3>Question 1: Calculate CT, TAT, and WT</h3>
           <p>Schedule the four processes using <strong>non-preemptive SJF</strong>. The image gives their burst times and shows <strong>all arrival times as 0</strong>, so every process is ready when scheduling begins.</p>
 
@@ -1709,7 +1727,7 @@ Return to User Mode</code></pre>
         <p><strong>Convoy effect:</strong> A short quantum limits how long short jobs wait behind one long CPU-bound job, so RR greatly reduces the classic FCFS convoy effect. A very large quantum makes RR behave more like FCFS, and convoy-like delays can then occur.</p>
         <p><strong>Starvation:</strong> Standard RR does <strong>not</strong> cause starvation. A ready process gets another turn after the processes ahead of it have each received at most one quantum, assuming normal finite scheduling overhead and that new arrivals join the back of the queue.</p>
 
-        <div class="subtopic" id="rr-question-1">
+        <div class="subtopic practice-question" id="rr-question-1">
           <h3>Question 1: RR with Time Quantum = 4</h3>
           <p>All three processes arrive at <strong>time 0</strong> in the order P<sub>1</sub>, P<sub>2</sub>, P<sub>3</sub>. Use Round Robin with a <strong>time quantum of 4 units</strong> to find CT, TAT, WT, and their averages. Assume context-switch time is zero.</p>
 
@@ -1790,7 +1808,7 @@ Return to User Mode</code></pre>
         <p><strong>Convoy effect:</strong> SRTF avoids the classic FCFS convoy effect because an arriving short process can preempt a long process instead of waiting for its entire burst to finish.</p>
         <p><strong>Starvation:</strong> SRTF <strong>can</strong> starve a long process if shorter jobs keep arriving and repeatedly take priority.</p>
 
-        <div class="subtopic" id="srtf-question-1">
+        <div class="subtopic practice-question" id="srtf-question-1">
           <h3>Question 1: Calculate CT, TAT, and WT</h3>
           <p>Use SRTF for the following processes. Assume context-switch time is zero.</p>
 
@@ -1881,7 +1899,7 @@ Return to User Mode</code></pre>
         <p><strong>Convoy effect:</strong> LJF can cause a convoy effect because selecting a long CPU burst can force shorter ready processes to wait behind it.</p>
         <p><strong>Starvation:</strong> A short process can starve if longer jobs keep arriving and are always selected first. With a fixed, finite set of processes whose bursts finish, every process eventually runs.</p>
 
-        <div class="subtopic" id="ljf-question-1">
+        <div class="subtopic practice-question" id="ljf-question-1">
           <h3>Question 1: Calculate CT, TAT, and WT</h3>
           <p>Use <strong>non-preemptive LJF</strong> for the following processes. Arrival and burst times are in milliseconds; assume context-switch time is zero.</p>
 
@@ -1975,7 +1993,7 @@ Return to User Mode</code></pre>
         <p><strong>Convoy effect:</strong> LRTF can produce convoy-like delays because processes with short remaining bursts may repeatedly wait while longer remaining bursts receive CPU time.</p>
         <p><strong>Starvation:</strong> A short process may be postponed indefinitely if longer work keeps arriving. For a fixed, finite set of processes with finite bursts, all processes eventually finish.</p>
 
-        <div class="subtopic" id="lrtf-question-1">
+        <div class="subtopic practice-question" id="lrtf-question-1">
           <h3>Question 1: Calculate CT, TAT, and WT</h3>
           <p>Use LRTF for P<sub>1</sub> through P<sub>4</sub>. The original arrival and burst times shown in the image are <strong>(1, 2), (2, 4), (3, 6), and (4, 8)</strong>, respectively; the handwritten numbers beside the burst times show remaining-time updates. Assume context-switch time is zero.</p>
           <p><strong>Tie rule:</strong> If the running process is tied for the longest remaining time, keep it running. Otherwise, choose the tied process that arrived first. The tie rule matters here because several remaining times become equal; a different tie rule can change individual completion, turnaround, and waiting times.</p>

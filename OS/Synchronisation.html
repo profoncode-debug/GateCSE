@@ -127,6 +127,8 @@
       font-weight: 600;
     }
 
+    main [id] { scroll-margin-top: 130px; }
+
     main {
       min-width: 0;
       padding: clamp(24px, 4vw, 46px);
@@ -284,6 +286,22 @@
       font-size: 15px;
       line-height: 1.35;
     }
+
+    .practice-question {
+      margin-top: 24px;
+      padding: clamp(16px, 3vw, 24px);
+      border: 0;
+      border-radius: 8px;
+      background: #edf3fa;
+    }
+
+    .practice-question > :first-child { margin-top: 0; }
+    .practice-question > :last-child { margin-bottom: 0; }
+    .practice-question .equation,
+    .practice-question .note,
+    .practice-question .panel,
+    .practice-question .comparison-table th { background: #f8fafd; }
+    .practice-question .comparison-table td { background: #fff; }
 
     .note {
       margin: 12px 0 0;
@@ -929,7 +947,7 @@ Neither process enters the critical section.</code></pre>
           <p>This failure motivates combining the <strong>interest flags</strong> with a tie-breaker such as <code>turn</code>. That combination leads to <strong>Peterson's solution</strong>.</p>
         </div>
 
-        <div class="subtopic" id="gate-2010-question-23">
+        <div class="subtopic practice-question" id="gate-2010-question-23">
           <h3>Question: GATE CSE 2010 &mdash; Question 23</h3>
           <p>Consider the methods used by processes P<sub>1</sub> and P<sub>2</sub> for accessing their critical sections whenever needed, as given below. The initial values of shared Boolean variables <code>S1</code> and <code>S2</code> are randomly assigned.</p>
 
@@ -995,7 +1013,7 @@ P1: cannot enter</code></pre>
           <p class="note"><strong>Exam takeaway:</strong> Random initial values decide who gets the first turn. They do not fix the Progress problem. Always test the case where the critical section is empty and only the process without permission wants to enter.</p>
         </div>
 
-        <div class="subtopic" id="gate-2007-question-58">
+        <div class="subtopic practice-question" id="gate-2007-question-58">
           <h3>Question: GATE CSE 2007 &mdash; Question 58</h3>
           <p>Two processes, P<sub>1</sub> and P<sub>2</sub>, need to access a critical section of code. Consider the following synchronisation construct used by the processes:</p>
 
@@ -1070,7 +1088,7 @@ while (true) {
           <p class="note"><strong>Exam takeaway:</strong> Raising your own flag before checking the other flag preserves mutual exclusion but allows both flags to become true together. Both processes then wait forever: <strong>deadlock is possible, so choose D</strong>.</p>
         </div>
 
-        <div class="subtopic" id="gate-2015-set-3">
+        <div class="subtopic practice-question" id="gate-2015-set-3">
           <h3>Question: GATE CSE 2015 &mdash; Set 3</h3>
           <p>Two processes X and Y need to access a critical section. Consider the following synchronisation construct used by both processes:</p>
 
@@ -1146,7 +1164,7 @@ while (true)
           <p class="note"><strong>Exam takeaway:</strong> Both flags becoming true causes <strong>deadlock</strong> in the empty-wait-loop algorithm, but allows <strong>simultaneous critical-section entry</strong> in this algorithm. Always inspect the semicolon and braces before deciding what a <code>while</code> loop does.</p>
         </div>
 
-        <div class="subtopic" id="gate-2016-set-2-question-48">
+        <div class="subtopic practice-question" id="gate-2016-set-2-question-48">
           <h3>Question: GATE CSE 2016 &mdash; Set 2, Question 48</h3>
           <p>Consider the following two-process synchronisation solution:</p>
 
