@@ -39,16 +39,24 @@
     .subtopic { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); scroll-margin-top: 82px; }
     h3 { margin: 0 0 12px; font-size: 18px; }
     .gate-details { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 24px; margin-top: 18px; }
+    .practice-question { margin-top: 24px; padding: clamp(16px, 3vw, 24px); border-radius: 8px; background: #edf3fa; }
+    .practice-question > :first-child { margin-top: 0; }
+    .practice-question > :last-child { margin-bottom: 0; }
+    .practice-question .truth-table th { background: #f8fafd; }
+    .practice-question .truth-table td { background: #fff; }
+    .worked-result { margin-top: 16px; padding: 12px 14px; border-left: 3px solid #175cd3; background: #f8fafd; }
     .grouping-examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; margin: 16px 0; }
     .grouping-example { margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 4px; text-align: center; }
     .grouping-example svg { display: block; width: 100%; max-width: 220px; height: auto; margin: auto; }
     .grouping-example figcaption { color: #b42318; font-weight: 750; }
     .adjacency-figure { margin: 18px 0; }
-    .adjacency-figure svg { display: block; width: 100%; height: auto; }
+    .adjacency-figure svg { display: block; width: 100%; max-width: var(--diagram-width, 420px); height: auto; }
     .adjacency-figure figcaption { color: var(--muted); font-size: 13px; }
     .adjacency-legend { display: flex; flex-wrap: wrap; gap: 10px 20px; margin: 12px 0; padding: 0; list-style: none; font-size: 13px; }
     .adjacency-legend li { margin: 0; padding-left: 9px; border-left: 4px solid var(--edge-color); }
-    .kmap-layouts { align-items: start; }
+    .kmap-layouts { grid-template-columns: repeat(2, minmax(0, 300px)); align-items: start; }
+    .truth-table.kmap-table { max-width: 300px; table-layout: fixed; }
+    .truth-table.kmap-table th, .truth-table.kmap-table td { padding: 7px 6px; }
     .kmap-layouts td { font-family: ui-monospace, Consolas, monospace; }
     .table-wrap { overflow-x: auto; margin: 14px 0; }
     .indexed-terms { min-width: 600px; }
@@ -157,6 +165,29 @@
         <a class="sub-link" href="#pos-zero-group-examples">9.7 Zero-Group Examples</a>
         <a class="sub-link" href="#more-zero-cubes">9.8 More Zero Groups</a>
         <a class="sub-link" href="#mpos-worked-maps">9.9 Solved mPOS Maps</a>
+        <a href="#dont-care">10. Don&rsquo;t Care</a>
+        <a class="sub-link" href="#dont-care-reasons">10.1 Reasons for Don&rsquo;t-Cares</a>
+        <a class="sub-link" href="#dont-care-assignment">10.2 Choosing an Assignment</a>
+        <a class="sub-link" href="#dont-care-gates-practice">10.3 Practice: Fewest Gates</a>
+        <a class="sub-link" href="#dont-care-unreachable">10.4 Unreachable Circuit Inputs</a>
+        <a class="sub-link" href="#dont-care-msop-examples">10.5 Solved mSOP Examples</a>
+        <a href="#implicant">11. Implicant</a>
+        <a class="sub-link" href="#implicant-definition">11.1 Definition</a>
+        <a class="sub-link" href="#implicant-count-example">11.2 Counting Implicants</a>
+        <a class="sub-link" href="#implicant-dont-care-example">11.3 Don&rsquo;t-Care Example</a>
+        <a href="#prime-implicant">12. Prime Implicant</a>
+        <a class="sub-link" href="#prime-implicant-definition">12.1 Definition</a>
+        <a class="sub-link" href="#prime-implicant-example">12.2 Four-Variable Example</a>
+        <a class="sub-link" href="#prime-implicant-dc">12.3 Don&rsquo;t-Care Example</a>
+        <a href="#essential-prime-implicant">13. Essential Prime Implicant</a>
+        <a class="sub-link" href="#epi-definition">13.1 Definition and mSOP</a>
+        <a class="sub-link" href="#epi-earlier-examples">13.2 Earlier Examples</a>
+        <a class="sub-link" href="#epi-full-exercise">13.3 Complete Worked Exercise</a>
+        <a href="#compact-kmap">14. Compact Kmap</a>
+        <a class="sub-link" href="#compact-kmap-method">14.1 Variable-Entered Maps</a>
+        <a class="sub-link" href="#compact-table-examples">14.2 Compact Table Examples</a>
+        <a class="sub-link" href="#compact-gate-1988">14.3 GATE 1988: Reduction</a>
+        <a class="sub-link" href="#compact-gate-1992">14.4 GATE 1992: Find SOP</a>
       </nav>
     </aside>
     <main>
@@ -1115,7 +1146,7 @@
           <h3 id="kmap-layout-heading">8.2 Cells and Adjacency</h3>
           <p>Each cell represents <strong>one truth-table row</strong>; n variables give <strong>2<sup>n</sup> cells</strong>. Enter the function&rsquo;s output for that input combination in the corresponding cell.</p>
           <p>Adjacent cells differ in <strong>exactly one input variable</strong>. Horizontal and vertical neighbors are adjacent, including across opposite edges; diagonal neighbors are not.</p>
-          <table class="truth-table">
+          <table class="truth-table kmap-table">
             <caption>Two-variable layout: columns a, rows b (labels show ab)</caption>
             <thead><tr><th scope="col">b &bsol; a</th><th scope="col">0</th><th scope="col">1</th></tr></thead>
             <tbody>
@@ -1129,7 +1160,7 @@
           <h3 id="two-variable-kmaps-heading">8.3 Two-Variable K-Maps</h3>
           <p>For <strong>f(a, b)</strong>, a is the most significant bit and b the least significant: <strong>i = 2a + b</strong>. Both layouts are valid; we will usually use <strong>a as rows and b as columns</strong>.</p>
           <div class="gate-details kmap-layouts">
-            <table class="truth-table">
+            <table class="truth-table kmap-table">
               <caption>Rows b; columns a</caption>
               <thead><tr><th scope="col">b &bsol; a</th><th scope="col">0</th><th scope="col">1</th></tr></thead>
               <tbody>
@@ -1137,7 +1168,7 @@
                 <tr><th scope="row">1</th><td>1</td><td>3</td></tr>
               </tbody>
             </table>
-            <table class="truth-table">
+            <table class="truth-table kmap-table">
               <caption>Rows a; columns b</caption>
               <thead><tr><th scope="col">a &bsol; b</th><th scope="col">0</th><th scope="col">1</th></tr></thead>
               <tbody>
@@ -1152,7 +1183,7 @@
           <h3 id="three-variable-kmaps-heading">8.4 Three-Variable K-Maps</h3>
           <p>For <strong>f(a, b, c)</strong>, <strong>i = 4a + 2b + c</strong>: a is most significant and c least significant. Two-bit axes follow <strong>Gray-code order 00, 01, 11, 10</strong>, so neighboring cells differ in one bit, including across the edges.</p>
           <div class="gate-details kmap-layouts">
-            <table class="truth-table">
+            <table class="truth-table kmap-table">
               <caption>Rows c; columns ab</caption>
               <thead><tr><th scope="col">c &bsol; ab</th><th scope="col">00</th><th scope="col">01</th><th scope="col">11</th><th scope="col">10</th></tr></thead>
               <tbody>
@@ -1160,7 +1191,7 @@
                 <tr><th scope="row">1</th><td>1</td><td>3</td><td>7</td><td>5</td></tr>
               </tbody>
             </table>
-            <table class="truth-table">
+            <table class="truth-table kmap-table">
               <caption>Rows a; columns bc</caption>
               <thead><tr><th scope="col">a &bsol; bc</th><th scope="col">00</th><th scope="col">01</th><th scope="col">11</th><th scope="col">10</th></tr></thead>
               <tbody>
@@ -1168,7 +1199,7 @@
                 <tr><th scope="row">1</th><td>4</td><td>5</td><td>7</td><td>6</td></tr>
               </tbody>
             </table>
-            <table class="truth-table">
+            <table class="truth-table kmap-table">
               <caption>Rows bc; columns a</caption>
               <thead><tr><th scope="col">bc &bsol; a</th><th scope="col">0</th><th scope="col">1</th></tr></thead>
               <tbody>
@@ -1178,7 +1209,7 @@
                 <tr><th scope="row">10</th><td>2</td><td>6</td></tr>
               </tbody>
             </table>
-            <table class="truth-table">
+            <table class="truth-table kmap-table">
               <caption>Rows ab; columns c</caption>
               <thead><tr><th scope="col">ab &bsol; c</th><th scope="col">0</th><th scope="col">1</th></tr></thead>
               <tbody>
@@ -1195,7 +1226,7 @@
           <h3 id="four-variable-kmaps-heading">8.5 Four-Variable K-Maps</h3>
           <p>For <strong>f(a, b, c, d)</strong>, <strong>i = 8a + 4b + 2c + d</strong>. There are 16 cells, with both axes in <strong>00, 01, 11, 10</strong> order.</p>
           <div class="gate-details kmap-layouts">
-            <table class="truth-table">
+            <table class="truth-table kmap-table">
               <caption>Rows cd; columns ab</caption>
               <thead><tr><th scope="col">cd &bsol; ab</th><th scope="col">00</th><th scope="col">01</th><th scope="col">11</th><th scope="col">10</th></tr></thead>
               <tbody>
@@ -1205,7 +1236,7 @@
                 <tr><th scope="row">10</th><td>2</td><td>6</td><td>14</td><td>10</td></tr>
               </tbody>
             </table>
-            <table class="truth-table">
+            <table class="truth-table kmap-table">
               <caption>Rows ab; columns cd</caption>
               <thead><tr><th scope="col">ab &bsol; cd</th><th scope="col">00</th><th scope="col">01</th><th scope="col">11</th><th scope="col">10</th></tr></thead>
               <tbody>
@@ -1223,7 +1254,7 @@
           <h3 id="kmap-adjacency-diagram-heading">8.6 Adjacent Cells and Wraparound Edges</h3>
           <p>Adjacent cells differ in <strong>exactly one variable</strong>. The colored arrows below show example neighbor pairs in a three-variable map.</p>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 760 410" role="img" aria-labelledby="adjacency-svg-title adjacency-svg-desc">
+            <svg style="--diagram-width: 520px" viewBox="0 0 760 410" role="img" aria-labelledby="adjacency-svg-title adjacency-svg-desc">
               <title id="adjacency-svg-title">Three-variable K-map with colored adjacency arrows</title>
               <desc id="adjacency-svg-desc">Columns ab are 00, 01, 11, 10; rows c are 0 and 1. Blue connects horizontal neighbors 0 and 2. Teal connects vertical neighbors 6 and 7. Pink connects edge cells 0 and 4 across the top. Purple connects edge cells 1 and 5 across the bottom. Orange connects the top and bottom cells 4 and 5 around the right edge.</desc>
               <defs>
@@ -1276,7 +1307,7 @@
           <p>For three variables, rows are a and columns bc; for four variables, rows are ab and columns cd. Two-bit axes use 00, 01, 11, 10.</p>
           <div class="gate-details kmap-layouts">
             <figure class="adjacency-figure">
-              <svg viewBox="0 0 360 300" role="img" aria-labelledby="neighbors-three-interior-title neighbors-three-interior-caption">
+              <svg style="--diagram-width: 360px" viewBox="0 0 360 300" role="img" aria-labelledby="neighbors-three-interior-title neighbors-three-interior-caption">
                 <title id="neighbors-three-interior-title">Three variables: ordinary neighbors</title>
                 <g font-family="sans-serif" font-size="14" fill="#111" text-anchor="middle"><text x="95" y="90">0</text><text x="145" y="90">1</text><text x="195" y="90">3</text><text x="245" y="90">2</text><text x="95" y="140">4</text><text x="145" y="140">5</text><rect x="171" y="111" width="48" height="48" fill="#e0eaff" /><text x="195" y="140">7</text><text x="245" y="140">6</text></g>
                 <path d="M 70 60 H 270 V 160 H 70 Z M 120 60 V 160 M 170 60 V 160 M 220 60 V 160 M 70 110 H 270" fill="none" stroke="#aaa" stroke-width="1.3" />
@@ -1285,7 +1316,7 @@
               <figcaption id="neighbors-three-interior-caption"><strong>Three variables: ordinary neighbors.</strong> Cell 7 has three neighbors: 3, 5, and 6.</figcaption>
             </figure>
             <figure class="adjacency-figure">
-              <svg viewBox="0 0 360 300" role="img" aria-labelledby="neighbors-three-edge-title neighbors-three-edge-caption">
+              <svg style="--diagram-width: 360px" viewBox="0 0 360 300" role="img" aria-labelledby="neighbors-three-edge-title neighbors-three-edge-caption">
                 <title id="neighbors-three-edge-title">Three variables: edge wraparound</title>
                 <g font-family="sans-serif" font-size="14" fill="#111" text-anchor="middle"><text x="95" y="90">0</text><text x="145" y="90">1</text><text x="195" y="90">3</text><text x="245" y="90">2</text><text x="95" y="140">4</text><text x="145" y="140">5</text><text x="195" y="140">7</text><rect x="221" y="111" width="48" height="48" fill="#e0eaff" /><text x="245" y="140">6</text></g>
                 <path d="M 70 60 H 270 V 160 H 70 Z M 120 60 V 160 M 170 60 V 160 M 220 60 V 160 M 70 110 H 270" fill="none" stroke="#aaa" stroke-width="1.3" />
@@ -1294,7 +1325,7 @@
               <figcaption id="neighbors-three-edge-caption"><strong>Three variables: edge wraparound.</strong> Cell 6 has neighbors 2, 7, and 4. The pink route connects the rightmost and leftmost cells.</figcaption>
             </figure>
             <figure class="adjacency-figure">
-              <svg viewBox="0 0 360 300" role="img" aria-labelledby="neighbors-four-interior-title neighbors-four-interior-caption">
+              <svg style="--diagram-width: 360px" viewBox="0 0 360 300" role="img" aria-labelledby="neighbors-four-interior-title neighbors-four-interior-caption">
                 <title id="neighbors-four-interior-title">Four variables: ordinary neighbors</title>
                 <g font-family="sans-serif" font-size="14" fill="#111" text-anchor="middle"><text x="95" y="90">0</text><text x="145" y="90">1</text><text x="195" y="90">3</text><text x="245" y="90">2</text><text x="95" y="140">4</text><text x="145" y="140">5</text><text x="195" y="140">7</text><text x="245" y="140">6</text><text x="95" y="190">12</text><text x="145" y="190">13</text><rect x="171" y="161" width="48" height="48" fill="#e0eaff" /><text x="195" y="190">15</text><text x="245" y="190">14</text><text x="95" y="240">8</text><text x="145" y="240">9</text><text x="195" y="240">11</text><text x="245" y="240">10</text></g>
                 <path d="M 70 60 H 270 V 260 H 70 Z M 120 60 V 260 M 170 60 V 260 M 220 60 V 260 M 70 110 H 270 M 70 160 H 270 M 70 210 H 270" fill="none" stroke="#aaa" stroke-width="1.3" />
@@ -1303,7 +1334,7 @@
               <figcaption id="neighbors-four-interior-caption"><strong>Four variables: ordinary neighbors.</strong> Cell 15 has four neighbors: 7, 13, 14, and 11.</figcaption>
             </figure>
             <figure class="adjacency-figure">
-              <svg viewBox="0 0 360 300" role="img" aria-labelledby="neighbors-four-corner-title neighbors-four-corner-caption">
+              <svg style="--diagram-width: 360px" viewBox="0 0 360 300" role="img" aria-labelledby="neighbors-four-corner-title neighbors-four-corner-caption">
                 <title id="neighbors-four-corner-title">Four variables: corner wraparound</title>
                 <g font-family="sans-serif" font-size="14" fill="#111" text-anchor="middle"><rect x="71" y="61" width="48" height="48" fill="#e0eaff" /><text x="95" y="90">0</text><text x="145" y="90">1</text><text x="195" y="90">3</text><text x="245" y="90">2</text><text x="95" y="140">4</text><text x="145" y="140">5</text><text x="195" y="140">7</text><text x="245" y="140">6</text><text x="95" y="190">12</text><text x="145" y="190">13</text><text x="195" y="190">15</text><text x="245" y="190">14</text><text x="95" y="240">8</text><text x="145" y="240">9</text><text x="195" y="240">11</text><text x="245" y="240">10</text></g>
                 <path d="M 70 60 H 270 V 260 H 70 Z M 120 60 V 260 M 170 60 V 260 M 220 60 V 260 M 70 110 H 270 M 70 160 H 270 M 70 210 H 270" fill="none" stroke="#aaa" stroke-width="1.3" />
@@ -1498,7 +1529,7 @@
           <p>All four functions are given as sums of minterms. The first variable is the most significant bit.</p>
           <h4>(a) F(x, y, z) = &Sigma;m(0, 2, 6, 7)</h4>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 440 205" role="img" aria-labelledby="msop-a-svg-title msop-a-svg-caption">
+            <svg style="--diagram-width: 440px" viewBox="0 0 440 205" role="img" aria-labelledby="msop-a-svg-title msop-a-svg-caption">
               <title id="msop-a-svg-title">Problem A: colored K-map groups</title>
               <rect x="70" y="55" width="320" height="120" fill="#fff" />
               <path d="M 70 55 H 390 V 175 H 70 Z M 150 55 V 175 M 230 55 V 175 M 310 55 V 175 M 70 115 H 390" fill="none" stroke="#bbb" stroke-width="1.3" />
@@ -1522,7 +1553,7 @@
           <p><strong>Minimum SOP: F = x&prime;z&prime; + xy</strong> (2 terms, 4 literals).</p>
           <h4>(b) F(A, B, C) = &Sigma;m(0, 2, 3, 4, 6)</h4>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 440 205" role="img" aria-labelledby="msop-b-svg-title msop-b-svg-caption">
+            <svg style="--diagram-width: 440px" viewBox="0 0 440 205" role="img" aria-labelledby="msop-b-svg-title msop-b-svg-caption">
               <title id="msop-b-svg-title">Problem B: colored K-map groups</title>
               <rect x="70" y="55" width="320" height="120" fill="#fff" />
               <path d="M 70 55 H 390 V 175 H 70 Z M 150 55 V 175 M 230 55 V 175 M 310 55 V 175 M 70 115 H 390" fill="none" stroke="#bbb" stroke-width="1.3" />
@@ -1546,7 +1577,7 @@
           <p><strong>Minimum SOP: F = C&prime; + A&prime;B</strong> (2 terms, 3 literals).</p>
           <h4>(c) F(a, b, c) = &Sigma;m(0, 1, 2, 3, 7)</h4>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 440 205" role="img" aria-labelledby="msop-c-svg-title msop-c-svg-caption">
+            <svg style="--diagram-width: 440px" viewBox="0 0 440 205" role="img" aria-labelledby="msop-c-svg-title msop-c-svg-caption">
               <title id="msop-c-svg-title">Problem C: colored K-map groups</title>
               <rect x="70" y="55" width="320" height="120" fill="#fff" />
               <path d="M 70 55 H 390 V 175 H 70 Z M 150 55 V 175 M 230 55 V 175 M 310 55 V 175 M 70 115 H 390" fill="none" stroke="#bbb" stroke-width="1.3" />
@@ -1570,7 +1601,7 @@
           <p><strong>Minimum SOP: F = a&prime; + bc</strong> (2 terms, 3 literals).</p>
           <h4>(d) F(x, y, z) = &Sigma;m(3, 5, 6, 7)</h4>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 440 205" role="img" aria-labelledby="msop-d-svg-title msop-d-svg-caption">
+            <svg style="--diagram-width: 440px" viewBox="0 0 440 205" role="img" aria-labelledby="msop-d-svg-title msop-d-svg-caption">
               <title id="msop-d-svg-title">Problem D: colored K-map groups</title>
               <rect x="70" y="55" width="320" height="120" fill="#fff" />
               <path d="M 70 55 H 390 V 175 H 70 Z M 150 55 V 175 M 230 55 V 175 M 310 55 V 175 M 70 115 H 390" fill="none" stroke="#bbb" stroke-width="1.3" />
@@ -1599,7 +1630,7 @@
           <p>Rows are <strong>A<sub>1</sub>A<sub>0</sub></strong> and columns are <strong>B<sub>1</sub>B<sub>0</sub></strong>, both in Gray-code order 00, 01, 11, 10. Blank cells in the given map represent 0.</p>
           <p>Using variable order <strong>A<sub>1</sub>, A<sub>0</sub>, B<sub>1</sub>, B<sub>0</sub></strong>, <strong>F = &Sigma;m(7, 10, 11, 13, 14, 15)</strong>.</p>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 460 380" role="img" aria-labelledby="four-msop-title four-msop-caption">
+            <svg style="--diagram-width: 460px" viewBox="0 0 460 380" role="img" aria-labelledby="four-msop-title four-msop-caption">
               <title id="four-msop-title">Four-variable K-map with a blue pair, green pair, and orange four-cell group</title>
               <rect x="100" y="60" width="280" height="280" fill="#fff" />
               <path d="M 100 60 H 380 V 340 H 100 Z M 170 60 V 340 M 240 60 V 340 M 310 60 V 340 M 100 130 H 380 M 100 200 H 380 M 100 270 H 380" fill="none" stroke="#aaa" stroke-width="1.5" />
@@ -1736,7 +1767,7 @@
           <p>As before, blank cells are omitted from these group illustrations. Only the all-zero map specifies the entire function.</p>
           <h4>A stays 1 while B and C change: the sum term is A&prime;.</h4>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 350 205" role="img" aria-labelledby="fixed-a-title fixed-a-caption">
+            <svg style="--diagram-width: 350px" viewBox="0 0 350 205" role="img" aria-labelledby="fixed-a-title fixed-a-caption">
               <title id="fixed-a-title">Zero groups for fixed a</title>
               <rect x="70" y="60" width="240" height="120" fill="#fff" />
               <path d="M 70 60 H 310 V 180 H 70 Z M 130 60 V 180 M 190 60 V 180 M 250 60 V 180 M 70 120 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
@@ -1748,7 +1779,7 @@
           <p><strong>Sum term: A&prime;</strong>.</p>
           <h4>All eight cells are 0. Three variables are eliminated, giving F = 0.</h4>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 350 205" role="img" aria-labelledby="all-zero-three-title all-zero-three-caption">
+            <svg style="--diagram-width: 350px" viewBox="0 0 350 205" role="img" aria-labelledby="all-zero-three-title all-zero-three-caption">
               <title id="all-zero-three-title">Zero groups for all zero three</title>
               <rect x="70" y="60" width="240" height="120" fill="#fff" />
               <path d="M 70 60 H 310 V 180 H 70 Z M 130 60 V 180 M 190 60 V 180 M 250 60 V 180 M 70 120 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
@@ -1760,7 +1791,7 @@
           <p><strong>Sum term: 0</strong>.</p>
           <h4>The four corners form one group through both edge wraps. A and C change; B = D = 0 gives B + D.</h4>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 350 325" role="img" aria-labelledby="four-corners-title four-corners-caption">
+            <svg style="--diagram-width: 350px" viewBox="0 0 350 325" role="img" aria-labelledby="four-corners-title four-corners-caption">
               <title id="four-corners-title">Zero groups for four corners</title>
               <rect x="70" y="60" width="240" height="240" fill="#fff" />
               <path d="M 70 60 H 310 V 300 H 70 Z M 130 60 V 300 M 190 60 V 300 M 250 60 V 300 M 70 120 H 310 M 70 180 H 310 M 70 240 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
@@ -1772,7 +1803,7 @@
           <p><strong>Sum term: B + D</strong>.</p>
           <h4>The CD = 11 row is one four-cell group. A and B change; C = D = 1 gives C&prime; + D&prime;.</h4>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 350 325" role="img" aria-labelledby="fixed-cd-title fixed-cd-caption">
+            <svg style="--diagram-width: 350px" viewBox="0 0 350 325" role="img" aria-labelledby="fixed-cd-title fixed-cd-caption">
               <title id="fixed-cd-title">Zero groups for fixed cd</title>
               <rect x="70" y="60" width="240" height="240" fill="#fff" />
               <path d="M 70 60 H 310 V 300 H 70 Z M 130 60 V 300 M 190 60 V 300 M 250 60 V 300 M 70 120 H 310 M 70 180 H 310 M 70 240 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
@@ -1790,7 +1821,7 @@
           <p><strong>Given:</strong> F(A, B) = &Pi;M(0, 3).</p>
           <p>The zeros are diagonal, so they cannot be grouped together. Keep two single-cell groups.</p>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 230 205" role="img" aria-labelledby="mpos-two-title mpos-two-caption">
+            <svg style="--diagram-width: 230px" viewBox="0 0 230 205" role="img" aria-labelledby="mpos-two-title mpos-two-caption">
               <title id="mpos-two-title">Zero groups for mpos two</title>
               <rect x="70" y="60" width="120" height="120" fill="#fff" />
               <path d="M 70 60 H 190 V 180 H 70 Z M 130 60 V 180 M 70 120 H 190" fill="none" stroke="#aaa" stroke-width="1.4" />
@@ -1808,7 +1839,7 @@
           <p><strong>Given:</strong> F(A, B, C) = &Pi;M(6, 7).</p>
           <p>C changes; A and B remain 1. The single sum term is A&prime; + B&prime;.</p>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 350 205" role="img" aria-labelledby="mpos-three-title mpos-three-caption">
+            <svg style="--diagram-width: 350px" viewBox="0 0 350 205" role="img" aria-labelledby="mpos-three-title mpos-three-caption">
               <title id="mpos-three-title">Zero groups for mpos three</title>
               <rect x="70" y="60" width="240" height="120" fill="#fff" />
               <path d="M 70 60 H 310 V 180 H 70 Z M 130 60 V 180 M 190 60 V 180 M 250 60 V 180 M 70 120 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
@@ -1825,7 +1856,7 @@
           <p><strong>Given:</strong> F = (A&prime; + B&prime; + C + D)(A&prime; + B + C&prime; + D&prime;)(A + B + C&prime; + D)(A&prime; + B&prime; + C&prime; + D&prime;)(A + B + C&prime; + D&prime;).</p>
           <p>The five factors are M<sub>12</sub>, M<sub>11</sub>, M<sub>2</sub>, M<sub>15</sub>, M<sub>3</sub>. Thus F = &Pi;M(2, 3, 11, 12, 15). Cell 12 is isolated, so its four-literal term must remain.</p>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 350 325" role="img" aria-labelledby="mpos-standard-four-title mpos-standard-four-caption">
+            <svg style="--diagram-width: 350px" viewBox="0 0 350 325" role="img" aria-labelledby="mpos-standard-four-title mpos-standard-four-caption">
               <title id="mpos-standard-four-title">Zero groups for mpos standard four</title>
               <rect x="70" y="60" width="240" height="240" fill="#fff" />
               <path d="M 70 60 H 310 V 300 H 70 Z M 130 60 V 300 M 190 60 V 300 M 250 60 V 300 M 70 120 H 310 M 70 180 H 310 M 70 240 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
@@ -1844,7 +1875,7 @@
           <p><strong>Given:</strong> F = (B + C + D)(A + B + C&prime; + D)(A&prime; + B + C + D&prime;)(A + B&prime; + C + D)(A&prime; + B&prime; + C + D).</p>
           <p>B + C + D omits A, so it is 0 for both A = 0 and A = 1, giving cells 0 and 8. The other factors give cells 2, 9, 4, and 12. Hence F = &Pi;M(0, 2, 4, 8, 9, 12).</p>
           <figure class="adjacency-figure">
-            <svg viewBox="0 0 350 325" role="img" aria-labelledby="mpos-general-four-title mpos-general-four-caption">
+            <svg style="--diagram-width: 350px" viewBox="0 0 350 325" role="img" aria-labelledby="mpos-general-four-title mpos-general-four-caption">
               <title id="mpos-general-four-title">Zero groups for mpos general four</title>
               <rect x="70" y="60" width="240" height="240" fill="#fff" />
               <path d="M 70 60 H 310 V 300 H 70 Z M 130 60 V 300 M 190 60 V 300 M 250 60 V 300 M 70 120 H 310 M 70 180 H 310 M 70 240 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
@@ -1859,6 +1890,571 @@
             <li style="--edge-color: #087e8b">Zero group {8, 9} &rarr; <strong>A&prime; + B + C</strong></li>
           </ul>
           <p><strong>Minimum POS: F = (C + D)(A + B + D)(A&prime; + B + C)</strong> (3 sum terms, 8 literals).</p>
+        </section>
+      </section>
+      <section class="rule" id="dont-care" aria-labelledby="dont-care-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">10</span>
+          <h2 id="dont-care-heading">Don&rsquo;t Care</h2>
+        </div>
+        <p>Input combinations for which the function&rsquo;s output is <strong>not specified</strong> are called <strong>don&rsquo;t-care combinations</strong>. Their outputs are denoted by <strong>X</strong> or <strong>d</strong>.</p>
+        <table class="truth-table">
+          <caption>Example: f(a, b) is unspecified for input 11</caption>
+          <thead><tr><th scope="col">Index</th><th scope="col">a</th><th scope="col">b</th><th scope="col">f(a, b)</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>0</td><td>0</td><td>1</td></tr>
+            <tr><td>1</td><td>0</td><td>1</td><td>0</td></tr>
+            <tr><td>2</td><td>1</td><td>0</td><td>1</td></tr>
+            <tr><td>3</td><td>1</td><td>1</td><td>X (don&rsquo;t care)</td></tr>
+          </tbody>
+        </table>
+        <p>For input <strong>a = b = 1</strong>, either output 0 or 1 is acceptable. During K-map simplification, a don&rsquo;t-care cell may be included in a group when helpful, or left unused; it does not have to be covered.</p>
+        <section class="subtopic" id="dont-care-reasons" aria-labelledby="dont-care-reasons-heading">
+          <h3 id="dont-care-reasons-heading">10.1 Reasons for Don&rsquo;t-Care Combinations</h3>
+          <ul>
+            <li><strong>Output is irrelevant:</strong> the specification permits either output for certain input combinations.</li>
+            <li><strong>Input cannot occur:</strong> constraints or preceding circuitry prevent certain combinations from reaching the circuit.</li>
+          </ul>
+          <p>These freedoms can reduce literals and gates. Assign each don&rsquo;t-care a value that helps simplification while preserving every specified output.</p>
+        </section>
+        <section class="subtopic" id="dont-care-assignment" aria-labelledby="dont-care-assignment-heading">
+          <h3 id="dont-care-assignment-heading">10.2 Choosing a Don&rsquo;t-Care Assignment</h3>
+          <p>In the table above, the outputs for ab = 00, 01, 10, 11 are <strong>1, 0, 1, X</strong>.</p>
+          <table class="truth-table">
+            <caption>Two valid completions of the same partial specification</caption>
+            <thead><tr><th scope="col">Assignment at 11</th><th scope="col">Completed outputs</th><th scope="col">Minimum SOP</th></tr></thead>
+            <tbody>
+              <tr><td>X = 0</td><td>1, 0, 1, 0</td><td>b&prime;</td></tr>
+              <tr><td>X = 1</td><td>1, 0, 1, 1</td><td>a + b&prime;</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Choose X = 0</strong> for the simpler implementation <strong>f = b&prime;</strong>. A don&rsquo;t-care does not always need to be assigned 1.</p>
+        </section>
+        <section class="subtopic" id="dont-care-gates-practice" aria-labelledby="dont-care-gates-practice-heading">
+          <h3 id="dont-care-gates-practice-heading">10.3 Practice: Assignment Giving the Fewest Gates</h3>
+          <table class="truth-table">
+            <caption>Given incompletely specified function</caption>
+            <thead><tr><th scope="col">a</th><th scope="col">b</th><th scope="col">F(a, b)</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>X</td></tr>
+              <tr><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>1</td><td>0</td><td>1</td></tr>
+              <tr><td>1</td><td>1</td><td>0</td></tr>
+            </tbody>
+          </table>
+          <p>Which assignment gives an implementation with the fewest gates?</p>
+          <ol type="A">
+            <li>F(0, 0) = 1</li>
+            <li>F(0, 0) = 0</li>
+            <li>Neither A nor B</li>
+            <li>Both A and B</li>
+          </ol>
+          <p><strong>Answer: A.</strong> Setting X = 1 gives <strong>F = b&prime;</strong> (one NOT gate). Setting X = 0 gives <strong>F = ab&prime;</strong> (a NOT gate and an AND gate, using ordinary AND/OR/NOT gates with uncomplemented inputs).</p>
+        </section>
+        <section class="subtopic" id="dont-care-unreachable" aria-labelledby="dont-care-unreachable-heading">
+          <h3 id="dont-care-unreachable-heading">10.4 Circuit Example: Unreachable Internal Inputs</h3>
+          <p>Block G produces <strong>j = (a + b)&prime;</strong> using NOR and <strong>k = (ab)&prime;</strong> using NAND. Block H computes <strong>f = j &oplus; k</strong>.</p>
+          <figure class="adjacency-figure">
+            <svg style="--diagram-width: 520px" viewBox="0 0 620 180" role="img" aria-labelledby="dont-care-circuit-title dont-care-circuit-caption">
+              <title id="dont-care-circuit-title">NOR and NAND outputs j and k feed an XOR block</title>
+              <g fill="#f8fafc" stroke="#555" stroke-width="1.5">
+                <rect x="100" y="40" width="220" height="100" rx="6" /><rect x="430" y="40" width="100" height="100" rx="6" />
+              </g>
+              <g fill="none" stroke="#111" stroke-width="1.8">
+                <path d="M 50 90 H 100 M 320 70 H 430 M 320 110 H 430 M 530 90 H 580" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="16" text-anchor="middle">
+                <text x="31" y="95">a, b</text><text x="210" y="64">G: NOR and NAND</text>
+                <text x="210" y="94">j = (a + b)&#8242;</text><text x="210" y="121">k = (ab)&#8242;</text>
+                <text x="375" y="61">j</text><text x="375" y="105">k</text><text x="480" y="84">H: XOR</text><text x="480" y="108">j &#8853; k</text><text x="594" y="95">f</text>
+              </g>
+            </svg>
+            <figcaption id="dont-care-circuit-caption">The preceding block constrains which combinations can reach H.</figcaption>
+          </figure>
+          <table class="truth-table">
+            <caption>Reachable internal combinations</caption>
+            <thead><tr><th scope="col">a</th><th scope="col">b</th><th scope="col">j</th><th scope="col">k</th><th scope="col">f = j &oplus; k</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>1</td><td>1</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>
+              <tr><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+              <tr><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td></tr>
+            </tbody>
+          </table>
+          <p><strong>jk = 10 never occurs:</strong> j = 1 requires a = b = 0, which forces k = 1. Therefore H&rsquo;s required behavior can be written as:</p>
+          <table class="truth-table">
+            <caption>Specification for H when driven by G</caption>
+            <thead><tr><th scope="col">j</th><th scope="col">k</th><th scope="col">Required f</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>1</td></tr>
+              <tr><td>1</td><td>0</td><td>X (unreachable)</td></tr>
+              <tr><td>1</td><td>1</td><td>0</td></tr>
+            </tbody>
+          </table>
+          <p>The original XOR gate outputs 1 for jk = 10, but this value is irrelevant under G&rsquo;s input constraints. Any replacement for H must match the three reachable rows; its output on 10 may be chosen freely.</p>
+        </section>
+        <section class="subtopic" id="dont-care-msop-examples" aria-labelledby="dont-care-msop-examples-heading">
+          <h3 id="dont-care-msop-examples-heading">10.5 Solved mSOP Examples with Don&rsquo;t-Cares</h3>
+          <p>Fill required minterms with 1, don&rsquo;t-care cells with X, and all remaining cells with 0. Groups may use 1s and Xs, but no 0s; every required 1 must be covered.</p>
+          <h4>Example 1: Eight-cell wraparound group</h4>
+          <p><strong>F(A, B, C, D) = &Sigma;m(0, 2, 4, 6, 8) + d(10, 11, 12, 13, 14, 15)</strong></p>
+          <figure class="adjacency-figure">
+            <svg style="--diagram-width: 400px" viewBox="0 0 400 365" role="img" aria-labelledby="dc-msop-one-title dc-msop-one-caption">
+              <title id="dc-msop-one-title">Example 1: Eight-cell wraparound group</title>
+              <rect x="70" y="60" width="280" height="280" fill="#fff" />
+              <path d="M 70 60 H 350 V 340 H 70 Z M 140 60 V 340 M 210 60 V 340 M 280 60 V 340 M 70 130 H 350 M 70 200 H 350 M 70 270 H 350" fill="none" stroke="#aaa" stroke-width="1.3" />
+              <g font-family="sans-serif" text-anchor="middle"><g font-size="15" fill="#111"><text x="105" y="48">00</text><text x="53" y="104">00</text><text x="175" y="48">01</text><text x="53" y="174">01</text><text x="245" y="48">11</text><text x="53" y="244">11</text><text x="315" y="48">10</text><text x="53" y="314">10</text><text x="210" y="22">AB</text><text x="22" y="200">CD</text></g><text x="82" y="77" font-size="10" fill="#667085">0</text><text x="105" y="104" font-size="21" fill="#111">1</text><text x="152" y="77" font-size="10" fill="#667085">4</text><text x="175" y="104" font-size="21" fill="#111">1</text><text x="222" y="77" font-size="10" fill="#667085">12</text><text x="245" y="104" font-size="21" fill="#b54708">X</text><text x="292" y="77" font-size="10" fill="#667085">8</text><text x="315" y="104" font-size="21" fill="#111">1</text><text x="82" y="147" font-size="10" fill="#667085">1</text><text x="105" y="174" font-size="21" fill="#111">0</text><text x="152" y="147" font-size="10" fill="#667085">5</text><text x="175" y="174" font-size="21" fill="#111">0</text><text x="222" y="147" font-size="10" fill="#667085">13</text><text x="245" y="174" font-size="21" fill="#b54708">X</text><text x="292" y="147" font-size="10" fill="#667085">9</text><text x="315" y="174" font-size="21" fill="#111">0</text><text x="82" y="217" font-size="10" fill="#667085">3</text><text x="105" y="244" font-size="21" fill="#111">0</text><text x="152" y="217" font-size="10" fill="#667085">7</text><text x="175" y="244" font-size="21" fill="#111">0</text><text x="222" y="217" font-size="10" fill="#667085">15</text><text x="245" y="244" font-size="21" fill="#b54708">X</text><text x="292" y="217" font-size="10" fill="#667085">11</text><text x="315" y="244" font-size="21" fill="#b54708">X</text><text x="82" y="287" font-size="10" fill="#667085">2</text><text x="105" y="314" font-size="21" fill="#111">1</text><text x="152" y="287" font-size="10" fill="#667085">6</text><text x="175" y="314" font-size="21" fill="#111">1</text><text x="222" y="287" font-size="10" fill="#667085">14</text><text x="245" y="314" font-size="21" fill="#b54708">X</text><text x="292" y="287" font-size="10" fill="#667085">10</text><text x="315" y="314" font-size="21" fill="#b54708">X</text></g>
+              <rect x="75" y="65" width="270" height="60" rx="15" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="75" y="275" width="270" height="60" rx="15" fill="none" stroke="#175cd3" stroke-width="2.5" />
+            </svg>
+            <figcaption id="dc-msop-one-caption">Rows CD, columns AB, both in Gray-code order. Small numbers are indices. Same-colored outlines across opposite edges form one group.</figcaption>
+          </figure>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #175cd3">Group {0, 2, 4, 6, 8, 10, 12, 14} &rarr; <strong>D&prime;</strong></li>
+          </ul>
+          <p>The top and bottom rows are adjacent. Group all eight cells with D = 0, using don&rsquo;t-care cells 10, 12, and 14. A, B, and C change, so only D&prime; remains. Don&rsquo;t-cares 11, 13, and 15 are left unused.</p>
+          <p><strong>Minimum SOP: F = D&prime;</strong> (1 terms, 1 literals).</p>
+          <h4>Example 2: Four overlapping groups</h4>
+          <p><strong>F(A, B, C, D) = &Sigma;m(1, 3, 5, 8, 9, 11, 15) + d(2, 13)</strong></p>
+          <figure class="adjacency-figure">
+            <svg style="--diagram-width: 400px" viewBox="0 0 400 365" role="img" aria-labelledby="dc-msop-two-title dc-msop-two-caption">
+              <title id="dc-msop-two-title">Example 2: Four overlapping groups</title>
+              <rect x="70" y="60" width="280" height="280" fill="#fff" />
+              <path d="M 70 60 H 350 V 340 H 70 Z M 140 60 V 340 M 210 60 V 340 M 280 60 V 340 M 70 130 H 350 M 70 200 H 350 M 70 270 H 350" fill="none" stroke="#aaa" stroke-width="1.3" />
+              <g font-family="sans-serif" text-anchor="middle"><g font-size="15" fill="#111"><text x="105" y="48">00</text><text x="53" y="104">00</text><text x="175" y="48">01</text><text x="53" y="174">01</text><text x="245" y="48">11</text><text x="53" y="244">11</text><text x="315" y="48">10</text><text x="53" y="314">10</text><text x="210" y="22">AB</text><text x="22" y="200">CD</text></g><text x="82" y="77" font-size="10" fill="#667085">0</text><text x="105" y="104" font-size="21" fill="#111">0</text><text x="152" y="77" font-size="10" fill="#667085">4</text><text x="175" y="104" font-size="21" fill="#111">0</text><text x="222" y="77" font-size="10" fill="#667085">12</text><text x="245" y="104" font-size="21" fill="#111">0</text><text x="292" y="77" font-size="10" fill="#667085">8</text><text x="315" y="104" font-size="21" fill="#111">1</text><text x="82" y="147" font-size="10" fill="#667085">1</text><text x="105" y="174" font-size="21" fill="#111">1</text><text x="152" y="147" font-size="10" fill="#667085">5</text><text x="175" y="174" font-size="21" fill="#111">1</text><text x="222" y="147" font-size="10" fill="#667085">13</text><text x="245" y="174" font-size="21" fill="#b54708">X</text><text x="292" y="147" font-size="10" fill="#667085">9</text><text x="315" y="174" font-size="21" fill="#111">1</text><text x="82" y="217" font-size="10" fill="#667085">3</text><text x="105" y="244" font-size="21" fill="#111">1</text><text x="152" y="217" font-size="10" fill="#667085">7</text><text x="175" y="244" font-size="21" fill="#111">0</text><text x="222" y="217" font-size="10" fill="#667085">15</text><text x="245" y="244" font-size="21" fill="#111">1</text><text x="292" y="217" font-size="10" fill="#667085">11</text><text x="315" y="244" font-size="21" fill="#111">1</text><text x="82" y="287" font-size="10" fill="#667085">2</text><text x="105" y="314" font-size="21" fill="#b54708">X</text><text x="152" y="287" font-size="10" fill="#667085">6</text><text x="175" y="314" font-size="21" fill="#111">0</text><text x="222" y="287" font-size="10" fill="#667085">14</text><text x="245" y="314" font-size="21" fill="#111">0</text><text x="292" y="287" font-size="10" fill="#667085">10</text><text x="315" y="314" font-size="21" fill="#111">0</text></g>
+              <rect x="285" y="65" width="60" height="130" rx="15" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="218" y="138" width="124" height="124" rx="15" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="81" y="141" width="48" height="118" rx="15" fill="none" stroke="#087e8b" stroke-width="2.5" /><rect x="291" y="141" width="48" height="118" rx="15" fill="none" stroke="#087e8b" stroke-width="2.5" /><rect x="84" y="144" width="252" height="42" rx="15" fill="none" stroke="#b54708" stroke-width="2.5" />
+            </svg>
+            <figcaption id="dc-msop-two-caption">Rows CD, columns AB, both in Gray-code order. Small numbers are indices. Same-colored outlines across opposite edges form one group.</figcaption>
+          </figure>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #175cd3">Group {8, 9} &rarr; <strong>AB&prime;C&prime;</strong></li>
+            <li style="--edge-color: #c11574">Group {9, 11, 13, 15} &rarr; <strong>AD</strong></li>
+            <li style="--edge-color: #087e8b">Group {1, 3, 9, 11} &rarr; <strong>B&prime;D</strong></li>
+            <li style="--edge-color: #b54708">Group {1, 5, 9, 13} &rarr; <strong>C&prime;D</strong></li>
+          </ul>
+          <p>Use don&rsquo;t-care cell 13 in the two four-cell groups that contain it; cell 2 is unnecessary. The leftmost and rightmost columns form a wraparound group for B&prime;D. Overlap at 9, 11, and 13 is allowed.</p>
+          <p><strong>Minimum SOP: F = AB&prime;C&prime; + AD + B&prime;D + C&prime;D</strong> (4 terms, 9 literals).</p>
+        </section>
+      </section>
+      <section class="rule" id="implicant" aria-labelledby="implicant-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">11</span>
+          <h2 id="implicant-heading">Implicant</h2>
+        </div>
+        <section class="subtopic" id="implicant-definition" aria-labelledby="implicant-definition-heading">
+          <h3 id="implicant-definition-heading">11.1 Implicant of a Boolean Function</h3>
+          <p>An <strong>implicant</strong> is a product term that guarantees F = 1 whenever that term is 1. On a K-map, it corresponds to any valid cube of <strong>1, 2, 4, 8, &hellip; cells</strong>, including a single 1. It must contain <strong>no 0-cells</strong>.</p>
+          <p>Groups may overlap or wrap across edges. They do not have to be the largest possible groups to qualify as implicants. A group of 2<sup>m</sup> cells in an n-variable map produces a term with n &minus; m literals.</p>
+          <p><strong>Don&rsquo;t-care convention in these slides:</strong> treat X cells as 1 when enumerating allowable cubes, including cubes made entirely of Xs. Such X-only cubes do not cover any required 1 and are unnecessary when selecting an SOP cover.</p>
+        </section>
+        <section class="subtopic" id="implicant-count-example" aria-labelledby="implicant-count-example-heading">
+          <h3 id="implicant-count-example-heading">11.2 Example: Count All Implicants</h3>
+          <p><strong>F(A, B, C, D) = &Sigma;m(0, 3, 7, 11, 12, 13, 15)</strong>. Rows CD and columns AB both use 00, 01, 11, 10.</p>
+          <p>For instance, the single cell 0 gives <strong>A&prime;B&prime;C&prime;D&prime;</strong>, and the pair {12, 13} gives <strong>ABC&prime;</strong>. Both are implicants.</p>
+          <div class="gate-details kmap-layouts">
+            <figure class="adjacency-figure">
+              <svg style="--diagram-width: 320px" viewBox="0 0 350 325" role="img" aria-labelledby="implicant-size-1-title implicant-size-1-caption">
+                <title id="implicant-size-1-title">Size 1: 7 implicants</title>
+                <rect x="70" y="60" width="240" height="240" fill="#fff" />
+                <path d="M 70 60 H 310 V 300 H 70 Z M 130 60 V 300 M 190 60 V 300 M 250 60 V 300 M 70 120 H 310 M 70 180 H 310 M 70 240 H 310" fill="none" stroke="#aaa" stroke-width="1.3" />
+                <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">00</text><text x="53" y="158">01</text><text x="53" y="218">11</text><text x="53" y="278">10</text><text x="190" y="22">AB</text><text x="24" y="180.0">CD</text></g><text x="76" y="75" font-size="9" fill="#667085">0</text><text x="100" y="98" font-size="20" fill="#111">1</text><text x="136" y="75" font-size="9" fill="#667085">4</text><text x="160" y="98" font-size="20" fill="#111">0</text><text x="196" y="75" font-size="9" fill="#667085">12</text><text x="220" y="98" font-size="20" fill="#111">1</text><text x="256" y="75" font-size="9" fill="#667085">8</text><text x="280" y="98" font-size="20" fill="#111">0</text><text x="76" y="135" font-size="9" fill="#667085">1</text><text x="100" y="158" font-size="20" fill="#111">0</text><text x="136" y="135" font-size="9" fill="#667085">5</text><text x="160" y="158" font-size="20" fill="#111">0</text><text x="196" y="135" font-size="9" fill="#667085">13</text><text x="220" y="158" font-size="20" fill="#111">1</text><text x="256" y="135" font-size="9" fill="#667085">9</text><text x="280" y="158" font-size="20" fill="#111">0</text><text x="76" y="195" font-size="9" fill="#667085">3</text><text x="100" y="218" font-size="20" fill="#111">1</text><text x="136" y="195" font-size="9" fill="#667085">7</text><text x="160" y="218" font-size="20" fill="#111">1</text><text x="196" y="195" font-size="9" fill="#667085">15</text><text x="220" y="218" font-size="20" fill="#111">1</text><text x="256" y="195" font-size="9" fill="#667085">11</text><text x="280" y="218" font-size="20" fill="#111">1</text><text x="76" y="255" font-size="9" fill="#667085">2</text><text x="100" y="278" font-size="20" fill="#111">0</text><text x="136" y="255" font-size="9" fill="#667085">6</text><text x="160" y="278" font-size="20" fill="#111">0</text><text x="196" y="255" font-size="9" fill="#667085">14</text><text x="220" y="278" font-size="20" fill="#111">0</text><text x="256" y="255" font-size="9" fill="#667085">10</text><text x="280" y="278" font-size="20" fill="#111">0</text></g>
+                <rect x="74" y="64" width="52" height="52" rx="11" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="77" y="187" width="46" height="46" rx="11" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="140" y="190" width="40" height="40" rx="11" fill="none" stroke="#087e8b" stroke-width="2.5" /><rect x="254" y="184" width="52" height="52" rx="11" fill="none" stroke="#b54708" stroke-width="2.5" /><rect x="197" y="67" width="46" height="46" rx="11" fill="none" stroke="#6938bf" stroke-width="2.5" /><rect x="200" y="130" width="40" height="40" rx="11" fill="none" stroke="#067647" stroke-width="2.5" /><rect x="194" y="184" width="52" height="52" rx="11" fill="none" stroke="#b42318" stroke-width="2.5" />
+              </svg>
+              <figcaption id="implicant-size-1-caption"><strong>Size 1: 7 implicants.</strong> Rows CD, columns AB; matching colors across edges denote one wraparound cube.</figcaption>
+            </figure>
+            <figure class="adjacency-figure">
+              <svg style="--diagram-width: 320px" viewBox="0 0 350 325" role="img" aria-labelledby="implicant-size-2-title implicant-size-2-caption">
+                <title id="implicant-size-2-title">Size 2: 6 implicants</title>
+                <rect x="70" y="60" width="240" height="240" fill="#fff" />
+                <path d="M 70 60 H 310 V 300 H 70 Z M 130 60 V 300 M 190 60 V 300 M 250 60 V 300 M 70 120 H 310 M 70 180 H 310 M 70 240 H 310" fill="none" stroke="#aaa" stroke-width="1.3" />
+                <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">00</text><text x="53" y="158">01</text><text x="53" y="218">11</text><text x="53" y="278">10</text><text x="190" y="22">AB</text><text x="24" y="180.0">CD</text></g><text x="76" y="75" font-size="9" fill="#667085">0</text><text x="100" y="98" font-size="20" fill="#111">1</text><text x="136" y="75" font-size="9" fill="#667085">4</text><text x="160" y="98" font-size="20" fill="#111">0</text><text x="196" y="75" font-size="9" fill="#667085">12</text><text x="220" y="98" font-size="20" fill="#111">1</text><text x="256" y="75" font-size="9" fill="#667085">8</text><text x="280" y="98" font-size="20" fill="#111">0</text><text x="76" y="135" font-size="9" fill="#667085">1</text><text x="100" y="158" font-size="20" fill="#111">0</text><text x="136" y="135" font-size="9" fill="#667085">5</text><text x="160" y="158" font-size="20" fill="#111">0</text><text x="196" y="135" font-size="9" fill="#667085">13</text><text x="220" y="158" font-size="20" fill="#111">1</text><text x="256" y="135" font-size="9" fill="#667085">9</text><text x="280" y="158" font-size="20" fill="#111">0</text><text x="76" y="195" font-size="9" fill="#667085">3</text><text x="100" y="218" font-size="20" fill="#111">1</text><text x="136" y="195" font-size="9" fill="#667085">7</text><text x="160" y="218" font-size="20" fill="#111">1</text><text x="196" y="195" font-size="9" fill="#667085">15</text><text x="220" y="218" font-size="20" fill="#111">1</text><text x="256" y="195" font-size="9" fill="#667085">11</text><text x="280" y="218" font-size="20" fill="#111">1</text><text x="76" y="255" font-size="9" fill="#667085">2</text><text x="100" y="278" font-size="20" fill="#111">0</text><text x="136" y="255" font-size="9" fill="#667085">6</text><text x="160" y="278" font-size="20" fill="#111">0</text><text x="196" y="255" font-size="9" fill="#667085">14</text><text x="220" y="278" font-size="20" fill="#111">0</text><text x="256" y="255" font-size="9" fill="#667085">10</text><text x="280" y="278" font-size="20" fill="#111">0</text></g>
+                <rect x="74" y="184" width="112" height="52" rx="11" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="77" y="187" width="46" height="46" rx="11" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="257" y="187" width="46" height="46" rx="11" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="140" y="190" width="100" height="40" rx="11" fill="none" stroke="#087e8b" stroke-width="2.5" /><rect x="194" y="184" width="112" height="52" rx="11" fill="none" stroke="#b54708" stroke-width="2.5" /><rect x="197" y="67" width="46" height="106" rx="11" fill="none" stroke="#6938bf" stroke-width="2.5" /><rect x="200" y="130" width="40" height="100" rx="11" fill="none" stroke="#067647" stroke-width="2.5" />
+              </svg>
+              <figcaption id="implicant-size-2-caption"><strong>Size 2: 6 implicants.</strong> Rows CD, columns AB; matching colors across edges denote one wraparound cube.</figcaption>
+            </figure>
+            <figure class="adjacency-figure">
+              <svg style="--diagram-width: 320px" viewBox="0 0 350 325" role="img" aria-labelledby="implicant-size-4-title implicant-size-4-caption">
+                <title id="implicant-size-4-title">Size 4: 1 implicant</title>
+                <rect x="70" y="60" width="240" height="240" fill="#fff" />
+                <path d="M 70 60 H 310 V 300 H 70 Z M 130 60 V 300 M 190 60 V 300 M 250 60 V 300 M 70 120 H 310 M 70 180 H 310 M 70 240 H 310" fill="none" stroke="#aaa" stroke-width="1.3" />
+                <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">00</text><text x="53" y="158">01</text><text x="53" y="218">11</text><text x="53" y="278">10</text><text x="190" y="22">AB</text><text x="24" y="180.0">CD</text></g><text x="76" y="75" font-size="9" fill="#667085">0</text><text x="100" y="98" font-size="20" fill="#111">1</text><text x="136" y="75" font-size="9" fill="#667085">4</text><text x="160" y="98" font-size="20" fill="#111">0</text><text x="196" y="75" font-size="9" fill="#667085">12</text><text x="220" y="98" font-size="20" fill="#111">1</text><text x="256" y="75" font-size="9" fill="#667085">8</text><text x="280" y="98" font-size="20" fill="#111">0</text><text x="76" y="135" font-size="9" fill="#667085">1</text><text x="100" y="158" font-size="20" fill="#111">0</text><text x="136" y="135" font-size="9" fill="#667085">5</text><text x="160" y="158" font-size="20" fill="#111">0</text><text x="196" y="135" font-size="9" fill="#667085">13</text><text x="220" y="158" font-size="20" fill="#111">1</text><text x="256" y="135" font-size="9" fill="#667085">9</text><text x="280" y="158" font-size="20" fill="#111">0</text><text x="76" y="195" font-size="9" fill="#667085">3</text><text x="100" y="218" font-size="20" fill="#111">1</text><text x="136" y="195" font-size="9" fill="#667085">7</text><text x="160" y="218" font-size="20" fill="#111">1</text><text x="196" y="195" font-size="9" fill="#667085">15</text><text x="220" y="218" font-size="20" fill="#111">1</text><text x="256" y="195" font-size="9" fill="#667085">11</text><text x="280" y="218" font-size="20" fill="#111">1</text><text x="76" y="255" font-size="9" fill="#667085">2</text><text x="100" y="278" font-size="20" fill="#111">0</text><text x="136" y="255" font-size="9" fill="#667085">6</text><text x="160" y="278" font-size="20" fill="#111">0</text><text x="196" y="255" font-size="9" fill="#667085">14</text><text x="220" y="278" font-size="20" fill="#111">0</text><text x="256" y="255" font-size="9" fill="#667085">10</text><text x="280" y="278" font-size="20" fill="#111">0</text></g>
+                <rect x="74" y="184" width="232" height="52" rx="11" fill="none" stroke="#175cd3" stroke-width="2.5" />
+              </svg>
+              <figcaption id="implicant-size-4-caption"><strong>Size 4: 1 implicant.</strong> Rows CD, columns AB; matching colors across edges denote one wraparound cube.</figcaption>
+            </figure>
+          </div>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <caption>All valid cubes and their product terms</caption>
+              <thead><tr><th scope="col">Size</th><th scope="col">Cell indices</th><th scope="col">Implicant</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>{0}</td><td>A&prime;B&prime;C&prime;D&prime;</td></tr>
+                <tr><td>1</td><td>{3}</td><td>A&prime;B&prime;CD</td></tr>
+                <tr><td>1</td><td>{7}</td><td>A&prime;BCD</td></tr>
+                <tr><td>1</td><td>{11}</td><td>AB&prime;CD</td></tr>
+                <tr><td>1</td><td>{12}</td><td>ABC&prime;D&prime;</td></tr>
+                <tr><td>1</td><td>{13}</td><td>ABC&prime;D</td></tr>
+                <tr><td>1</td><td>{15}</td><td>ABCD</td></tr>
+                <tr><td>2</td><td>{3, 7}</td><td>A&prime;CD</td></tr>
+                <tr><td>2</td><td>{3, 11}</td><td>B&prime;CD</td></tr>
+                <tr><td>2</td><td>{7, 15}</td><td>BCD</td></tr>
+                <tr><td>2</td><td>{11, 15}</td><td>ACD</td></tr>
+                <tr><td>2</td><td>{12, 13}</td><td>ABC&prime;</td></tr>
+                <tr><td>2</td><td>{13, 15}</td><td>ABD</td></tr>
+                <tr><td>4</td><td>{3, 7, 11, 15}</td><td>CD</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Total = 7 single cells + 6 pairs + 1 four-cell cube = 14 implicants.</strong> No valid cube of size 8 or 16 exists. Count each distinct cube once; reordering literals does not create another implicant.</p>
+        </section>
+        <section class="subtopic" id="implicant-dont-care-example" aria-labelledby="implicant-dont-care-example-heading">
+          <h3 id="implicant-dont-care-example-heading">11.3 Example with Don&rsquo;t-Cares</h3>
+          <p><strong>F(a, b, c) = &Sigma;m(1, 7) + d(0, 2, 5, 6)</strong>. Rows are a; columns bc are in Gray-code order 00, 01, 11, 10. The remaining cells, 3 and 4, are 0.</p>
+          <div class="gate-details kmap-layouts">
+            <figure class="adjacency-figure">
+              <svg style="--diagram-width: 320px" viewBox="0 0 350 205" role="img" aria-labelledby="implicant-dc-size-1-title implicant-dc-size-1-caption">
+                <title id="implicant-dc-size-1-title">Size 1: 6 allowable cubes</title>
+                <rect x="70" y="60" width="240" height="120" fill="#fff" />
+                <path d="M 70 60 H 310 V 180 H 70 Z M 130 60 V 180 M 190 60 V 180 M 250 60 V 180 M 70 120 H 310" fill="none" stroke="#aaa" stroke-width="1.3" />
+                <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">0</text><text x="53" y="158">1</text><text x="190" y="22">bc</text><text x="24" y="120.0">a</text></g><text x="76" y="75" font-size="9" fill="#667085">0</text><text x="100" y="98" font-size="20" fill="#b54708">X</text><text x="136" y="75" font-size="9" fill="#667085">1</text><text x="160" y="98" font-size="20" fill="#111">1</text><text x="196" y="75" font-size="9" fill="#667085">3</text><text x="220" y="98" font-size="20" fill="#111">0</text><text x="256" y="75" font-size="9" fill="#667085">2</text><text x="280" y="98" font-size="20" fill="#b54708">X</text><text x="76" y="135" font-size="9" fill="#667085">4</text><text x="100" y="158" font-size="20" fill="#111">0</text><text x="136" y="135" font-size="9" fill="#667085">5</text><text x="160" y="158" font-size="20" fill="#b54708">X</text><text x="196" y="135" font-size="9" fill="#667085">7</text><text x="220" y="158" font-size="20" fill="#111">1</text><text x="256" y="135" font-size="9" fill="#667085">6</text><text x="280" y="158" font-size="20" fill="#b54708">X</text></g>
+                <rect x="74" y="64" width="52" height="52" rx="11" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="137" y="67" width="46" height="46" rx="11" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="260" y="70" width="40" height="40" rx="11" fill="none" stroke="#087e8b" stroke-width="2.5" /><rect x="134" y="124" width="52" height="52" rx="11" fill="none" stroke="#b54708" stroke-width="2.5" /><rect x="257" y="127" width="46" height="46" rx="11" fill="none" stroke="#6938bf" stroke-width="2.5" /><rect x="200" y="130" width="40" height="40" rx="11" fill="none" stroke="#067647" stroke-width="2.5" />
+              </svg>
+              <figcaption id="implicant-dc-size-1-caption"><strong>Size 1: 6 allowable cubes.</strong> Rows a, columns bc; matching colors across edges denote one wraparound cube.</figcaption>
+            </figure>
+            <figure class="adjacency-figure">
+              <svg style="--diagram-width: 320px" viewBox="0 0 350 205" role="img" aria-labelledby="implicant-dc-size-2-title implicant-dc-size-2-caption">
+                <title id="implicant-dc-size-2-title">Size 2: 6 allowable cubes</title>
+                <rect x="70" y="60" width="240" height="120" fill="#fff" />
+                <path d="M 70 60 H 310 V 180 H 70 Z M 130 60 V 180 M 190 60 V 180 M 250 60 V 180 M 70 120 H 310" fill="none" stroke="#aaa" stroke-width="1.3" />
+                <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">0</text><text x="53" y="158">1</text><text x="190" y="22">bc</text><text x="24" y="120.0">a</text></g><text x="76" y="75" font-size="9" fill="#667085">0</text><text x="100" y="98" font-size="20" fill="#b54708">X</text><text x="136" y="75" font-size="9" fill="#667085">1</text><text x="160" y="98" font-size="20" fill="#111">1</text><text x="196" y="75" font-size="9" fill="#667085">3</text><text x="220" y="98" font-size="20" fill="#111">0</text><text x="256" y="75" font-size="9" fill="#667085">2</text><text x="280" y="98" font-size="20" fill="#b54708">X</text><text x="76" y="135" font-size="9" fill="#667085">4</text><text x="100" y="158" font-size="20" fill="#111">0</text><text x="136" y="135" font-size="9" fill="#667085">5</text><text x="160" y="158" font-size="20" fill="#b54708">X</text><text x="196" y="135" font-size="9" fill="#667085">7</text><text x="220" y="158" font-size="20" fill="#111">1</text><text x="256" y="135" font-size="9" fill="#667085">6</text><text x="280" y="158" font-size="20" fill="#b54708">X</text></g>
+                <rect x="74" y="64" width="112" height="52" rx="11" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="77" y="67" width="46" height="46" rx="11" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="257" y="67" width="46" height="46" rx="11" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="140" y="70" width="40" height="100" rx="11" fill="none" stroke="#087e8b" stroke-width="2.5" /><rect x="254" y="64" width="52" height="112" rx="11" fill="none" stroke="#b54708" stroke-width="2.5" /><rect x="137" y="127" width="106" height="46" rx="11" fill="none" stroke="#6938bf" stroke-width="2.5" /><rect x="200" y="130" width="100" height="40" rx="11" fill="none" stroke="#067647" stroke-width="2.5" />
+              </svg>
+              <figcaption id="implicant-dc-size-2-caption"><strong>Size 2: 6 allowable cubes.</strong> Rows a, columns bc; matching colors across edges denote one wraparound cube.</figcaption>
+            </figure>
+          </div>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <caption>All valid cubes and their product terms</caption>
+              <thead><tr><th scope="col">Size</th><th scope="col">Cell indices</th><th scope="col">Implicant</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>{0}</td><td>a&prime;b&prime;c&prime;</td></tr>
+                <tr><td>1</td><td>{1}</td><td>a&prime;b&prime;c</td></tr>
+                <tr><td>1</td><td>{2}</td><td>a&prime;bc&prime;</td></tr>
+                <tr><td>1</td><td>{5}</td><td>ab&prime;c</td></tr>
+                <tr><td>1</td><td>{6}</td><td>abc&prime;</td></tr>
+                <tr><td>1</td><td>{7}</td><td>abc</td></tr>
+                <tr><td>2</td><td>{0, 1}</td><td>a&prime;b&prime;</td></tr>
+                <tr><td>2</td><td>{0, 2}</td><td>a&prime;c&prime;</td></tr>
+                <tr><td>2</td><td>{1, 5}</td><td>b&prime;c</td></tr>
+                <tr><td>2</td><td>{2, 6}</td><td>bc&prime;</td></tr>
+                <tr><td>2</td><td>{5, 7}</td><td>ac</td></tr>
+                <tr><td>2</td><td>{6, 7}</td><td>ab</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Slide count: 6 single cells + 6 pairs = 12 allowable implicant cubes</strong>, treating all Xs as 1. No four-cell group is valid because it would include a 0.</p>
+          <p><strong>Counting distinction:</strong> four singleton cubes and two pairs ({0, 2} and {2, 6}) contain only Xs. If counting only cubes that cover at least one required 1, there are <strong>2 singletons + 4 pairs = 6</strong>. The slide&rsquo;s total of 12 includes the X-only cubes.</p>
+        </section>
+      </section>
+      <section class="rule" id="prime-implicant" aria-labelledby="prime-implicant-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">12</span>
+          <h2 id="prime-implicant-heading">Prime Implicant</h2>
+        </div>
+        <section class="subtopic" id="prime-implicant-definition" aria-labelledby="prime-implicant-definition-heading">
+          <h3 id="prime-implicant-definition-heading">12.1 Definition</h3>
+          <p>A <strong>prime implicant (PI)</strong> is an implicant that is <strong>not fully contained in any larger valid implicant</strong>. On a K-map, its cube cannot be enlarged without including a 0.</p>
+          <p>In simple words, make each cube <strong>as large as it can be</strong>. This means maximal by containment, not necessarily the largest cube anywhere on the map: prime implicants can have different sizes.</p>
+          <p><strong>Every PI is an implicant; every implicant need not be prime.</strong> A smaller cube inside a larger valid cube is an implicant but not a PI.</p>
+          <p>For the slide&rsquo;s enumeration, treat <strong>don&rsquo;t-cares (X) as 1</strong>. As in topic 11, this may count maximal X-only cubes; they do not help cover required 1s.</p>
+        </section>
+        <section class="subtopic" id="prime-implicant-example" aria-labelledby="prime-implicant-example-heading">
+          <h3 id="prime-implicant-example-heading">12.2 Four-Variable Example</h3>
+          <p><strong>F(A, B, C, D) = &Sigma;m(0, 3, 7, 11, 12, 13, 15)</strong></p>
+          <p>Use the same function as in the implicant-counting example. Of its 14 implicants, only the four maximal cubes are prime.</p>
+          <figure class="adjacency-figure">
+            <svg style="--diagram-width: 340px" viewBox="0 0 350 325" role="img" aria-labelledby="prime-implicant-example-svg-title prime-implicant-example-svg-caption">
+              <title id="prime-implicant-example-svg-title">4 maximal cubes for 12.2 Four-Variable Example</title>
+              <rect x="70" y="60" width="240" height="240" fill="#fff" />
+              <path d="M 70 60 H 310 V 300 H 70 Z M 130 60 V 300 M 190 60 V 300 M 250 60 V 300 M 70 120 H 310 M 70 180 H 310 M 70 240 H 310" fill="none" stroke="#aaa" stroke-width="1.3" />
+              <g font-family="sans-serif" text-anchor="middle"><g fill="#111" font-size="14"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">00</text><text x="53" y="158">01</text><text x="53" y="218">11</text><text x="53" y="278">10</text><text x="190" y="22">AB</text><text x="24" y="180.0">CD</text></g><text x="78" y="76" fill="#667085" font-size="10">0</text><text x="100" y="98" fill="#111" font-size="21">1</text><text x="138" y="76" fill="#667085" font-size="10">4</text><text x="160" y="98" fill="#111" font-size="21">0</text><text x="198" y="76" fill="#667085" font-size="10">12</text><text x="220" y="98" fill="#111" font-size="21">1</text><text x="258" y="76" fill="#667085" font-size="10">8</text><text x="280" y="98" fill="#111" font-size="21">0</text><text x="78" y="136" fill="#667085" font-size="10">1</text><text x="100" y="158" fill="#111" font-size="21">0</text><text x="138" y="136" fill="#667085" font-size="10">5</text><text x="160" y="158" fill="#111" font-size="21">0</text><text x="198" y="136" fill="#667085" font-size="10">13</text><text x="220" y="158" fill="#111" font-size="21">1</text><text x="258" y="136" fill="#667085" font-size="10">9</text><text x="280" y="158" fill="#111" font-size="21">0</text><text x="78" y="196" fill="#667085" font-size="10">3</text><text x="100" y="218" fill="#111" font-size="21">1</text><text x="138" y="196" fill="#667085" font-size="10">7</text><text x="160" y="218" fill="#111" font-size="21">1</text><text x="198" y="196" fill="#667085" font-size="10">15</text><text x="220" y="218" fill="#111" font-size="21">1</text><text x="258" y="196" fill="#667085" font-size="10">11</text><text x="280" y="218" fill="#111" font-size="21">1</text><text x="78" y="256" fill="#667085" font-size="10">2</text><text x="100" y="278" fill="#111" font-size="21">0</text><text x="138" y="256" fill="#667085" font-size="10">6</text><text x="160" y="278" fill="#111" font-size="21">0</text><text x="198" y="256" fill="#667085" font-size="10">14</text><text x="220" y="278" fill="#111" font-size="21">0</text><text x="258" y="256" fill="#667085" font-size="10">10</text><text x="280" y="278" fill="#111" font-size="21">0</text></g>
+              <rect x="75" y="65" width="50" height="50" rx="13" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="198" y="68" width="44" height="104" rx="13" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="201" y="131" width="38" height="98" rx="13" fill="none" stroke="#087e8b" stroke-width="2.5" /><rect x="75" y="185" width="230" height="50" rx="13" fill="none" stroke="#b54708" stroke-width="2.5" />
+            </svg>
+            <figcaption id="prime-implicant-example-svg-caption">Rows CD, columns AB. Small numbers are indices. Matching colors on opposite edges denote one wraparound cube.</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <caption>All prime cubes under the slide&rsquo;s counting convention</caption>
+              <thead><tr><th scope="col">Group</th><th scope="col">Cells</th><th scope="col">Product term</th><th scope="col">Why prime?</th></tr></thead>
+              <tbody>
+                <tr><td><span style="color: #175cd3">P1</span></td><td>{0}</td><td>A&prime;B&prime;C&prime;D&prime;</td><td>Cannot expand without including a 0</td></tr>
+                <tr><td><span style="color: #c11574">P2</span></td><td>{12, 13}</td><td>ABC&prime;</td><td>Cannot expand without including a 0</td></tr>
+                <tr><td><span style="color: #087e8b">P3</span></td><td>{13, 15}</td><td>ABD</td><td>Cannot expand without including a 0</td></tr>
+                <tr><td><span style="color: #b54708">P4</span></td><td>{3, 7, 11, 15}</td><td>CD</td><td>Cannot expand without including a 0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Total: 4 prime implicants</strong> &mdash; A&prime;B&prime;C&prime;D&prime;, ABC&prime;, ABD, and CD. The isolated cell 0 is prime even though it is much smaller than the four-cell CD group.</p>
+          <p><strong>Not prime:</strong> the singleton at cell 13 is contained in larger pairs {12, 13} and {13, 15}. Likewise, the pair {3, 7} is contained in the four-cell CD group.</p>
+        </section>
+        <section class="subtopic" id="prime-implicant-dc" aria-labelledby="prime-implicant-dc-heading">
+          <h3 id="prime-implicant-dc-heading">12.3 Example with Don&rsquo;t-Cares</h3>
+          <p><strong>F(a, b, c) = &Sigma;m(1, 7) + d(0, 2, 5, 6)</strong></p>
+          <p>Treat the X cells as available while searching for maximal groups. Rows are a; columns bc use 00, 01, 11, 10.</p>
+          <figure class="adjacency-figure">
+            <svg style="--diagram-width: 340px" viewBox="0 0 350 205" role="img" aria-labelledby="prime-implicant-dc-svg-title prime-implicant-dc-svg-caption">
+              <title id="prime-implicant-dc-svg-title">6 maximal cubes for 12.3 Example with Don&#8217;t-Cares</title>
+              <rect x="70" y="60" width="240" height="120" fill="#fff" />
+              <path d="M 70 60 H 310 V 180 H 70 Z M 130 60 V 180 M 190 60 V 180 M 250 60 V 180 M 70 120 H 310" fill="none" stroke="#aaa" stroke-width="1.3" />
+              <g font-family="sans-serif" text-anchor="middle"><g fill="#111" font-size="14"><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text><text x="53" y="98">0</text><text x="53" y="158">1</text><text x="190" y="22">bc</text><text x="24" y="120.0">a</text></g><text x="78" y="76" fill="#667085" font-size="10">0</text><text x="100" y="98" fill="#b54708" font-size="21">X</text><text x="138" y="76" fill="#667085" font-size="10">1</text><text x="160" y="98" fill="#111" font-size="21">1</text><text x="198" y="76" fill="#667085" font-size="10">3</text><text x="220" y="98" fill="#111" font-size="21">0</text><text x="258" y="76" fill="#667085" font-size="10">2</text><text x="280" y="98" fill="#b54708" font-size="21">X</text><text x="78" y="136" fill="#667085" font-size="10">4</text><text x="100" y="158" fill="#111" font-size="21">0</text><text x="138" y="136" fill="#667085" font-size="10">5</text><text x="160" y="158" fill="#b54708" font-size="21">X</text><text x="198" y="136" fill="#667085" font-size="10">7</text><text x="220" y="158" fill="#111" font-size="21">1</text><text x="258" y="136" fill="#667085" font-size="10">6</text><text x="280" y="158" fill="#b54708" font-size="21">X</text></g>
+              <rect x="75" y="65" width="110" height="50" rx="13" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="78" y="68" width="44" height="44" rx="13" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="258" y="68" width="44" height="44" rx="13" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="141" y="71" width="38" height="98" rx="13" fill="none" stroke="#087e8b" stroke-width="2.5" /><rect x="255" y="65" width="50" height="110" rx="13" fill="none" stroke="#b54708" stroke-width="2.5" /><rect x="138" y="128" width="104" height="44" rx="13" fill="none" stroke="#6938bf" stroke-width="2.5" /><rect x="201" y="131" width="98" height="38" rx="13" fill="none" stroke="#067647" stroke-width="2.5" />
+            </svg>
+            <figcaption id="prime-implicant-dc-svg-caption">Rows a, columns bc. Small numbers are indices. Matching colors on opposite edges denote one wraparound cube.</figcaption>
+          </figure>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <caption>All prime cubes under the slide&rsquo;s counting convention</caption>
+              <thead><tr><th scope="col">Group</th><th scope="col">Cells</th><th scope="col">Product term</th><th scope="col">Why prime?</th></tr></thead>
+              <tbody>
+                <tr><td><span style="color: #175cd3">P1</span></td><td>{0, 1}</td><td>a&prime;b&prime;</td><td>Cannot expand without including a 0</td></tr>
+                <tr><td><span style="color: #c11574">P2</span></td><td>{0, 2}</td><td>a&prime;c&prime;</td><td>Cannot expand without including a 0; X-only cube</td></tr>
+                <tr><td><span style="color: #087e8b">P3</span></td><td>{1, 5}</td><td>b&prime;c</td><td>Cannot expand without including a 0</td></tr>
+                <tr><td><span style="color: #b54708">P4</span></td><td>{2, 6}</td><td>bc&prime;</td><td>Cannot expand without including a 0; X-only cube</td></tr>
+                <tr><td><span style="color: #6938bf">P5</span></td><td>{5, 7}</td><td>ac</td><td>Cannot expand without including a 0</td></tr>
+                <tr><td><span style="color: #067647">P6</span></td><td>{6, 7}</td><td>ab</td><td>Cannot expand without including a 0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Slide count: 6 prime cubes.</strong> All six pairs are maximal; none can expand to four cells without including a 0.</p>
+          <p>The pairs {0, 2} (a&prime;c&prime;) and {2, 6} (bc&prime;) contain only Xs. Excluding X-only groups leaves <strong>4 prime implicants covering required 1s</strong>: a&prime;b&prime;, b&prime;c, ac, and ab. X-only groups are unnecessary for an SOP cover.</p>
+        </section>
+      </section>
+      <section class="rule" id="essential-prime-implicant" aria-labelledby="essential-prime-implicant-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">13</span>
+          <h2 id="essential-prime-implicant-heading">Essential Prime Implicant</h2>
+        </div>
+        <section class="subtopic" id="epi-definition" aria-labelledby="epi-definition-heading">
+          <h3 id="epi-definition-heading">13.1 Definition and Role in mSOP</h3>
+          <p>An <strong>essential prime implicant (EPI)</strong> is a PI that covers at least one <strong>required 1 not covered by any other PI</strong>. That uniquely covered 1 makes the PI compulsory.</p>
+          <ul>
+            <li>Find all PIs, then check which required 1s have only one covering PI.</li>
+            <li>A PI containing <strong>only don&rsquo;t-cares is not an EPI</strong>: Xs need not be covered.</li>
+            <li><strong>Every EPI must appear in every minimum SOP</strong>.</li>
+            <li>If the EPIs together cover all required 1s, their sum gives the <strong>unique mSOP</strong> (ignoring term order).</li>
+          </ul>
+          <p>If some 1s remain uncovered, select additional PIs to complete a minimum cover. A function may have no EPIs and still have a valid mSOP.</p>
+        </section>
+        <section class="subtopic" id="epi-earlier-examples" aria-labelledby="epi-earlier-examples-heading">
+          <h3 id="epi-earlier-examples-heading">13.2 EPIs in the Earlier Examples</h3>
+          <p><strong>Example 1:</strong> F(A, B, C, D) = &Sigma;m(0, 3, 7, 11, 12, 13, 15). Use the map from <a href="#prime-implicant-example">12.2</a>.</p>
+          <table class="truth-table">
+            <caption>Four PIs, but only three are essential</caption>
+            <thead><tr><th scope="col">PI</th><th scope="col">Covered cells</th><th scope="col">Uniquely covered 1s</th><th scope="col">EPI?</th></tr></thead>
+            <tbody>
+              <tr><td>A&prime;B&prime;C&prime;D&prime;</td><td>0</td><td>0</td><td>Yes</td></tr>
+              <tr><td>CD</td><td>3, 7, 11, 15</td><td>3, 7, 11</td><td>Yes</td></tr>
+              <tr><td>ABC&prime;</td><td>12, 13</td><td>12</td><td>Yes</td></tr>
+              <tr><td>ABD</td><td>13, 15</td><td>None</td><td>No</td></tr>
+            </tbody>
+          </table>
+          <p><strong>ABD is prime but not essential:</strong> cell 13 is also covered by ABC&prime;, and cell 15 by CD.</p>
+          <p>The three EPIs cover every 1, so the <strong>unique mSOP is F = A&prime;B&prime;C&prime;D&prime; + ABC&prime; + CD</strong>.</p>
+          <p><strong>Example 2:</strong> F(a, b, c) = &Sigma;m(1, 7) + d(0, 2, 5, 6), using the map from <a href="#prime-implicant-dc">12.3</a>.</p>
+          <ul>
+            <li>Required cell 1 is covered by both a&prime;b&prime; ({0, 1}) and b&prime;c ({1, 5}).</li>
+            <li>Required cell 7 is covered by both ac ({5, 7}) and ab ({6, 7}).</li>
+          </ul>
+          <p><strong>No EPIs exist.</strong> Neither required 1 has a unique covering PI, and the two X-only prime cubes cannot be essential.</p>
+        </section>
+        <section class="subtopic" id="epi-full-exercise" aria-labelledby="epi-full-exercise-heading">
+          <h3 id="epi-full-exercise-heading">13.3 Exercise: Implicants, PIs, EPIs, and mSOP</h3>
+          <p><strong>F(w, x, y, z) = &Sigma;m(0, 4, 5, 7, 8, 11, 12, 15)</strong>. Rows yz and columns wx use Gray-code order 00, 01, 11, 10.</p>
+          <figure class="adjacency-figure">
+            <svg style="--diagram-width: 340px" viewBox="0 0 350 325" role="img" aria-labelledby="epi-exercise-svg-title epi-exercise-svg-caption">
+              <title id="epi-exercise-svg-title">Five prime implicants in the worked four-variable map</title>
+              <rect x="70" y="60" width="240" height="240" fill="#fff" />
+              <path d="M 70 60 H 310 V 300 H 70 Z M 130 60 V 300 M 190 60 V 300 M 250 60 V 300 M 70 120 H 310 M 70 180 H 310 M 70 240 H 310" fill="none" stroke="#aaa" stroke-width="1.3" />
+              <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="100" y="48">00</text><text x="53" y="98">00</text><text x="160" y="48">01</text><text x="53" y="158">01</text><text x="220" y="48">11</text><text x="53" y="218">11</text><text x="280" y="48">10</text><text x="53" y="278">10</text><text x="190" y="22">wx</text><text x="24" y="180">yz</text></g><text x="78" y="76" font-size="10" fill="#667085">0</text><text x="100" y="98" font-size="21" fill="#111">1</text><text x="138" y="76" font-size="10" fill="#667085">4</text><text x="160" y="98" font-size="21" fill="#111">1</text><text x="198" y="76" font-size="10" fill="#667085">12</text><text x="220" y="98" font-size="21" fill="#111">1</text><text x="258" y="76" font-size="10" fill="#667085">8</text><text x="280" y="98" font-size="21" fill="#111">1</text><text x="78" y="136" font-size="10" fill="#667085">1</text><text x="100" y="158" font-size="21" fill="#111">0</text><text x="138" y="136" font-size="10" fill="#667085">5</text><text x="160" y="158" font-size="21" fill="#111">1</text><text x="198" y="136" font-size="10" fill="#667085">13</text><text x="220" y="158" font-size="21" fill="#111">0</text><text x="258" y="136" font-size="10" fill="#667085">9</text><text x="280" y="158" font-size="21" fill="#111">0</text><text x="78" y="196" font-size="10" fill="#667085">3</text><text x="100" y="218" font-size="21" fill="#111">0</text><text x="138" y="196" font-size="10" fill="#667085">7</text><text x="160" y="218" font-size="21" fill="#111">1</text><text x="198" y="196" font-size="10" fill="#667085">15</text><text x="220" y="218" font-size="21" fill="#111">1</text><text x="258" y="196" font-size="10" fill="#667085">11</text><text x="280" y="218" font-size="21" fill="#111">1</text><text x="78" y="256" font-size="10" fill="#667085">2</text><text x="100" y="278" font-size="21" fill="#111">0</text><text x="138" y="256" font-size="10" fill="#667085">6</text><text x="160" y="278" font-size="21" fill="#111">0</text><text x="198" y="256" font-size="10" fill="#667085">14</text><text x="220" y="278" font-size="21" fill="#111">0</text><text x="258" y="256" font-size="10" fill="#667085">10</text><text x="280" y="278" font-size="21" fill="#111">0</text></g>
+              <rect x="75" y="65" width="230" height="50" rx="12" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="138" y="188" width="104" height="44" rx="12" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="141" y="131" width="38" height="98" rx="12" fill="none" stroke="#087e8b" stroke-width="2.5" /><rect x="135" y="65" width="50" height="110" rx="12" fill="none" stroke="#b54708" stroke-width="2.5" /><rect x="198" y="188" width="104" height="44" rx="12" fill="none" stroke="#6938bf" stroke-width="2.5" />
+            </svg>
+            <figcaption id="epi-exercise-svg-caption">All five PIs are outlined. The top row is a four-cell cube; its opposite edge cells are also adjacent.</figcaption>
+          </figure>
+          <h4>1. All implicants</h4>
+          <p><strong>Size 1:</strong> the eight minterms m<sub>0</sub>, m<sub>4</sub>, m<sub>5</sub>, m<sub>7</sub>, m<sub>8</sub>, m<sub>11</sub>, m<sub>12</sub>, m<sub>15</sub>.</p>
+          <table class="truth-table">
+            <caption>All eight size-2 implicants</caption>
+            <thead><tr><th scope="col">Pair</th><th scope="col">Product term</th></tr></thead>
+            <tbody>
+              <tr><td>{0, 4}</td><td>w&prime;y&prime;z&prime;</td></tr>
+              <tr><td>{0, 8}</td><td>x&prime;y&prime;z&prime;</td></tr>
+              <tr><td>{4, 5}</td><td>w&prime;xy&prime;</td></tr>
+              <tr><td>{4, 12}</td><td>xy&prime;z&prime;</td></tr>
+              <tr><td>{5, 7}</td><td>w&prime;xz</td></tr>
+              <tr><td>{7, 15}</td><td>xyz</td></tr>
+              <tr><td>{8, 12}</td><td>wy&prime;z&prime;</td></tr>
+              <tr><td>{11, 15}</td><td>wyz</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Size 4:</strong> {0, 4, 8, 12} &rarr; y&prime;z&prime;. No larger group exists. <strong>Total = 8 + 8 + 1 = 17 implicants</strong>.</p>
+          <h4>2. Prime and essential prime implicants</h4>
+          <table class="truth-table">
+            <caption>PI chart: identify uniquely covered required 1s</caption>
+            <thead><tr><th scope="col">PI</th><th scope="col">Cells</th><th scope="col">Unique 1s</th><th scope="col">EPI?</th></tr></thead>
+            <tbody>
+              <tr><td><span style="color: #175cd3">y&prime;z&prime;</span></td><td>0, 4, 8, 12</td><td>0, 8, 12</td><td>Yes</td></tr>
+              <tr><td><span style="color: #c11574">xyz</span></td><td>7, 15</td><td>None</td><td>No</td></tr>
+              <tr><td><span style="color: #087e8b">w&prime;xz</span></td><td>5, 7</td><td>None</td><td>No</td></tr>
+              <tr><td><span style="color: #b54708">w&prime;xy&prime;</span></td><td>4, 5</td><td>None</td><td>No</td></tr>
+              <tr><td><span style="color: #6938bf">wyz</span></td><td>11, 15</td><td>11</td><td>Yes</td></tr>
+            </tbody>
+          </table>
+          <p><strong>5 PIs; 2 EPIs:</strong> y&prime;z&prime; (uniquely covers 0, 8, and 12) and wyz (uniquely covers 11).</p>
+          <h4>3. Minimum SOP</h4>
+          <p>The EPIs cover {0, 4, 8, 11, 12, 15}, leaving <strong>5 and 7</strong>. Select w&prime;xz, which covers both in one pair.</p>
+          <p><strong>F = y&prime;z&prime; + wyz + w&prime;xz</strong> &mdash; <strong>3 terms, 8 literals</strong>. This mSOP is unique: the two EPIs are mandatory, and w&prime;xz is the only PI covering both remaining cells in one term.</p>
+          <p>The condition &ldquo;EPIs cover every 1&rdquo; is sufficient for uniqueness, but not necessary: this example still has a unique mSOP after one additional PI is chosen.</p>
+        </section>
+      </section>
+      <section class="rule" id="compact-kmap" aria-labelledby="compact-kmap-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">14</span>
+          <h2 id="compact-kmap-heading">Compact Kmap</h2>
+        </div>
+        <section class="subtopic" id="compact-kmap-method" aria-labelledby="compact-kmap-method-heading">
+          <h3 id="compact-kmap-method-heading">14.1 Compact Truth Tables and Variable-Entered Maps</h3>
+          <p>A <strong>compact (reduced) truth table</strong> keeps some variables in the input columns and writes the output as a constant or an expression in the remaining variables. Arranging these entries as a K-map gives a <strong>variable-entered K-map</strong>.</p>
+          <p>For F(A, B, C), keep A and B as map axes and enter C in the cells. For each fixed AB, compare outputs at <strong>C = 0 and C = 1</strong>:</p>
+          <table class="truth-table">
+            <caption>How a pair of outputs becomes one cell entry</caption>
+            <thead><tr><th scope="col">F at C = 0</th><th scope="col">F at C = 1</th><th scope="col">Compact entry</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>C</td></tr>
+              <tr><td>1</td><td>0</td><td>C&prime;</td></tr>
+              <tr><td>1</td><td>1</td><td>1</td></tr>
+            </tbody>
+          </table>
+          <p><strong>General reconstruction:</strong> if the entries for AB = 00, 01, 10, 11 are f<sub>0</sub>, f<sub>1</sub>, f<sub>2</sub>, f<sub>3</sub>, then</p>
+          <p><strong>F = A&prime;B&prime;f<sub>0</sub> + A&prime;Bf<sub>1</sub> + AB&prime;f<sub>2</sub> + ABf<sub>3</sub></strong>.</p>
+          <p>Each entry may be 0, 1, or an expression in the entered variables (for example C, D, or C + D). Multiply the cell&rsquo;s row/column condition by its entry, OR all contributions, then simplify. An entered variable is <strong>not a don&rsquo;t-care</strong>: its value must be preserved.</p>
+        </section>
+        <section class="subtopic" id="compact-table-examples" aria-labelledby="compact-table-examples-heading">
+          <h3 id="compact-table-examples-heading">14.2 Introductory Examples</h3>
+          <h4>Example 1: F(A, B, C) = AB&prime; + BC</h4>
+          <table class="truth-table">
+            <caption>Eight ordinary rows reduced to four variable-entered rows</caption>
+            <thead><tr><th scope="col">A</th><th scope="col">B</th><th scope="col">Entry</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>0</td></tr>
+              <tr><td>0</td><td>1</td><td>C</td></tr>
+              <tr><td>1</td><td>0</td><td>1</td></tr>
+              <tr><td>1</td><td>1</td><td>C</td></tr>
+            </tbody>
+          </table>
+          <p>Reconstruct: F = A&prime;BC + AB&prime; + ABC = AB&prime; + BC(A&prime; + A) = <strong>AB&prime; + BC</strong>.</p>
+          <h4>Example 2: Entries involving two variables</h4>
+          <table class="truth-table">
+            <caption>Compact table for F(A, B, C, D)</caption>
+            <thead><tr><th scope="col">A</th><th scope="col">B</th><th scope="col">Output in C, D</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>D</td></tr>
+              <tr><td>0</td><td>1</td><td>1</td></tr>
+              <tr><td>1</td><td>0</td><td>C + D</td></tr>
+              <tr><td>1</td><td>1</td><td>C</td></tr>
+            </tbody>
+          </table>
+          <p><strong>F = A&prime;B&prime;D + A&prime;B + AB&prime;(C + D) + ABC</strong>.</p>
+          <p>Expand AB&prime;(C + D), then combine A&prime;B&prime;D + AB&prime;D = B&prime;D and AB&prime;C + ABC = AC. Hence <strong>F = A&prime;B + AC + B&prime;D</strong>.</p>
+        </section>
+        <section class="subtopic practice-question" id="compact-gate-1988" aria-labelledby="compact-gate-1988-heading">
+          <h3 id="compact-gate-1988-heading">14.3 GATE CSE 1988: Derive and Use the Reduced Map</h3>
+          <p><strong>Question:</strong> Reduce the given three-variable K-map by entering C into a two-variable map. Explain (a) how the reduced map is formed and (b) how to derive the Boolean function from it.</p>
+          <figure class="adjacency-figure">
+            <svg style="--diagram-width: 340px" viewBox="0 0 350 205" role="img" aria-labelledby="compact-1988-title compact-1988-caption">
+              <title id="compact-1988-title">Expanded K-map and minimum SOP groups</title>
+              <rect x="70" y="60" width="240" height="120" fill="#fff" />
+              <path d="M 70 60 H 310 V 180 H 70 Z M 130 60 V 180 M 190 60 V 180 M 250 60 V 180 M 70 120 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
+              <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="190" y="22">BC</text><text x="25" y="120">A</text><text x="53" y="98">0</text><text x="53" y="158">1</text><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text></g><text x="78" y="76" font-size="10" fill="#667085">0</text><text x="100" y="98" font-size="21" fill="#111">1</text><text x="138" y="76" font-size="10" fill="#667085">1</text><text x="160" y="98" font-size="21" fill="#111">0</text><text x="198" y="76" font-size="10" fill="#667085">3</text><text x="220" y="98" font-size="21" fill="#111">1</text><text x="258" y="76" font-size="10" fill="#667085">2</text><text x="280" y="98" font-size="21" fill="#111">1</text><text x="78" y="136" font-size="10" fill="#667085">4</text><text x="100" y="158" font-size="21" fill="#111">0</text><text x="138" y="136" font-size="10" fill="#667085">5</text><text x="160" y="158" font-size="21" fill="#111">1</text><text x="198" y="136" font-size="10" fill="#667085">7</text><text x="220" y="158" font-size="21" fill="#111">1</text><text x="258" y="136" font-size="10" fill="#667085">6</text><text x="280" y="158" font-size="21" fill="#111">0</text></g>
+              <rect x="75" y="65" width="50" height="50" rx="11" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="255" y="65" width="50" height="50" rx="11" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="198" y="68" width="104" height="44" rx="11" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="141" y="131" width="98" height="38" rx="11" fill="none" stroke="#087e8b" stroke-width="2.5" />
+            </svg>
+            <figcaption id="compact-1988-caption">Expanded map: rows A, columns BC in Gray-code order. Small numbers are minterm indices; matching outlines across edges are one group.</figcaption>
+          </figure>
+          <h4>(a) Construct the reduced map</h4>
+          <p>Hold A and B fixed and inspect the two cells that differ only in C. Read the pair in <strong>C = 0, C = 1 order</strong>, even though the original columns are in Gray-code order.</p>
+          <table class="truth-table">
+            <caption>Pair the original cells before assigning entries</caption>
+            <thead><tr><th scope="col">AB</th><th scope="col">F(C = 0)</th><th scope="col">F(C = 1)</th><th scope="col">Entry</th></tr></thead>
+            <tbody>
+              <tr><td>00</td><td>1 (m<sub>0</sub>)</td><td>0 (m<sub>1</sub>)</td><td>C&prime;</td></tr>
+              <tr><td>01</td><td>1 (m<sub>2</sub>)</td><td>1 (m<sub>3</sub>)</td><td>1</td></tr>
+              <tr><td>10</td><td>0 (m<sub>4</sub>)</td><td>1 (m<sub>5</sub>)</td><td>C</td></tr>
+              <tr><td>11</td><td>0 (m<sub>6</sub>)</td><td>1 (m<sub>7</sub>)</td><td>C</td></tr>
+            </tbody>
+          </table>
+          <table class="truth-table kmap-table">
+            <caption>Reduced K-map: rows A, columns B</caption>
+            <thead><tr><th scope="col">A &bsol; B</th><th scope="col">0</th><th scope="col">1</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>C&prime;</td><td>1</td></tr>
+              <tr><td>1</td><td>C</td><td>C</td></tr>
+            </tbody>
+          </table>
+          <h4>(b) Derive and simplify the function</h4>
+          <ol>
+            <li>Read each compact cell: <strong>F = A&prime;B&prime;C&prime; + A&prime;B + AB&prime;C + ABC</strong>.</li>
+            <li>Combine the two C entries in row A = 1: AB&prime;C + ABC = AC.</li>
+            <li>Use B + B&prime;C&prime; = B + C&prime;: A&prime;B + A&prime;B&prime;C&prime; = A&prime;B + A&prime;C&prime;.</li>
+          </ol>
+          <p class="worked-result"><strong>One minimum SOP: F = A&prime;C&prime; + A&prime;B + AC</strong> (3 terms, 6 literals).</p>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #175cd3">{0, 2} &rarr; A&prime;C&prime; (edge wrap)</li>
+            <li style="--edge-color: #c11574">{2, 3} &rarr; A&prime;B</li>
+            <li style="--edge-color: #087e8b">{5, 7} &rarr; AC</li>
+          </ul>
+          <p><strong>Alternative mSOP:</strong> A&prime;C&prime; + BC + AC has the same cost. Thus the minimum form here is not unique.</p>
+        </section>
+        <section class="subtopic practice-question" id="compact-gate-1992" aria-labelledby="compact-gate-1992-heading">
+          <h3 id="compact-gate-1992-heading">14.4 GATE CSE 1992: Find the SOP Expression</h3>
+          <p><strong>Question:</strong> Find the Boolean function in SOP form from this variable-entered K-map.</p>
+          <table class="truth-table kmap-table">
+            <caption>Given map: rows B, columns C; A is entered in the cells</caption>
+            <thead><tr><th scope="col">B &bsol; C</th><th scope="col">0</th><th scope="col">1</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>1</td><td>0</td></tr>
+              <tr><td>1</td><td>A&prime;</td><td>A</td></tr>
+            </tbody>
+          </table>
+          <h4>Read the four contributions</h4>
+          <table class="truth-table">
+            <caption>Multiply each entry by its B/C cell condition</caption>
+            <thead><tr><th scope="col">B</th><th scope="col">C</th><th scope="col">Entry</th><th scope="col">Contribution</th></tr></thead>
+            <tbody>
+              <tr><td>0</td><td>0</td><td>1</td><td>B&prime;C&prime;</td></tr>
+              <tr><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+              <tr><td>1</td><td>0</td><td>A&prime;</td><td>A&prime;BC&prime;</td></tr>
+              <tr><td>1</td><td>1</td><td>A</td><td>ABC</td></tr>
+            </tbody>
+          </table>
+          <p><strong>Direct SOP: F = B&prime;C&prime; + A&prime;BC&prime; + ABC</strong>.</p>
+          <p>Simplify the first two terms: C&prime;(B&prime; + A&prime;B) = C&prime;(B&prime; + A&prime;). Therefore:</p>
+          <p class="worked-result"><strong>Minimum SOP: F = B&prime;C&prime; + A&prime;C&prime; + ABC</strong> (3 terms, 7 literals).</p>
+          <figure class="adjacency-figure">
+            <svg style="--diagram-width: 340px" viewBox="0 0 350 205" role="img" aria-labelledby="compact-1992-title compact-1992-caption">
+              <title id="compact-1992-title">Expanded K-map and minimum SOP groups</title>
+              <rect x="70" y="60" width="240" height="120" fill="#fff" />
+              <path d="M 70 60 H 310 V 180 H 70 Z M 130 60 V 180 M 190 60 V 180 M 250 60 V 180 M 70 120 H 310" fill="none" stroke="#aaa" stroke-width="1.4" />
+              <g font-family="sans-serif" text-anchor="middle"><g font-size="14" fill="#111"><text x="190" y="22">BC</text><text x="25" y="120">A</text><text x="53" y="98">0</text><text x="53" y="158">1</text><text x="100" y="48">00</text><text x="160" y="48">01</text><text x="220" y="48">11</text><text x="280" y="48">10</text></g><text x="78" y="76" font-size="10" fill="#667085">0</text><text x="100" y="98" font-size="21" fill="#111">1</text><text x="138" y="76" font-size="10" fill="#667085">1</text><text x="160" y="98" font-size="21" fill="#111">0</text><text x="198" y="76" font-size="10" fill="#667085">3</text><text x="220" y="98" font-size="21" fill="#111">0</text><text x="258" y="76" font-size="10" fill="#667085">2</text><text x="280" y="98" font-size="21" fill="#111">1</text><text x="78" y="136" font-size="10" fill="#667085">4</text><text x="100" y="158" font-size="21" fill="#111">1</text><text x="138" y="136" font-size="10" fill="#667085">5</text><text x="160" y="158" font-size="21" fill="#111">0</text><text x="198" y="136" font-size="10" fill="#667085">7</text><text x="220" y="158" font-size="21" fill="#111">1</text><text x="258" y="136" font-size="10" fill="#667085">6</text><text x="280" y="158" font-size="21" fill="#111">0</text></g>
+              <rect x="75" y="65" width="50" height="110" rx="11" fill="none" stroke="#175cd3" stroke-width="2.5" /><rect x="78" y="68" width="44" height="44" rx="11" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="258" y="68" width="44" height="44" rx="11" fill="none" stroke="#c11574" stroke-width="2.5" /><rect x="201" y="131" width="38" height="38" rx="11" fill="none" stroke="#087e8b" stroke-width="2.5" />
+            </svg>
+            <figcaption id="compact-1992-caption">Expanded map: rows A, columns BC in Gray-code order. Small numbers are minterm indices; matching outlines across edges are one group.</figcaption>
+          </figure>
+          <ul class="adjacency-legend">
+            <li style="--edge-color: #175cd3">{0, 4} &rarr; B&prime;C&prime;</li>
+            <li style="--edge-color: #c11574">{0, 2} &rarr; A&prime;C&prime; (edge wrap)</li>
+            <li style="--edge-color: #087e8b">{7} &rarr; ABC (isolated 1)</li>
+          </ul>
+          <p><strong>Check:</strong> F = &Sigma;m(0, 2, 4, 7). Cell 7 is isolated, so the three-literal term ABC cannot be removed.</p>
         </section>
       </section>
     </main>
