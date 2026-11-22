@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Compact GATE Theory of Computation notes on finite automata.">
+  <title>Finite Automata Notes</title>
+  <style>
+    :root { --ink: #111; --muted: #555; --line: #d9dce1; --paper: #fff; --page: #f1f2f4; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--page); font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 15px; line-height: 1.68; }
+    a { color: inherit; }
+    .topbar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 58px; padding: 10px 24px; color: #fff; background: #111; }
+    .brand { font-size: 15px; font-weight: 750; letter-spacing: -0.2px; }
+    .topbar-meta { display: flex; align-items: center; gap: 12px; }
+    .author-credit { color: #bbb; font-size: 12px; }
+    .author-credit strong { color: #fff; }
+    .course-tag { padding: 3px 9px; border: 1px solid #666; border-radius: 999px; color: #ddd; font-size: 12px; letter-spacing: 0.08em; white-space: nowrap; }
+    .layout { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 24px; width: min(1280px, calc(100% - 40px)); margin: 24px auto; }
+    .sidebar { position: sticky; top: 74px; align-self: start; max-height: calc(100dvh - 90px); overflow-y: auto; padding: 4px 14px 12px 0; border-right: 1px solid var(--line); }
+    .sidebar-title { margin: 0 0 10px 10px; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+    .sidebar a { display: block; padding: 8px 10px; border-left: 3px solid transparent; font-size: 13.5px; font-weight: 650; text-decoration: none; }
+    .sidebar a:hover, .sidebar a:focus-visible { background: var(--paper); border-left-color: var(--ink); }
+    a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    main { min-width: 0; padding: clamp(24px, 4vw, 46px); background: var(--paper); border-radius: 3px; box-shadow: 0 3px 14px rgb(0 0 0 / 4%); }
+    .page-heading { margin-top: 24px; }
+    .eyebrow { margin: 0 0 4px; color: var(--muted); font-size: 12px; font-weight: 750; letter-spacing: 0.12em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(26px, 3.4vw, 38px); line-height: 1.12; letter-spacing: -1.4px; }
+    .rule { margin-top: 28px; padding-top: 25px; border-top: 2px solid var(--ink); scroll-margin-top: 82px; }
+    .section-heading { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+    .section-number { color: var(--muted); font: 700 13px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    h2 { margin: 0; font-size: 22px; letter-spacing: -0.4px; }
+    p { margin: 0 0 12px; }
+    ul { margin: 0; padding-left: 22px; }
+    li + li { margin-top: 6px; }
+    .sidebar a.sub-link { padding-left: 25px; color: var(--muted); font-size: 12.5px; }
+    .sidebar a.question-link { padding-left: 40px; color: var(--muted); font-size: 12px; }
+    .sidebar a.question-link.important-question { color: #7c3aed; font-weight: 750; }
+    .subtopic { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); scroll-margin-top: 82px; }
+    h3 { margin: 0 0 12px; font-size: 18px; }
+    .table-wrap { overflow-x: auto; margin: 14px 0; }
+    .worked-result { margin-top: 16px; padding: 12px 14px; background: #f8fafd; }
+    .practice-question { margin-top: 24px; padding: clamp(16px, 3vw, 24px); border-radius: 8px; background: #edf3fa; scroll-margin-top: 82px; }
+    .practice-question h4 { margin: 0 0 12px; font-size: 16px; }
+    .practice-question > :last-child { margin-bottom: 0; }
+    .question-options { margin: 12px 0; padding-left: 24px; }
+    .truth-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; }
+    .truth-table th, .truth-table td { padding: 7px 12px; border: 1px solid var(--line); }
+    .truth-table th { background: var(--page); }
+    .graph-figure { margin: 18px 0 0; }
+    .graph-figure svg { display: block; width: 100%; max-width: 520px; height: auto; }
+    .graph-figure figcaption { color: var(--muted); font-size: 13px; }
+    .graph-examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px; margin: 18px 0; }
+    .graph-examples .graph-figure { margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: #fafbfc; }
+    .graph-examples .graph-figure svg { margin: 0 auto; }
+    .graph-wide svg { max-width: 660px; }
+    .isomorphism-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .graph-subheading { margin: 24px 0 10px; font-size: 17px; }
+    @media (max-width: 760px) {
+      .isomorphism-options { grid-template-columns: 1fr; }
+      .topbar { padding: 10px 16px; }
+      .author-credit { display: none; }
+      .layout { grid-template-columns: 1fr; width: calc(100% - 24px); gap: 16px; margin: 12px auto; }
+      .sidebar { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 12px; }
+      main { padding: 24px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Theory of Computation</div>
+    <div class="topbar-meta">
+      <span class="author-credit">By <strong>ProFonCoDe</strong></span>
+      <span class="course-tag">GATE &middot; TOC</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Table of contents">
+      <p class="sidebar-title">Topic Index</p>
+      <nav aria-label="Sections">
+        <a href="Intro.html">Introduction to TOC &larr;</a>
+        <a href="#introduction-to-fa">1. Introduction to Finite Automata</a>
+        <a class="sub-link" href="#automaton">1.1 Automaton</a>
+        <a class="sub-link" href="#state-diagram-conventions">1.2 State-Diagram Conventions</a>
+        <a class="sub-link" href="#string-acceptance">1.3 String Acceptance</a>
+        <a class="sub-link" href="#language-of-fa">1.4 Language of a Finite Automaton</a>
+        <a class="sub-link" href="#input-tape">1.5 Input Tape Working</a>
+        <a class="sub-link" href="#regular-language">1.6 Regular Languages</a>
+        <a class="sub-link" href="#dfa-and-nfa">1.7 DFA and NFA</a>
+        <a href="#construction-of-dfas">2. Construction of DFA's</a>
+        <a class="sub-link" href="#odd-length-dfa">2.1 Set of All Odd-Length Strings</a>
+        <a class="sub-link" href="#even-a-or-odd-b-dfa">2.2 Even Number of a's or Odd Number of b's</a>
+        <a class="sub-link" href="#even-a-and-odd-b-dfa">2.3 Even Number of a's and Odd Number of b's</a>
+        <a class="sub-link" href="#starts-with-a-dfa">2.4 Strings Starting with a</a>
+        <a class="sub-link" href="#starts-with-ab-dfa">2.5 Strings Starting with ab</a>
+        <a class="sub-link" href="#contains-a-dfa">2.6 Strings Containing a</a>
+        <a class="sub-link" href="#contains-001-dfa">2.7 Strings Containing 001</a>
+        <a class="sub-link" href="#contains-000-dfa">2.8 Strings Containing 000</a>
+        <a class="sub-link" href="#ends-with-a-dfa">2.9 Strings Ending with a</a>
+        <a class="sub-link" href="#ends-with-01-dfa">2.10 Strings Ending with 01</a>
+        <a class="sub-link" href="#a-star-b-dfa">2.11 L = {a<sup>n</sup>b | n &ge; 0}</a>
+        <a class="sub-link" href="#exactly-one-a-dfa">2.12 Strings with Exactly One a</a>
+        <a class="sub-link" href="#at-least-two-a-dfa">2.13 Strings with at Least Two a's</a>
+        <a class="sub-link" href="#at-most-two-a-dfa">2.14 Strings with No More Than Two a's</a>
+        <a class="sub-link" href="#a-count-mod-3-dfa">2.15 Number of a's Divisible by 3</a>
+        <a class="sub-link" href="#binary-mod-3-dfa">2.16 Binary Value Divisible by 3</a>
+        <a class="sub-link" href="#binary-mod-4-dfa">2.17 Binary Value Divisible by 4</a>
+      </nav>
+    </aside>
+    <main>
+      <header class="page-heading">
+        <p class="eyebrow">GATE Study Notes</p>
+        <h1>Finite Automata</h1>
+      </header>
+      <section class="rule" id="introduction-to-fa" aria-labelledby="introduction-to-fa-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">01</span>
+          <h2 id="introduction-to-fa-heading">Introduction to Finite Automata</h2>
+        </div>
+        <section class="subtopic" id="automaton" aria-labelledby="automaton-heading">
+          <h3 id="automaton-heading">1.1 Automaton</h3>
+          <p>A <strong>finite automaton</strong> (FA) is a machine with a <strong>finite set of states</strong> that processes an input string using transitions between states.</p>
+          <ul>
+            <li><strong>States:</strong> represent the possible configurations of the machine.</li>
+            <li><strong>Start / initial state:</strong> the state where processing begins, often denoted by q<sub>0</sub>.</li>
+            <li><strong>Accepting / final states:</strong> states used to determine acceptance after the entire input has been read.</li>
+            <li><strong>Transitions:</strong> specify how the machine changes state on reading an input symbol.</li>
+          </ul>
+          <p class="worked-result"><strong>Terminology:</strong> &ldquo;automaton&rdquo; is singular; &ldquo;automata&rdquo; is plural. A final state is an <strong>accepting state</strong>, not necessarily a state with no outgoing transitions.</p>
+        </section>
+        <section class="subtopic" id="state-diagram-conventions" aria-labelledby="state-diagram-conventions-heading">
+          <h3 id="state-diagram-conventions-heading">1.2 State-Diagram Conventions</h3>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Element</th><th scope="col">How It Is Drawn</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">State</th><td>A circle containing the state name</td></tr>
+                <tr><th scope="row">Initial state</th><td>An incoming arrow with no source state</td></tr>
+                <tr><th scope="row">Accepting state</th><td>A double circle</td></tr>
+                <tr><th scope="row">Transition on symbol a</th><td>A directed arrow labelled a, from the current state to the next state</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <figure class="graph-figure">
+            <svg viewBox="0 0 520 155" role="img" aria-labelledby="fa-conventions-title fa-conventions-caption">
+              <title id="fa-conventions-title">An initial state q0 and an accepting state q1 connected by a transition labelled a</title>
+              <defs>
+                <marker id="fa-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 Z" fill="#344054" /></marker>
+              </defs>
+              <g fill="none" stroke="#344054" stroke-width="2">
+                <path d="M 32 65 H 115" marker-end="url(#fa-arrow)" />
+                <circle cx="150" cy="65" r="32" />
+                <path d="M 182 65 H 332" marker-end="url(#fa-arrow)" />
+                <circle cx="367" cy="65" r="32" />
+                <circle cx="367" cy="65" r="25" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="150" y="71">q₀</text><text x="367" y="71">q₁</text><text x="257" y="51">a</text>
+              </g>
+              <g fill="#555" font-family="sans-serif" font-size="13" text-anchor="middle">
+                <text x="150" y="124">Initial state</text><text x="367" y="124">Accepting state</text>
+              </g>
+            </svg>
+            <figcaption id="fa-conventions-caption">Notation example: q<sub>0</sub> is initial, q<sub>1</sub> is accepting, and the labelled arrow means &ldquo;read a and move from q<sub>0</sub> to q<sub>1</sub>.&rdquo;</figcaption>
+          </figure>
+        </section>
+        <section class="subtopic" id="string-acceptance" aria-labelledby="string-acceptance-heading">
+          <h3 id="string-acceptance-heading">1.3 String Acceptance</h3>
+          <p>Begin at the initial state and process the input string <strong>w</strong> according to the transitions. For a deterministic run, check the state reached <strong>after reading the entire input</strong>:</p>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">State after the Entire Input</th><th scope="col">Decision</th></tr></thead>
+              <tbody>
+                <tr><td>Accepting / final state</td><td><strong>Accept w</strong></td></tr>
+                <tr><td>Nonaccepting / nonfinal state</td><td><strong>Reject w</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="worked-result"><strong>Read the whole string:</strong> reaching a final state partway through the input does not by itself imply acceptance. Continue processing any remaining symbols before deciding.</p>
+          <p>If a machine allows multiple possible runs, acceptance requires <strong>at least one run</strong> that consumes the entire input and ends in an accepting state.</p>
+          <h4 class="graph-subheading">Example: Accepting an Odd Number of 1's</h4>
+          <p>Let <strong>&Sigma; = {0, 1}</strong> and <strong>F = {q<sub>1</sub>}</strong>. The DFA below stays in the same state on 0 and switches states on 1. State q<sub>0</sub> represents an even number of 1's so far; q<sub>1</sub> represents an odd number.</p>
+          <figure class="graph-figure">
+            <svg viewBox="0 0 520 220" role="img" aria-labelledby="acceptance-example-title acceptance-example-caption">
+              <title id="acceptance-example-title">Binary DFA with zero self-loops and one transitions between q0 and accepting q1</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 25 120 H 112" />
+                <path d="M 178 108 Q 260 35 342 108" /><path d="M 342 132 Q 260 205 178 132" />
+                <path d="M 127 97 C 80 12 210 12 163 97" /><path d="M 357 97 C 310 12 440 12 393 97" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="145" cy="120" r="32" /><circle cx="375" cy="120" r="32" /><circle cx="375" cy="120" r="25" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="145" y="126">q<tspan baseline-shift="sub" font-size="12">0</tspan></text><text x="375" y="126">q<tspan baseline-shift="sub" font-size="12">1</tspan></text>
+                <text x="145" y="32">0</text><text x="375" y="32">0</text><text x="260" y="65">1</text><text x="260" y="193">1</text>
+              </g>
+            </svg>
+            <figcaption id="acceptance-example-caption">q<sub>0</sub> is initial; q<sub>1</sub> is the only accepting state. Decide acceptance after the last symbol.</figcaption>
+          </figure>
+          <p><strong>Rejected example, w = 0011:</strong><br>q<sub>0</sub> &rarr;<sup>0</sup> q<sub>0</sub> &rarr;<sup>0</sup> q<sub>0</sub> &rarr;<sup>1</sup> q<sub>1</sub> &rarr;<sup>1</sup> q<sub>0</sub>.</p>
+          <p>Although the run visits q<sub>1</sub>, the last 1 takes it back to nonfinal q<sub>0</sub>, so the string is rejected.</p>
+          <p><strong>Accepted example, w = 0010011:</strong><br>q<sub>0</sub> &rarr;<sup>0</sup> q<sub>0</sub> &rarr;<sup>0</sup> q<sub>0</sub> &rarr;<sup>1</sup> q<sub>1</sub> &rarr;<sup>0</sup> q<sub>1</sub> &rarr;<sup>0</sup> q<sub>1</sub> &rarr;<sup>1</sup> q<sub>0</sub> &rarr;<sup>1</sup> q<sub>1</sub>.</p>
+          <p class="worked-result">The complete string leaves the machine in <strong>final state q<sub>1</sub></strong>, so 0010011 is accepted.</p>
+        </section>
+        <section class="subtopic" id="language-of-fa" aria-labelledby="language-of-fa-heading">
+          <h3 id="language-of-fa-heading">1.4 Language of a Finite Automaton</h3>
+          <p>The <strong>language of a finite automaton M</strong>, denoted by <strong>L(M)</strong>, is the set of <strong>all and only those strings accepted by M</strong>.</p>
+          <p class="worked-result"><strong>L(M) = {w &isin; &Sigma;* | M accepts w}</strong>.</p>
+          <ul>
+            <li>If w &isin; L(M), then M accepts w.</li>
+            <li>If w &notin; L(M), then M rejects w.</li>
+          </ul>
+          <p><strong>Distinguish:</strong> acceptance is a decision about one input string; L(M) collects every accepted string into a language.</p>
+        </section>
+        <section class="subtopic" id="input-tape" aria-labelledby="input-tape-heading">
+          <h3 id="input-tape-heading">1.5 Input Tape Working</h3>
+          <ul>
+            <li>The input tape is divided into <strong>cells</strong>. Each occupied cell contains one symbol from the input alphabet &Sigma;.</li>
+            <li>The symbols of the input string are placed in consecutive cells, in their original order.</li>
+            <li>The FA reads / scans / consumes the input <strong>one symbol at a time, from left to right</strong>.</li>
+            <li>Consuming a symbol advances to the <strong>next cell on the right</strong>, while the transition determines the next state.</li>
+          </ul>
+          <figure class="graph-figure">
+            <svg viewBox="0 0 520 145" role="img" aria-labelledby="input-tape-title input-tape-caption">
+              <title id="input-tape-title">Input 0011 in four cells, scanned from left to right</title>
+              <g fill="#f8fafd" stroke="#344054" stroke-width="2">
+                <rect x="90" y="55" width="280" height="52" />
+                <path d="M 160 55 V 107 M 230 55 V 107 M 300 55 V 107" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="20" text-anchor="middle">
+                <text x="125" y="88">0</text><text x="195" y="88">0</text><text x="265" y="88">1</text><text x="335" y="88">1</text>
+              </g>
+              <path d="M 100 27 H 360" fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)" />
+              <text x="230" y="132" fill="#555" font-family="sans-serif" font-size="13" text-anchor="middle">One input symbol per cell</text>
+            </svg>
+            <figcaption id="input-tape-caption">The scanning direction is left to right. Only alphabet symbols occupy input cells.</figcaption>
+          </figure>
+          <p class="worked-result"><strong>&epsilon; is not written in an input cell:</strong> the empty string has no symbols to place on the tape. An &epsilon;-transition, when allowed, changes state <strong>without consuming an input symbol</strong> or advancing the input position.</p>
+        </section>
+        <section class="subtopic" id="regular-language" aria-labelledby="regular-language-heading">
+          <h3 id="regular-language-heading">1.6 Regular Languages</h3>
+          <p>A language is <strong>regular</strong> if it is recognized by <strong>some finite automaton</strong>.</p>
+          <p class="worked-result"><strong>L is regular &hArr; there exists a finite automaton M such that L(M) = L.</strong><br>M must accept <strong>all and only</strong> the strings in L.</p>
+          <p><strong>Example:</strong> the binary DFA in 1.3 accepts exactly the strings with an odd number of 1's. Therefore <strong>{w &isin; {0, 1}* | w has an odd number of 1's}</strong> is a regular language.</p>
+        </section>
+        <section class="subtopic" id="dfa-and-nfa" aria-labelledby="dfa-and-nfa-heading">
+          <h3 id="dfa-and-nfa-heading">1.7 DFA and NFA</h3>
+          <p>Finite automata have two main forms:</p>
+          <ul>
+            <li><strong>DFA — Deterministic Finite Automaton:</strong> for each state and input symbol, there is <strong>exactly one next state</strong>.</li>
+            <li><strong>NFA — Nondeterministic Finite Automaton:</strong> for a state and input symbol, there may be <strong>zero, one, or several next states</strong>.</li>
+          </ul>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 660 230" role="img" aria-labelledby="dfa-nfa-title dfa-nfa-caption">
+              <title id="dfa-nfa-title">Transition fragments comparing a single DFA destination with two possible NFA destinations on a</title>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="160" y="25">DFA</text><text x="490" y="25">NFA</text>
+              </g>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 108 120 H 213" /><path d="M 437 107 L 543 72" /><path d="M 437 133 L 543 168" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="80" cy="120" r="28" /><circle cx="243" cy="120" r="28" />
+                <circle cx="410" cy="120" r="28" /><circle cx="573" cy="62" r="28" /><circle cx="573" cy="178" r="28" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="80" y="126">q</text><text x="243" y="126">q<tspan baseline-shift="sub" font-size="12">1</tspan></text>
+                <text x="410" y="126">q</text><text x="573" y="68">q<tspan baseline-shift="sub" font-size="12">1</tspan></text><text x="573" y="184">q<tspan baseline-shift="sub" font-size="12">2</tspan></text>
+                <text x="160" y="105">a</text><text x="490" y="72">a</text><text x="490" y="178">a</text>
+              </g>
+            </svg>
+            <figcaption id="dfa-nfa-caption">Transition fragments: on the same symbol a, a DFA has one destination; an NFA may have multiple destinations. These fragments are not complete automata.</figcaption>
+          </figure>
+          <p class="worked-result"><strong>The key difference is the transition function:</strong> a DFA returns one state; an NFA returns a set of possible states. Both use finite states, initial and accepting states, and the same definition of the language recognized.</p>
+          <p><strong>Acceptance:</strong> a DFA has one run for an input string. An NFA accepts if <strong>at least one possible run</strong> consumes the entire input and ends in a final state; it rejects if none does. Both recognize exactly the <strong>regular languages</strong>.</p>
+        </section>
+      </section>
+      <section class="rule" id="construction-of-dfas" aria-labelledby="construction-of-dfas-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">02</span>
+          <h2 id="construction-of-dfas-heading">Construction of DFA's</h2>
+        </div>
+        <section class="subtopic" id="odd-length-dfa" aria-labelledby="odd-length-dfa-heading">
+          <h3 id="odd-length-dfa-heading">2.1 Set of All Odd-Length Strings</h3>
+          <figure class="graph-figure">
+            <svg viewBox="0 0 520 200" role="img" aria-labelledby="odd-length-title">
+              <title id="odd-length-title">Two-state DFA accepting odd-length strings over a and b</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 25 100 H 112" />
+                <path d="M 178 88 Q 260 15 342 88" />
+                <path d="M 342 112 Q 260 185 178 112" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="145" cy="100" r="32" /><circle cx="375" cy="100" r="32" /><circle cx="375" cy="100" r="25" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="145" y="106">q<tspan baseline-shift="sub" font-size="12">E</tspan></text><text x="375" y="106">q<tspan baseline-shift="sub" font-size="12">O</tspan></text>
+                <text x="260" y="46">a, b</text><text x="260" y="169">a, b</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="even-a-or-odd-b-dfa" aria-labelledby="even-a-or-odd-b-dfa-heading">
+          <h3 id="even-a-or-odd-b-dfa-heading">2.2 Set of All Strings with Even a's or Odd b's</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 600 390" role="img" aria-labelledby="parity-or-title">
+              <title id="parity-or-title">Four-state DFA accepting an even number of a symbols or an odd number of b symbols</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 20 100 H 115" />
+                <path d="M 184 88 Q 300 20 416 88" /><path d="M 416 112 Q 300 180 184 112" />
+                <path d="M 184 288 Q 300 220 416 288" /><path d="M 416 312 Q 300 380 184 312" />
+                <path d="M 138 134 Q 72 200 138 266" /><path d="M 162 266 Q 228 200 162 134" />
+                <path d="M 438 134 Q 372 200 438 266" /><path d="M 462 266 Q 528 200 462 134" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="150" cy="100" r="34" /><circle cx="150" cy="100" r="27" />
+                <circle cx="450" cy="100" r="34" />
+                <circle cx="150" cy="300" r="34" /><circle cx="150" cy="300" r="27" />
+                <circle cx="450" cy="300" r="34" /><circle cx="450" cy="300" r="27" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="150" y="106">q<tspan baseline-shift="sub" font-size="12">EE</tspan></text><text x="450" y="106">q<tspan baseline-shift="sub" font-size="12">OE</tspan></text>
+                <text x="150" y="306">q<tspan baseline-shift="sub" font-size="12">EO</tspan></text><text x="450" y="306">q<tspan baseline-shift="sub" font-size="12">OO</tspan></text>
+                <text x="300" y="48">a</text><text x="300" y="164">a</text><text x="300" y="248">a</text><text x="300" y="364">a</text>
+                <text x="94" y="205">b</text><text x="206" y="205">b</text><text x="394" y="205">b</text><text x="506" y="205">b</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="even-a-and-odd-b-dfa" aria-labelledby="even-a-and-odd-b-dfa-heading">
+          <h3 id="even-a-and-odd-b-dfa-heading">2.3 Set of All Strings with Even a's and Odd b's</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 600 390" role="img" aria-labelledby="parity-and-title">
+              <title id="parity-and-title">Four-state DFA accepting an even number of a symbols and an odd number of b symbols</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 20 100 H 115" />
+                <path d="M 184 88 Q 300 20 416 88" /><path d="M 416 112 Q 300 180 184 112" />
+                <path d="M 184 288 Q 300 220 416 288" /><path d="M 416 312 Q 300 380 184 312" />
+                <path d="M 138 134 Q 72 200 138 266" /><path d="M 162 266 Q 228 200 162 134" />
+                <path d="M 438 134 Q 372 200 438 266" /><path d="M 462 266 Q 528 200 462 134" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="150" cy="100" r="34" /><circle cx="450" cy="100" r="34" />
+                <circle cx="150" cy="300" r="34" /><circle cx="150" cy="300" r="27" />
+                <circle cx="450" cy="300" r="34" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="150" y="106">q<tspan baseline-shift="sub" font-size="12">EE</tspan></text><text x="450" y="106">q<tspan baseline-shift="sub" font-size="12">OE</tspan></text>
+                <text x="150" y="306">q<tspan baseline-shift="sub" font-size="12">EO</tspan></text><text x="450" y="306">q<tspan baseline-shift="sub" font-size="12">OO</tspan></text>
+                <text x="300" y="48">a</text><text x="300" y="164">a</text><text x="300" y="248">a</text><text x="300" y="364">a</text>
+                <text x="94" y="205">b</text><text x="206" y="205">b</text><text x="394" y="205">b</text><text x="506" y="205">b</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="starts-with-a-dfa" aria-labelledby="starts-with-a-dfa-heading">
+          <h3 id="starts-with-a-dfa-heading">2.4 Strings Starting with a</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 660 340" role="img" aria-labelledby="starts-with-a-dfa-title">
+              <title id="starts-with-a-dfa-title">DFA over a and b: Strings Starting with a</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 25 145 H 96" />
+                <path d="M 162 140 L 386 105" />
+                <path d="M 151 171 Q 235 260 386 260" />
+                <path d="M 402 74 C 350 0 490 0 438 74" />
+                <path d="M 438 286 C 515 345 540 220 451 248" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="130" cy="145" r="32" />
+                <circle cx="420" cy="100" r="32" />
+                <circle cx="420" cy="100" r="25" />
+                <circle cx="420" cy="260" r="32" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="130" y="151">q0</text>
+                <text x="420" y="106">q1</text>
+                <text x="420" y="266">Dead</text>
+                <text x="265" y="107">a</text>
+                <text x="265" y="240">b</text>
+                <text x="420" y="22">a, b</text>
+                <text x="548" y="294">a, b</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="starts-with-ab-dfa" aria-labelledby="starts-with-ab-dfa-heading">
+          <h3 id="starts-with-ab-dfa-heading">2.5 Strings Starting with ab</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 660 340" role="img" aria-labelledby="starts-with-ab-dfa-title">
+              <title id="starts-with-ab-dfa-title">DFA over a and b: Strings Starting with ab</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 20 120 H 66" />
+                <path d="M 132 120 H 276" />
+                <path d="M 342 120 H 516" />
+                <path d="M 121 145 Q 165 280 276 280" />
+                <path d="M 310 152 V 246" />
+                <path d="M 532 94 C 480 5 620 5 568 94" />
+                <path d="M 339 293 C 440 350 440 225 340 267" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="100" cy="120" r="32" />
+                <circle cx="310" cy="120" r="32" />
+                <circle cx="550" cy="120" r="32" />
+                <circle cx="550" cy="120" r="25" />
+                <circle cx="310" cy="280" r="32" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="100" y="126">q0</text>
+                <text x="310" y="126">q1</text>
+                <text x="550" y="126">q2</text>
+                <text x="310" y="286">Dead</text>
+                <text x="205" y="106">a</text>
+                <text x="430" y="106">b</text>
+                <text x="181" y="245">b</text>
+                <text x="327" y="205">a</text>
+                <text x="550" y="26">a, b</text>
+                <text x="438" y="291">a, b</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="contains-a-dfa" aria-labelledby="contains-a-dfa-heading">
+          <h3 id="contains-a-dfa-heading">2.6 Strings Containing a</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 660 340" role="img" aria-labelledby="contains-a-dfa-title">
+              <title id="contains-a-dfa-title">DFA over a and b: Strings Containing a</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 30 135 H 116" />
+                <path d="M 182 135 H 446" />
+                <path d="M 132 109 C 80 15 220 15 168 109" />
+                <path d="M 462 109 C 410 15 550 15 498 109" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="150" cy="135" r="32" />
+                <circle cx="480" cy="135" r="32" />
+                <circle cx="480" cy="135" r="25" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="150" y="141">q0</text>
+                <text x="480" y="141">q1</text>
+                <text x="315" y="120">a</text>
+                <text x="150" y="38">b</text>
+                <text x="480" y="38">a, b</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="contains-001-dfa" aria-labelledby="contains-001-dfa-heading">
+          <h3 id="contains-001-dfa-heading">2.7 Strings Containing 001</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 700 260" role="img" aria-labelledby="contains-001-dfa-title">
+              <title id="contains-001-dfa-title">DFA over 0 and 1: Strings Containing 001</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 15 130 H 58" />
+                <path d="M 120 130 H 228" />
+                <path d="M 290 130 H 398" />
+                <path d="M 460 130 H 568" />
+                <path d="M 73 105 C 28 15 152 15 107 105" />
+                <path d="M 413 105 C 368 15 492 15 447 105" />
+                <path d="M 583 105 C 538 15 662 15 617 105" />
+                <path d="M 240 153 Q 175 232 110 153" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="90" cy="130" r="30" />
+                <circle cx="260" cy="130" r="30" />
+                <circle cx="430" cy="130" r="30" />
+                <circle cx="600" cy="130" r="30" />
+                <circle cx="600" cy="130" r="23" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="90" y="136">q<tspan baseline-shift="sub" font-size="12">0</tspan></text>
+                <text x="260" y="136">q<tspan baseline-shift="sub" font-size="12">1</tspan></text>
+                <text x="430" y="136">q<tspan baseline-shift="sub" font-size="12">2</tspan></text>
+                <text x="600" y="136">q<tspan baseline-shift="sub" font-size="12">3</tspan></text>
+                <text x="175" y="115">0</text>
+                <text x="345" y="115">0</text>
+                <text x="515" y="115">1</text>
+                <text x="90" y="40">1</text>
+                <text x="430" y="40">0</text>
+                <text x="600" y="40">0, 1</text>
+                <text x="175" y="213">1</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="contains-000-dfa" aria-labelledby="contains-000-dfa-heading">
+          <h3 id="contains-000-dfa-heading">2.8 Strings Containing 000</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 700 300" role="img" aria-labelledby="contains-000-dfa-title">
+              <title id="contains-000-dfa-title">DFA over 0 and 1: Strings Containing 000</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 15 130 H 58" />
+                <path d="M 120 130 H 228" />
+                <path d="M 290 130 H 398" />
+                <path d="M 460 130 H 568" />
+                <path d="M 73 105 C 28 15 152 15 107 105" />
+                <path d="M 583 105 C 538 15 662 15 617 105" />
+                <path d="M 240 153 Q 175 218 110 153" />
+                <path d="M 413 155 Q 260 340 94 161" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="90" cy="130" r="30" />
+                <circle cx="260" cy="130" r="30" />
+                <circle cx="430" cy="130" r="30" />
+                <circle cx="600" cy="130" r="30" />
+                <circle cx="600" cy="130" r="23" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="90" y="136">q<tspan baseline-shift="sub" font-size="12">0</tspan></text>
+                <text x="260" y="136">q<tspan baseline-shift="sub" font-size="12">1</tspan></text>
+                <text x="430" y="136">q<tspan baseline-shift="sub" font-size="12">2</tspan></text>
+                <text x="600" y="136">q<tspan baseline-shift="sub" font-size="12">3</tspan></text>
+                <text x="175" y="115">0</text>
+                <text x="345" y="115">0</text>
+                <text x="515" y="115">0</text>
+                <text x="90" y="40">1</text>
+                <text x="600" y="40">0, 1</text>
+                <text x="175" y="201">1</text>
+                <text x="265" y="266">1</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="ends-with-a-dfa" aria-labelledby="ends-with-a-dfa-heading">
+          <h3 id="ends-with-a-dfa-heading">2.9 Strings Ending with a</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 660 280" role="img" aria-labelledby="ends-with-a-dfa-title">
+              <title id="ends-with-a-dfa-title">DFA over a and b: Strings Ending with a</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 30 130 H 118" />
+                <path d="M 182 130 H 448" />
+                <path d="M 133 105 C 88 15 212 15 167 105" />
+                <path d="M 463 105 C 418 15 542 15 497 105" />
+                <path d="M 460 155 Q 315 285 170 155" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="150" cy="130" r="30" />
+                <circle cx="480" cy="130" r="30" />
+                <circle cx="480" cy="130" r="23" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="150" y="136">q<tspan baseline-shift="sub" font-size="12">0</tspan></text>
+                <text x="480" y="136">q<tspan baseline-shift="sub" font-size="12">1</tspan></text>
+                <text x="315" y="115">a</text>
+                <text x="150" y="40">b</text>
+                <text x="480" y="40">a</text>
+                <text x="315" y="236">b</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="ends-with-01-dfa" aria-labelledby="ends-with-01-dfa-heading">
+          <h3 id="ends-with-01-dfa-heading">2.10 Strings Ending with 01</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 660 330" role="img" aria-labelledby="ends-with-01-dfa-title">
+              <title id="ends-with-01-dfa-title">DFA over 0 and 1: Strings Ending with 01</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 20 130 H 68" />
+                <path d="M 132 130 H 288" />
+                <path d="M 352 130 H 518" />
+                <path d="M 83 105 C 38 15 162 15 117 105" />
+                <path d="M 303 105 C 258 15 382 15 337 105" />
+                <path d="M 530 153 Q 435 238 340 153" />
+                <path d="M 550 162 C 550 320 100 320 100 162" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="100" cy="130" r="30" />
+                <circle cx="320" cy="130" r="30" />
+                <circle cx="550" cy="130" r="30" />
+                <circle cx="550" cy="130" r="23" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="100" y="136">q<tspan baseline-shift="sub" font-size="12">0</tspan></text>
+                <text x="320" y="136">q<tspan baseline-shift="sub" font-size="12">1</tspan></text>
+                <text x="550" y="136">q<tspan baseline-shift="sub" font-size="12">2</tspan></text>
+                <text x="210" y="115">0</text>
+                <text x="435" y="115">1</text>
+                <text x="100" y="40">1</text>
+                <text x="320" y="40">0</text>
+                <text x="435" y="211">0</text>
+                <text x="320" y="292">1</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="a-star-b-dfa" aria-labelledby="a-star-b-dfa-heading">
+          <h3 id="a-star-b-dfa-heading">2.11 L = {a<sup>n</sup>b | n &ge; 0}</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 720 220" role="img" aria-labelledby="a-star-b-dfa-title">
+              <title id="a-star-b-dfa-title">DFA over a and b: L = {a<sup>n</sup>b | n &ge; 0}</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 20 130 H 66" />
+                <path d="M 132 130 H 316" />
+                <path d="M 382 130 H 566" />
+                <path d="M 82 104 C 35 12 165 12 118 104" />
+                <path d="M 582 104 C 535 12 665 12 618 104" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="100" cy="130" r="32" />
+                <circle cx="350" cy="130" r="32" />
+                <circle cx="350" cy="130" r="25" />
+                <circle cx="600" cy="130" r="32" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="100" y="136">q0</text>
+                <text x="350" y="136">q1</text>
+                <text x="600" y="136">Dead</text>
+                <text x="225" y="113">b</text>
+                <text x="475" y="113">a, b</text>
+                <text x="100" y="36">a</text>
+                <text x="600" y="36">a, b</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="exactly-one-a-dfa" aria-labelledby="exactly-one-a-dfa-heading">
+          <h3 id="exactly-one-a-dfa-heading">2.12 Strings with Exactly One a</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 720 220" role="img" aria-labelledby="exactly-one-a-dfa-title">
+              <title id="exactly-one-a-dfa-title">DFA over a and b: Strings with Exactly One a</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 20 130 H 66" />
+                <path d="M 132 130 H 316" />
+                <path d="M 382 130 H 566" />
+                <path d="M 82 104 C 35 12 165 12 118 104" />
+                <path d="M 332 104 C 285 12 415 12 368 104" />
+                <path d="M 582 104 C 535 12 665 12 618 104" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="100" cy="130" r="32" />
+                <circle cx="350" cy="130" r="32" />
+                <circle cx="350" cy="130" r="25" />
+                <circle cx="600" cy="130" r="32" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="100" y="136">q0</text>
+                <text x="350" y="136">q1</text>
+                <text x="600" y="136">Dead</text>
+                <text x="225" y="113">a</text>
+                <text x="475" y="113">a</text>
+                <text x="100" y="36">b</text>
+                <text x="350" y="36">b</text>
+                <text x="600" y="36">a, b</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="at-least-two-a-dfa" aria-labelledby="at-least-two-a-dfa-heading">
+          <h3 id="at-least-two-a-dfa-heading">2.13 Strings with at Least Two a's</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 720 220" role="img" aria-labelledby="at-least-two-a-dfa-title">
+              <title id="at-least-two-a-dfa-title">DFA over a and b: Strings with at Least Two a's</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 20 130 H 66" />
+                <path d="M 132 130 H 316" />
+                <path d="M 382 130 H 566" />
+                <path d="M 82 104 C 35 12 165 12 118 104" />
+                <path d="M 332 104 C 285 12 415 12 368 104" />
+                <path d="M 582 104 C 535 12 665 12 618 104" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="100" cy="130" r="32" />
+                <circle cx="350" cy="130" r="32" />
+                <circle cx="600" cy="130" r="32" />
+                <circle cx="600" cy="130" r="25" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="100" y="136">q0</text>
+                <text x="350" y="136">q1</text>
+                <text x="600" y="136">q2</text>
+                <text x="225" y="113">a</text>
+                <text x="475" y="113">a</text>
+                <text x="100" y="36">b</text>
+                <text x="350" y="36">b</text>
+                <text x="600" y="36">a, b</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="at-most-two-a-dfa" aria-labelledby="at-most-two-a-dfa-heading">
+          <h3 id="at-most-two-a-dfa-heading">2.14 Strings with No More Than Two a's</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 720 220" role="img" aria-labelledby="at-most-two-a-dfa-title">
+              <title id="at-most-two-a-dfa-title">DFA over a and b: Strings with No More Than Two a's</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 10 130 H 46" />
+                <path d="M 112 130 H 226" />
+                <path d="M 292 130 H 406" />
+                <path d="M 472 130 H 586" />
+                <path d="M 62 104 C 15 12 145 12 98 104" />
+                <path d="M 242 104 C 195 12 325 12 278 104" />
+                <path d="M 422 104 C 375 12 505 12 458 104" />
+                <path d="M 602 104 C 555 12 685 12 638 104" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="80" cy="130" r="32" />
+                <circle cx="80" cy="130" r="25" />
+                <circle cx="260" cy="130" r="32" />
+                <circle cx="260" cy="130" r="25" />
+                <circle cx="440" cy="130" r="32" />
+                <circle cx="440" cy="130" r="25" />
+                <circle cx="620" cy="130" r="32" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="17" text-anchor="middle">
+                <text x="80" y="136">q0</text>
+                <text x="260" y="136">q1</text>
+                <text x="440" y="136">q2</text>
+                <text x="620" y="136">Dead</text>
+                <text x="170" y="113">a</text>
+                <text x="350" y="113">a</text>
+                <text x="530" y="113">a</text>
+                <text x="80" y="36">b</text>
+                <text x="260" y="36">b</text>
+                <text x="440" y="36">b</text>
+                <text x="620" y="36">a, b</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="a-count-mod-3-dfa" aria-labelledby="a-count-mod-3-dfa-heading">
+          <h3 id="a-count-mod-3-dfa-heading">2.15 Number of a's Divisible by 3</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 720 290" role="img" aria-labelledby="a-count-mod-3-dfa-title">
+              <title id="a-count-mod-3-dfa-title">DFA over a and b accepting strings whose a count is divisible by 3</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 20 130 H 64" />
+                <path d="M 134 130 H 314" />
+                <path d="M 384 130 H 564" />
+                <path d="M 582 159 C 520 280 180 280 118 159" />
+                <path d="M 81 102 C 30 8 170 8 119 102" />
+                <path d="M 331 102 C 280 8 420 8 369 102" />
+                <path d="M 581 102 C 530 8 670 8 619 102" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="100" cy="130" r="34" />
+                <circle cx="100" cy="130" r="27" />
+                <circle cx="350" cy="130" r="34" />
+                <circle cx="600" cy="130" r="34" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="16" text-anchor="middle">
+                <text x="100" y="136">Rem 0</text>
+                <text x="350" y="136">Rem 1</text>
+                <text x="600" y="136">Rem 2</text>
+                <text x="225" y="114">a</text>
+                <text x="475" y="114">a</text>
+                <text x="350" y="260">a</text>
+                <text x="100" y="34">b</text>
+                <text x="350" y="34">b</text>
+                <text x="600" y="34">b</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="binary-mod-3-dfa" aria-labelledby="binary-mod-3-dfa-heading">
+          <h3 id="binary-mod-3-dfa-heading">2.16 Binary Value Divisible by 3</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 720 250" role="img" aria-labelledby="binary-mod-3-dfa-title">
+              <title id="binary-mod-3-dfa-title">DFA over 0 and 1 accepting binary values divisible by 3, with leading zeros and epsilon accepted</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 20 130 H 64" />
+                <path d="M 134 119 Q 225 65 316 119" />
+                <path d="M 316 144 Q 225 205 134 144" />
+                <path d="M 384 119 Q 475 65 566 119" />
+                <path d="M 566 144 Q 475 205 384 144" />
+                <path d="M 81 102 C 30 8 170 8 119 102" />
+                <path d="M 581 102 C 530 8 670 8 619 102" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="100" cy="130" r="34" />
+                <circle cx="100" cy="130" r="27" />
+                <circle cx="350" cy="130" r="34" />
+                <circle cx="600" cy="130" r="34" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="16" text-anchor="middle">
+                <text x="100" y="136">Rem 0</text>
+                <text x="350" y="136">Rem 1</text>
+                <text x="600" y="136">Rem 2</text>
+                <text x="225" y="81">1</text>
+                <text x="225" y="190">1</text>
+                <text x="475" y="81">0</text>
+                <text x="475" y="190">0</text>
+                <text x="100" y="34">0</text>
+                <text x="600" y="34">1</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+        <section class="subtopic" id="binary-mod-4-dfa" aria-labelledby="binary-mod-4-dfa-heading">
+          <h3 id="binary-mod-4-dfa-heading">2.17 Binary Value Divisible by 4</h3>
+          <figure class="graph-figure graph-wide">
+            <svg viewBox="0 0 720 440" role="img" aria-labelledby="binary-mod-4-dfa-title">
+              <title id="binary-mod-4-dfa-title">Four-remainder DFA over 0 and 1 accepting binary values divisible by 4, with leading zeros and epsilon accepted</title>
+              <g fill="none" stroke="#344054" stroke-width="2" marker-end="url(#fa-arrow)">
+                <path d="M 25 100 H 124" />
+                <path d="M 194 100 H 464" />
+                <path d="M 500 134 V 284" />
+                <path d="M 466 320 H 196" />
+                <path d="M 160 286 V 136" />
+                <path d="M 470 116 Q 275 140 177 289" />
+                <path d="M 190 304 Q 385 280 483 131" />
+                <path d="M 141 72 C 90 -5 230 -5 179 72" />
+                <path d="M 527 340 C 635 425 645 270 532 307" />
+              </g>
+              <g fill="white" stroke="#344054" stroke-width="2">
+                <circle cx="160" cy="100" r="34" />
+                <circle cx="160" cy="100" r="27" />
+                <circle cx="500" cy="100" r="34" />
+                <circle cx="160" cy="320" r="34" />
+                <circle cx="500" cy="320" r="34" />
+              </g>
+              <g fill="#111" font-family="sans-serif" font-size="16" text-anchor="middle">
+                <text x="160" y="106">Rem 0</text>
+                <text x="500" y="106">Rem 1</text>
+                <text x="160" y="326">Rem 2</text>
+                <text x="500" y="326">Rem 3</text>
+                <text x="330" y="85">1</text>
+                <text x="518" y="211">1</text>
+                <text x="330" y="343">0</text>
+                <text x="139" y="211">0</text>
+                <text x="301" y="169">0</text>
+                <text x="361" y="267">1</text>
+                <text x="160" y="15">0</text>
+                <text x="625" y="360">1</text>
+              </g>
+            </svg>
+          </figure>
+        </section>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

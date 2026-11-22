@@ -1,0 +1,724 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Compact GATE Theory of Computation notes on finite automata and introductory concepts.">
+  <title>Theory of Computation Notes — Finite Automata</title>
+  <style>
+    :root { --ink: #111; --muted: #555; --line: #d9dce1; --paper: #fff; --page: #f1f2f4; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--page); font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 15px; line-height: 1.68; }
+    a { color: inherit; }
+    .topbar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 58px; padding: 10px 24px; color: #fff; background: #111; }
+    .brand { font-size: 15px; font-weight: 750; letter-spacing: -0.2px; }
+    .topbar-meta { display: flex; align-items: center; gap: 12px; }
+    .author-credit { color: #bbb; font-size: 12px; }
+    .author-credit strong { color: #fff; }
+    .course-tag { padding: 3px 9px; border: 1px solid #666; border-radius: 999px; color: #ddd; font-size: 12px; letter-spacing: 0.08em; white-space: nowrap; }
+    .layout { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 24px; width: min(1280px, calc(100% - 40px)); margin: 24px auto; }
+    .sidebar { position: sticky; top: 74px; align-self: start; max-height: calc(100dvh - 90px); overflow-y: auto; padding: 4px 14px 12px 0; border-right: 1px solid var(--line); }
+    .sidebar-title { margin: 0 0 10px 10px; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+    .sidebar a { display: block; padding: 8px 10px; border-left: 3px solid transparent; font-size: 13.5px; font-weight: 650; text-decoration: none; }
+    .sidebar a:hover, .sidebar a:focus-visible { background: var(--paper); border-left-color: var(--ink); }
+    a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    main { min-width: 0; padding: clamp(24px, 4vw, 46px); background: var(--paper); border-radius: 3px; box-shadow: 0 3px 14px rgb(0 0 0 / 4%); }
+    .page-heading { margin-top: 24px; }
+    .eyebrow { margin: 0 0 4px; color: var(--muted); font-size: 12px; font-weight: 750; letter-spacing: 0.12em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(26px, 3.4vw, 38px); line-height: 1.12; letter-spacing: -1.4px; }
+    .rule { margin-top: 28px; padding-top: 25px; border-top: 2px solid var(--ink); scroll-margin-top: 82px; }
+    .section-heading { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+    .section-number { color: var(--muted); font: 700 13px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    h2 { margin: 0; font-size: 22px; letter-spacing: -0.4px; }
+    p { margin: 0 0 12px; }
+    ul { margin: 0; padding-left: 22px; }
+    li + li { margin-top: 6px; }
+    .sidebar a.sub-link { padding-left: 25px; color: var(--muted); font-size: 12.5px; }
+    .sidebar a.question-link { padding-left: 40px; color: var(--muted); font-size: 12px; }
+    .sidebar a.question-link.important-question { color: #7c3aed; font-weight: 750; }
+    .subtopic { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); scroll-margin-top: 82px; }
+    h3 { margin: 0 0 12px; font-size: 18px; }
+    .table-wrap { overflow-x: auto; margin: 14px 0; }
+    .worked-result { margin-top: 16px; padding: 12px 14px; background: #f8fafd; }
+    .practice-question { margin-top: 24px; padding: clamp(16px, 3vw, 24px); border-radius: 8px; background: #edf3fa; scroll-margin-top: 82px; }
+    .practice-question h4 { margin: 0 0 12px; font-size: 16px; }
+    .practice-question > :last-child { margin-bottom: 0; }
+    .question-options { margin: 12px 0; padding-left: 24px; }
+    .truth-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; }
+    .truth-table th, .truth-table td { padding: 7px 12px; border: 1px solid var(--line); }
+    .truth-table th { background: var(--page); }
+    .graph-figure { margin: 18px 0 0; }
+    .graph-figure svg { display: block; width: 100%; max-width: 520px; height: auto; }
+    .graph-figure figcaption { color: var(--muted); font-size: 13px; }
+    .graph-examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px; margin: 18px 0; }
+    .graph-examples .graph-figure { margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: #fafbfc; }
+    .graph-examples .graph-figure svg { margin: 0 auto; }
+    .graph-wide svg { max-width: 660px; }
+    .isomorphism-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .graph-subheading { margin: 24px 0 10px; font-size: 17px; }
+    @media (max-width: 760px) {
+      .isomorphism-options { grid-template-columns: 1fr; }
+      .topbar { padding: 10px 16px; }
+      .author-credit { display: none; }
+      .layout { grid-template-columns: 1fr; width: calc(100% - 24px); gap: 16px; margin: 12px auto; }
+      .sidebar { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 12px; }
+      main { padding: 24px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Theory of Computation</div>
+    <div class="topbar-meta">
+      <span class="author-credit">By <strong>ProFonCoDe</strong></span>
+      <span class="course-tag">GATE &middot; TOC</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Table of contents">
+      <p class="sidebar-title">Topic Index</p>
+      <nav aria-label="Sections">
+        <a href="#introduction-to-toc">1. Introduction to TOC</a>
+        <a class="sub-link" href="#alphabet">1.1 Alphabet</a>
+        <a class="sub-link" href="#strings">1.2 Strings</a>
+        <a class="sub-link" href="#empty-string">1.3 Empty String</a>
+        <a class="sub-link" href="#strings-vs-sets">1.4 Strings vs Sets</a>
+        <a class="question-link" href="#unary-string-count-q1">Q1. Number of Strings over {a}</a>
+        <a class="sub-link" href="#counting-strings">1.5 Counting Strings</a>
+        <a class="question-link" href="#count-length-q2">Q2. Length 5 or n</a>
+        <a class="question-link" href="#fixed-positions-q3">Q3. Fixed Positions</a>
+        <a class="question-link" href="#at-most-length-q4">Q4. Length at Most 5</a>
+        <a class="sub-link" href="#reversal">1.6 Reversal</a>
+        <a class="sub-link" href="#palindrome">1.7 Palindrome Strings</a>
+        <a class="sub-link" href="#concatenation">1.8 Concatenation</a>
+        <a class="sub-link" href="#string-powers">1.9 Powers of a String</a>
+        <a class="sub-link" href="#prefix-suffix-substring">1.10 Prefix, Suffix, and Substring</a>
+        <a class="sub-link" href="#counting-string-parts">1.11 Counting Prefixes, Suffixes, and Substrings</a>
+        <a class="sub-link" href="#subsequences">1.12 Subsequences</a>
+        <a class="question-link" href="#count-subsequences-q5">Q5. Counting Subsequences: Distinct Symbols</a>
+        <a class="sub-link" href="#all-strings">1.13 Set of All Strings: &Sigma;*</a>
+        <a class="sub-link" href="#languages">1.14 Languages</a>
+        <a class="sub-link" href="#language-set-operations">1.15 Set Operations on Languages</a>
+        <a class="sub-link" href="#language-reversal">1.16 Reversal of a Language</a>
+        <a class="question-link" href="#reversal-palindromes-q6">Q6. Does L = L<sup>R</sup> Imply Palindromes?</a>
+        <a class="sub-link" href="#language-concatenation">1.17 Language Concatenation</a>
+        <a class="sub-link" href="#language-powers">1.18 Powers of a Language</a>
+        <a class="question-link" href="#language-square-q7">Q7. Square of {a<sup>n</sup>b<sup>n</sup> | n &ge; 0}</a>
+        <a class="sub-link" href="#kleene-star">1.19 Kleene Star</a>
+        <a class="sub-link" href="#positive-closure">1.20 Positive Closure</a>
+        <a class="question-link" href="#gate-2012-star-q8">Q8. GATE 2012: Membership in L*</a>
+        <a class="sub-link" href="#star-finiteness">1.21 When Is L* Infinite?</a>
+        <a class="question-link" href="#gate-2013-closure-q9">Q9. GATE 2013: Empty Language and Star</a>
+        <a class="sub-link" href="#star-examples">1.22 More Examples of L*</a>
+        <a class="sub-link" href="#language-complement">1.23 Complement of a Language</a>
+        <a class="question-link" href="#complement-unary-q10">Q10. Complement of {a<sup>n</sup> | n &ge; 0}</a>
+        <a class="question-link important-question" href="#star-plus-identities-q11">Q11. Important: Star vs Positive Closure</a>
+      </nav>
+    </aside>
+    <main>
+      <header class="page-heading">
+        <p class="eyebrow">GATE Study Notes</p>
+        <h1>Finite Automata</h1>
+      </header>
+      <section class="rule" id="introduction-to-toc" aria-labelledby="introduction-to-toc-heading">
+        <div class="section-heading">
+          <span class="section-number" aria-hidden="true">01</span>
+          <h2 id="introduction-to-toc-heading">Introduction to TOC</h2>
+        </div>
+        <section class="subtopic" id="alphabet" aria-labelledby="alphabet-heading">
+          <h3 id="alphabet-heading">1.1 Alphabet</h3>
+          <p>An <strong>alphabet</strong> is a <strong>nonempty, finite set of symbols</strong>. It is usually denoted by <strong>&Sigma;</strong> (capital Greek letter sigma).</p>
+          <ul>
+            <li><strong>Nonempty:</strong> an alphabet must contain at least one symbol.</li>
+            <li><strong>Finite:</strong> the number of symbols must be finite.</li>
+            <li><strong>Symbol:</strong> an element of an alphabet; each symbol is an <strong>atomic entity</strong>, treated as a single indivisible unit of <strong>length 1</strong>.</li>
+          </ul>
+          <h4 class="graph-subheading">Example: English Alphabet</h4>
+          <p>Taking the lowercase English letters as symbols:</p>
+          <p class="worked-result"><strong>&Sigma; = {a, b, c, &hellip;, y, z}</strong><br>Here, a, b, &hellip;, z are individual symbols. Each has length 1: <strong>|a| = |b| = &hellip; = |z| = 1</strong>.</p>
+          <h4 class="graph-subheading">Types of Alphabets</h4>
+          <p>An alphabet can be classified by the <strong>number of symbols</strong> it contains.</p>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead>
+                <tr><th scope="col">Type</th><th scope="col">Number of Symbols</th><th scope="col">Example</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">Unary alphabet</th><td>1</td><td>&Sigma; = {a}</td></tr>
+                <tr><th scope="row">Binary alphabet</th><td>2</td><td>&Sigma; = {a, b} or &Sigma; = {0, 1}</td></tr>
+                <tr><th scope="row">Ternary alphabet</th><td>3</td><td>&Sigma; = {0, 1, 2}</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="worked-result"><strong>Remember:</strong> &ldquo;binary&rdquo; means an alphabet has <strong>two symbols</strong>; those symbols need not be 0 and 1. The <strong>length of each symbol</strong> is 1, while the <strong>size of the alphabet</strong>, written |&Sigma;|, counts how many symbols it contains.</p>
+        </section>
+        <section class="subtopic" id="strings" aria-labelledby="strings-heading">
+          <h3 id="strings-heading">1.2 Strings</h3>
+          <p>A <strong>string over an alphabet &Sigma;</strong> is a <strong>finite sequence of symbols</strong>, where every symbol belongs to &Sigma;.</p>
+          <ul>
+            <li><strong>Order matters:</strong> ab &ne; ba, even though both use the same symbols.</li>
+            <li><strong>Repetition matters:</strong> aa &ne; aaa. A symbol can appear more than once in a string.</li>
+            <li><strong>Alphabet restriction:</strong> a string may use only symbols from the given alphabet; it need not use every symbol.</li>
+          </ul>
+          <h4 class="graph-subheading">Examples over Different Alphabets</h4>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead>
+                <tr><th scope="col">Alphabet</th><th scope="col">Valid Strings</th><th scope="col">Invalid String and Reason</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>&Sigma;<sub>1</sub> = {a, b}</td><td>abaa, aa, aaa, ab, ba</td><td>abc: c &notin; &Sigma;<sub>1</sub></td></tr>
+                <tr><td>&Sigma;<sub>2</sub> = {a}</td><td>a, aa, aaa, aaaaa</td><td>ab: b &notin; &Sigma;<sub>2</sub></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h4 class="graph-subheading">Length of a String</h4>
+          <p>The <strong>length</strong> of a string w, written <strong>|w|</strong>, is the <strong>number of symbol occurrences</strong> in it. Count repeated symbols each time they occur.</p>
+          <p class="worked-result">For w = 000 over &Sigma; = {0, 1}, <strong>|w| = 3</strong>. Although only one distinct symbol appears, the string contains three symbol occurrences.</p>
+          <h4 class="graph-subheading">More Examples</h4>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead>
+                <tr><th scope="col">String w</th><th scope="col">Alphabet</th><th scope="col">Length |w|</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>1010</td><td>&Sigma;<sub>1</sub> = {0, 1}</td><td>4</td></tr>
+                <tr><td>1234</td><td>&Sigma;<sub>2</sub> = {1, 2, &hellip;, 9}</td><td>4</td></tr>
+                <tr><td>theory</td><td>&Sigma;<sub>3</sub> = {a, b, &hellip;, z}</td><td>6</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="worked-result"><strong>Alphabet vs string:</strong> an alphabet is a <strong>set of available symbols</strong>; a string is an <strong>ordered sequence</strong> formed from them. For &Sigma; = {a, b}, |&Sigma;| = 2, while the string abaa has length 4.</p>
+        </section>
+        <section class="subtopic" id="empty-string" aria-labelledby="empty-string-heading">
+          <h3 id="empty-string-heading">1.3 Empty String</h3>
+          <p>The <strong>empty string</strong> (or <strong>null string</strong>), denoted by <strong>&epsilon;</strong> or <strong>&lambda;</strong>, is the string containing <strong>no symbols</strong>.</p>
+          <ul>
+            <li><strong>Length zero:</strong> |&epsilon;| = |&lambda;| = 0.</li>
+            <li><strong>Not an alphabet symbol:</strong> &epsilon; &notin; &Sigma;. Every alphabet symbol has length 1; the empty string has length 0.</li>
+            <li><strong>A string over every alphabet:</strong> containing no symbols does not violate any alphabet restriction.</li>
+          </ul>
+          <h4 class="graph-subheading">Empty String vs Empty Set</h4>
+          <p>The empty string is a <strong>sequence</strong>; the empty set is a <strong>set with no elements</strong>. A set containing the empty string has <strong>one element</strong>.</p>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead>
+                <tr><th scope="col">Notation</th><th scope="col">Meaning</th><th scope="col">Length or Cardinality</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>&epsilon;</td><td>Empty string</td><td>|&epsilon;| = 0 (string length)</td></tr>
+                <tr><td>&empty; = {}</td><td>Empty set</td><td>|&empty;| = 0 (number of elements)</td></tr>
+                <tr><td>{&epsilon;}</td><td>Set containing the empty string</td><td>|{&epsilon;}| = 1 (number of elements)</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="worked-result"><strong>Do not confuse:</strong> &epsilon;, {&epsilon;}, and &empty; are different objects. In particular, <strong>&epsilon; &isin; {&epsilon;}</strong>, but <strong>&epsilon; &notin; &empty;</strong>. The zero length of &epsilon; does not make {&epsilon;} an empty set.</p>
+        </section>
+        <section class="subtopic" id="strings-vs-sets" aria-labelledby="strings-vs-sets-heading">
+          <h3 id="strings-vs-sets-heading">1.4 Strings vs Sets</h3>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead>
+                <tr><th scope="col">Property</th><th scope="col">String: Sequence of Symbols</th><th scope="col">Set: Collection of Distinct Elements</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">Order</th><td>Matters: ab &ne; ba</td><td>Does not matter: {a, b} = {b, a}</td></tr>
+                <tr><th scope="row">Repetition</th><td>Matters: aab &ne; ab; aa &ne; aaa</td><td>Duplicates do not add elements: {a, a, b} = {a, b}</td></tr>
+                <tr><th scope="row">Length / size</th><td>Always finite</td><td>May be finite or infinite</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Recall:</strong> an alphabet is specifically a <strong>nonempty finite set</strong>, even though sets in general may be infinite.</p>
+          <article class="practice-question" id="unary-string-count-q1" aria-labelledby="unary-string-count-q1-heading">
+            <h4 id="unary-string-count-q1-heading">Q1. How Many Strings Are There over &Sigma; = {a}?</h4>
+            <p><strong>Question:</strong> Let &Sigma; = {a}. How many strings can be formed over &Sigma;?</p>
+            <p><strong>Solution:</strong> The strings are &epsilon;, a, aa, aaa, aaaa, &hellip;. For every nonnegative integer n, there is exactly one string of length n: <strong>a<sup>n</sup></strong>, meaning n copies of a, with <strong>a<sup>0</sup> = &epsilon;</strong>.</p>
+            <div class="table-wrap">
+              <table class="truth-table">
+                <thead>
+                  <tr><th scope="col">String</th><th scope="col">&epsilon;</th><th scope="col">a</th><th scope="col">aa</th><th scope="col">aaa</th><th scope="col">aaaa</th><th scope="col">&hellip;</th></tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Length</th><td>0</td><td>1</td><td>2</td><td>3</td><td>4</td><td>&hellip;</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="worked-result"><strong>Answer: infinitely many strings.</strong> Each individual string has <strong>finite length</strong>, but there is <strong>no maximum length</strong>. The ellipsis lists more finite strings; it does not represent a single infinitely long string.</p>
+          </article>
+        </section>
+        <section class="subtopic" id="counting-strings" aria-labelledby="counting-strings-heading">
+          <h3 id="counting-strings-heading">1.5 Counting Strings</h3>
+          <p>If an alphabet has <strong>k symbols</strong>, each position of a string has k independent choices. For a nonnegative integer n:</p>
+          <p class="worked-result"><strong>Strings of length n = k<sup>n</sup>.</strong><br>There is exactly one length-0 string: &epsilon;. If r distinct positions are fixed to specified alphabet symbols, the remaining n &minus; r positions give <strong>k<sup>n &minus; r</sup></strong> strings.</p>
+          <article class="practice-question" id="count-length-q2">
+            <h4>Q2. Strings of Length 5 or n over {a, b, c}</h4>
+            <p><strong>Solution:</strong> Each position has 3 choices, with repetition allowed.</p>
+            <p><strong>Length 5:</strong> 3<sup>5</sup> = <strong>243</strong>.<br><strong>Length n:</strong> <strong>3<sup>n</sup></strong>.</p>
+          </article>
+          <article class="practice-question" id="fixed-positions-q3">
+            <h4>Q3. Length 7, with First, Middle, and Last Symbols Fixed to b</h4>
+            <p>Over &Sigma; = {a, b, c}, the required pattern is <strong>b _ _ b _ _ b</strong>. Positions 1, 4, and 7 are fixed; four positions remain free.</p>
+            <p><strong>Answer:</strong> 1 &times; 3 &times; 3 &times; 1 &times; 3 &times; 3 &times; 1 = 3<sup>4</sup> = <strong>81</strong>.</p>
+          </article>
+          <article class="practice-question" id="at-most-length-q4">
+            <h4>Q4. Strings of Length at Most 5 over {a, b, c}</h4>
+            <p>Include every length from <strong>0 through 5</strong>, so the empty string is counted once.</p>
+            <p><strong>Answer:</strong> 1 + 3 + 3<sup>2</sup> + 3<sup>3</sup> + 3<sup>4</sup> + 3<sup>5</sup> = <strong>364</strong>.</p>
+          </article>
+          <p class="worked-result"><strong>General rule:</strong> strings of length at most n = &sum;<sub>i = 0</sub><sup>n</sup> k<sup>i</sup> = <strong>(k<sup>n + 1</sup> &minus; 1)/(k &minus; 1)</strong> for k &gt; 1. For a unary alphabet (k = 1), the count is <strong>n + 1</strong>.</p>
+        </section>
+        <section class="subtopic" id="reversal" aria-labelledby="reversal-heading">
+          <h3 id="reversal-heading">1.6 Reversal</h3>
+          <p>The <strong>reversal</strong> of a string w is the string obtained by writing its symbols in reverse order. It is denoted by <strong>w<sup>R</sup></strong>.</p>
+          <p class="worked-result">If <strong>w = a<sub>1</sub>a<sub>2</sub>&hellip;a<sub>n</sub></strong>, then <strong>w<sup>R</sup> = a<sub>n</sub>a<sub>n &minus; 1</sub>&hellip;a<sub>1</sub></strong>.<br>Example: w = abaa &rArr; w<sup>R</sup> = aaba.</p>
+          <p>Reversing &epsilon; gives &epsilon;: <strong>&epsilon;<sup>R</sup> = &epsilon;</strong>.</p>
+        </section>
+        <section class="subtopic" id="palindrome" aria-labelledby="palindrome-heading">
+          <h3 id="palindrome-heading">1.7 Palindrome Strings</h3>
+          <p>A <strong>palindrome</strong> is a string that reads the same forward and backward.</p>
+          <p class="worked-result"><strong>w is a palindrome &hArr; w = w<sup>R</sup>.</strong></p>
+          <p><strong>Examples:</strong> otto, madamimadam, 0110, 11011, and &epsilon;. Every single-symbol string is also a palindrome.</p>
+          <p><strong>Nonexample:</strong> ab is not a palindrome because (ab)<sup>R</sup> = ba &ne; ab.</p>
+        </section>
+        <section class="subtopic" id="concatenation" aria-labelledby="concatenation-heading">
+          <h3 id="concatenation-heading">1.8 Concatenation</h3>
+          <p>The <strong>concatenation</strong> of strings w and x, written <strong>wx</strong>, places all symbols of x immediately after all symbols of w.</p>
+          <p class="worked-result">For <strong>w = abaa</strong> and <strong>x = ab</strong>:<br><strong>wx = abaaab</strong>, while <strong>xw = ababaa</strong>.</p>
+          <h4 class="graph-subheading">Properties</h4>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Property</th><th scope="col">Rule</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Generally not commutative</th><td>wx need not equal xw</td></tr>
+                <tr><th scope="row">Associative</th><td>(wx)y = w(xy)</td></tr>
+                <tr><th scope="row">Empty string is the identity</th><td>w&epsilon; = &epsilon;w = w; &epsilon;&epsilon; = &epsilon;</td></tr>
+                <tr><th scope="row">Lengths add</th><td>|xy| = |x| + |y|</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Examples with several strings:</strong> for w<sub>1</sub> = ab, w<sub>2</sub> = b, and w<sub>3</sub> = aa:</p>
+          <ul>
+            <li>w<sub>1</sub>w<sub>2</sub>w<sub>1</sub> = <strong>abbab</strong>.</li>
+            <li>w<sub>1</sub>w<sub>1</sub>w<sub>2</sub>w<sub>3</sub> = <strong>ababbaa</strong>.</li>
+            <li>w<sub>1</sub>w<sub>2</sub> = abb, while w<sub>2</sub>w<sub>1</sub> = bab.</li>
+          </ul>
+          <p class="worked-result"><strong>Length example:</strong> x = abaa, y = aa &rArr; xy = abaaaa, so <strong>|xy| = 4 + 2 = 6</strong>.</p>
+        </section>
+        <section class="subtopic" id="string-powers" aria-labelledby="string-powers-heading">
+          <h3 id="string-powers-heading">1.9 Powers of a String</h3>
+          <p>For a nonnegative integer n, <strong>w<sup>n</sup></strong> means the concatenation of <strong>n copies of w</strong>.</p>
+          <p class="worked-result"><strong>w<sup>0</sup> = &epsilon;</strong> by definition; <strong>w<sup>1</sup> = w</strong>.<br><strong>w<sup>n + 1</sup> = w<sup>n</sup>w = ww<sup>n</sup></strong>.</p>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">For w = ab</th><th scope="col">Result</th></tr></thead>
+              <tbody>
+                <tr><td>w<sup>0</sup></td><td>&epsilon;</td></tr>
+                <tr><td>w<sup>1</sup></td><td>ab</td></tr>
+                <tr><td>w<sup>2</sup></td><td>abab</td></tr>
+                <tr><td>w<sup>3</sup></td><td>ababab</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Zero copies always give &epsilon;:</strong> &epsilon;<sup>0</sup> = (ab)<sup>0</sup> = a<sup>0</sup> = b<sup>0</sup> = &epsilon;.</p>
+        </section>
+        <section class="subtopic" id="prefix-suffix-substring" aria-labelledby="prefix-suffix-substring-heading">
+          <h3 id="prefix-suffix-substring-heading">1.10 Prefix, Suffix, and Substring</h3>
+          <p>Let w and x be strings over the same alphabet. In the formal definitions below, <strong>&hArr;</strong> means <strong>if and only if</strong>.</p>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Term</th><th scope="col">Meaning</th><th scope="col">Formal Condition</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Prefix x</th><td>Initial part of w</td><td>x is a prefix of w &hArr; w = xy for some string y</td></tr>
+                <tr><th scope="row">Suffix x</th><td>Final part of w</td><td>x is a suffix of w &hArr; w = yx for some string y</td></tr>
+                <tr><th scope="row">Substring x</th><td>Consecutive part of w</td><td>x is a substring of w &hArr; w = yxz for some strings y and z</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="worked-result"><strong>Reading the decompositions:</strong> in w = xy, x is at the beginning; in w = yx, x is at the end; in w = yxz, x is a consecutive block between y and z. The surrounding strings y and z are over the same alphabet and <strong>may be &epsilon;</strong>.</p>
+          <p><strong>&epsilon; and w itself</strong> are prefixes, suffixes, and substrings of w. A <strong>proper prefix</strong> or <strong>proper suffix</strong> is any prefix or suffix <strong>except w itself</strong>; for a nonempty w, &epsilon; is proper.</p>
+          <h4 class="graph-subheading">Example: w = abaab</h4>
+          <p><strong>Prefixes:</strong> &epsilon;, a, ab, aba, abaa, abaab.<br><strong>Proper prefixes:</strong> &epsilon;, a, ab, aba, abaa.</p>
+          <p><strong>Suffixes:</strong> &epsilon;, b, ab, aab, baab, abaab.<br><strong>Proper suffixes:</strong> &epsilon;, b, ab, aab, baab.</p>
+          <p><strong>Distinct substrings, grouped by length:</strong></p>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Length</th><th scope="col">Distinct Substrings of abaab</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>&epsilon;</td></tr>
+                <tr><td>1</td><td>a, b</td></tr>
+                <tr><td>2</td><td>ab, ba, aa</td></tr>
+                <tr><td>3</td><td>aba, baa, aab</td></tr>
+                <tr><td>4</td><td>abaa, baab</td></tr>
+                <tr><td>5</td><td>abaab</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="worked-result"><strong>Substring means consecutive:</strong> symbols cannot be skipped. In abaab, bb is not a substring, even though b appears twice. The table has <strong>12 distinct substrings</strong>, including &epsilon;.</p>
+        </section>
+        <section class="subtopic" id="counting-string-parts" aria-labelledby="counting-string-parts-heading">
+          <h3 id="counting-string-parts-heading">1.11 Counting Prefixes, Suffixes, and Substrings</h3>
+          <p>Let <strong>|w| = n</strong>. There is exactly one prefix and one suffix of each length 0, 1, &hellip;, n.</p>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">What Is Counted?</th><th scope="col">Count</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Prefixes</th><td>n + 1</td></tr>
+                <tr><th scope="row">Proper prefixes</th><td>n</td></tr>
+                <tr><th scope="row">Suffixes</th><td>n + 1</td></tr>
+                <tr><th scope="row">Proper suffixes</th><td>n</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Example:</strong> abc, aaa, and aba each have 4 prefixes and 4 suffixes because each has length 3. Repeated symbols do not change these counts.</p>
+          <h4 class="graph-subheading">Distinct Substrings Depend on the String</h4>
+          <p>Different positions can produce the <strong>same substring</strong>. When counting distinct substrings, count each resulting string only once and include &epsilon; once.</p>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">String</th><th scope="col">Distinct Substrings</th><th scope="col">Count</th></tr></thead>
+              <tbody>
+                <tr><td>aaa</td><td>&epsilon;, a, aa, aaa</td><td>4</td></tr>
+                <tr><td>abc</td><td>&epsilon;, a, b, c, ab, bc, abc</td><td>7</td></tr>
+                <tr><td>aba</td><td>&epsilon;, a, b, ab, ba, aba</td><td>6</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <h4 class="graph-subheading">Minimum: Repeating One Symbol</h4>
+          <p>For w = a<sup>n</sup>, the distinct substrings are &epsilon;, a, a<sup>2</sup>, &hellip;, a<sup>n</sup>: <strong>n + 1</strong> in total.</p>
+          <h4 class="graph-subheading">Maximum: All Symbols Distinct</h4>
+          <p>For w = a<sub>1</sub>a<sub>2</sub>&hellip;a<sub>n</sub> with all symbols distinct, the n &minus; &ell; + 1 occurrences of length &ell; are all distinct. Summing over nonzero lengths gives:</p>
+          <p class="worked-result"><strong>n + (n &minus; 1) + &hellip; + 1 = n(n + 1)/2</strong> nonempty substrings.<br>Including &epsilon;: <strong>n(n + 1)/2 + 1</strong> distinct substrings.</p>
+          <p><strong>For any string of length n:</strong> the number of distinct substrings, including &epsilon;, lies between <strong>n + 1</strong> and <strong>n(n + 1)/2 + 1</strong>. All symbols being distinct is sufficient to attain the upper bound.</p>
+          <p class="worked-result"><strong>Counting reminder:</strong> there are always <strong>n(n + 1)/2 nonempty substring occurrences</strong> (choices of start and end positions). Repetitions can reduce the number of <strong>distinct substrings</strong>, so this formula is not always their exact count.</p>
+        </section>
+        <section class="subtopic" id="subsequences" aria-labelledby="subsequences-heading">
+          <h3 id="subsequences-heading">1.12 Subsequences</h3>
+          <p>A <strong>subsequence</strong> of a string is obtained by <strong>deleting zero or more symbols</strong> without changing the <strong>relative order</strong> of the remaining symbols. The retained symbols <strong>need not be consecutive</strong>.</p>
+          <ul>
+            <li><strong>Example:</strong> acd is a subsequence of abcde: delete b and e.</li>
+            <li><strong>Nonexample:</strong> aec is not a subsequence of abcde, because e occurs after c in the original string.</li>
+            <li><strong>Boundary cases:</strong> deleting no symbols gives the original string; deleting all symbols gives &epsilon;. Both are subsequences.</li>
+          </ul>
+          <p class="worked-result"><strong>Substring vs subsequence:</strong> a substring must be consecutive; a subsequence may skip symbols. For abc, <strong>ac is a subsequence but not a substring</strong>. Every substring is a subsequence.</p>
+          <h4 class="graph-subheading">Example: All Subsequences of ABCD</h4>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Length</th><th scope="col">Distinct Subsequences</th><th scope="col">Count</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>&epsilon;</td><td>1</td></tr>
+                <tr><td>1</td><td>A, B, C, D</td><td>4</td></tr>
+                <tr><td>2</td><td>AB, AC, AD, BC, BD, CD</td><td>6</td></tr>
+                <tr><td>3</td><td>ABC, ABD, ACD, BCD</td><td>4</td></tr>
+                <tr><td>4</td><td>ABCD</td><td>1</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Total:</strong> 1 + 4 + 6 + 4 + 1 = <strong>16</strong>, including &epsilon;.</p>
+          <h4 class="graph-subheading">Distinct Subsequences Depend on the String</h4>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">String</th><th scope="col">Distinct Subsequences</th><th scope="col">Count</th></tr></thead>
+              <tbody>
+                <tr><td>aaa</td><td>&epsilon;, a, aa, aaa</td><td>4</td></tr>
+                <tr><td>abc</td><td>&epsilon;, a, b, c, ab, ac, bc, abc</td><td>8</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Both strings have length 3, but repeated symbols can make different selections of positions produce the <strong>same resulting string</strong>. For aaa, retaining any one of its three positions gives a.</p>
+          <article class="practice-question" id="count-subsequences-q5">
+            <h4>Q5. How Many Subsequences When All Symbols Are Distinct?</h4>
+            <p><strong>Question:</strong> A string w has length n and all its symbols are distinct. How many distinct subsequences does it have?</p>
+            <p><strong>Solution:</strong> Each of the n positions has two independent choices: <strong>keep</strong> or <strong>delete</strong>. Because all symbols are distinct, every choice of retained positions gives a different string.</p>
+            <p class="worked-result"><strong>Answer: 2<sup>n</sup></strong> distinct subsequences, including &epsilon;.<br>For w = abcde: <strong>2<sup>5</sup> = 32</strong>.<br>If only nonempty subsequences are counted: <strong>2<sup>n</sup> &minus; 1</strong>.</p>
+          </article>
+          <p class="worked-result"><strong>Counting reminder:</strong> any length-n string has <strong>2<sup>n</sup> selections of positions</strong>, but these need not give 2<sup>n</sup> distinct strings when symbols repeat. For w = a<sup>n</sup>, there are only <strong>n + 1 distinct subsequences</strong>: &epsilon;, a, a<sup>2</sup>, &hellip;, a<sup>n</sup>.</p>
+        </section>
+        <section class="subtopic" id="all-strings" aria-labelledby="all-strings-heading">
+          <h3 id="all-strings-heading">1.13 Set of All Strings: &Sigma;*</h3>
+          <p>The <strong>set of all finite-length strings</strong> over an alphabet &Sigma; is denoted by <strong>&Sigma;*</strong> (read &ldquo;sigma star&rdquo;). It includes <strong>every string over &Sigma;</strong>, including &epsilon;.</p>
+          <h4 class="graph-subheading">Example: &Sigma; = {a, b}</h4>
+          <p class="worked-result"><strong>&Sigma;* = {&epsilon;, a, b, aa, ab, ba, bb, aaa, aab, aba, abb, baa, bab, bba, bbb, &hellip;}</strong><br>The strings are listed by increasing length: first length 0, then length 1, then length 2, and so on.</p>
+          <h4 class="graph-subheading">Example: Unary Alphabet &Sigma; = {a}</h4>
+          <p class="worked-result"><strong>&Sigma;* = {&epsilon;, a, aa, aaa, aaaa, &hellip;} = {a<sup>n</sup> | n &ge; 0}</strong>.</p>
+          <ul>
+            <li><strong>&Sigma;* is infinite:</strong> for a nonempty alphabet, strings can have arbitrarily large finite lengths.</li>
+            <li><strong>Every member has finite length:</strong> &Sigma;* is an infinite set of finite-length strings.</li>
+            <li><strong>&epsilon; &isin; &Sigma;*:</strong> the empty string is always included, though it is not an alphabet symbol.</li>
+          </ul>
+        </section>
+        <section class="subtopic" id="languages" aria-labelledby="languages-heading">
+          <h3 id="languages-heading">1.14 Languages</h3>
+          <p>A <strong>language over an alphabet &Sigma;</strong> is <strong>any set of strings over &Sigma;</strong>. Formally:</p>
+          <p class="worked-result"><strong>L &sube; &Sigma;*</strong><br>A language selects some, all, or none of the strings in &Sigma;*. It may be <strong>finite or infinite</strong>.</p>
+          <h4 class="graph-subheading">Examples over &Sigma; = {a, b}</h4>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Language</th><th scope="col">Meaning / Members</th><th scope="col">Size</th></tr></thead>
+              <tbody>
+                <tr><td>L<sub>1</sub> = {a, ab}</td><td>Contains exactly the strings a and ab</td><td>2 (finite)</td></tr>
+                <tr><td>L<sub>2</sub> = &Sigma;*</td><td>Contains every string over {a, b}</td><td>Infinite</td></tr>
+                <tr><td>L<sub>3</sub> = {a<sup>p</sup> | p is prime}</td><td>{a<sup>2</sup>, a<sup>3</sup>, a<sup>5</sup>, a<sup>7</sup>, a<sup>11</sup>, &hellip;}</td><td>Infinite</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>In set-builder notation, the vertical bar <strong>|</strong> means <strong>&ldquo;such that&rdquo;</strong>. Thus {a<sup>p</sup> | p is prime} contains a string of p copies of a for each prime number p.</p>
+          <h4 class="graph-subheading">Empty Language and Singleton Languages</h4>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Language</th><th scope="col">What It Contains</th><th scope="col">Cardinality</th></tr></thead>
+              <tbody>
+                <tr><td>&empty; = {}</td><td>No strings: the empty language</td><td>0</td></tr>
+                <tr><td>{&epsilon;}</td><td>Exactly one string: the empty string</td><td>1</td></tr>
+                <tr><td>{a}</td><td>Exactly one string: a</td><td>1</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="worked-result"><strong>&epsilon; is a string; {&epsilon;} is a language.</strong><br><strong>&empty; &ne; {&epsilon;}</strong>: the empty language has no members, while {&epsilon;} has one member of length zero. The notation |L| counts <strong>strings in a language</strong>, while |w| counts <strong>symbols in a string</strong>.</p>
+          <h4 class="graph-subheading">A Finite Language Defined by a Pattern</h4>
+          <p>Let <strong>L = {a<sup>n</sup>b<sup>n</sup> | n is an integer and 0 &le; n &le; 100}</strong>. Each member has n copies of a followed by n copies of b.</p>
+          <p class="worked-result"><strong>L = {&epsilon;, ab, aabb, aaabbb, &hellip;, a<sup>100</sup>b<sup>100</sup>}</strong><br>For n = 0: a<sup>0</sup>b<sup>0</sup> = &epsilon;&epsilon; = &epsilon;. There is one distinct string for each of the <strong>101</strong> values of n, so <strong>|L| = 101</strong>.</p>
+        </section>
+        <section class="subtopic" id="language-set-operations" aria-labelledby="language-set-operations-heading">
+          <h3 id="language-set-operations-heading">1.15 Set Operations on Languages</h3>
+          <p>Languages are <strong>sets of strings</strong>, so ordinary set operations apply. Let L<sub>1</sub> and L<sub>2</sub> be languages over the same alphabet.</p>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Operation</th><th scope="col">Formal Definition</th><th scope="col">Membership Rule</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Union</th><td>L<sub>1</sub> &cup; L<sub>2</sub> = {w | w &isin; L<sub>1</sub> or w &isin; L<sub>2</sub>}</td><td>In either language, including in both</td></tr>
+                <tr><th scope="row">Intersection</th><td>L<sub>1</sub> &cap; L<sub>2</sub> = {w | w &isin; L<sub>1</sub> and w &isin; L<sub>2</sub>}</td><td>In both languages</td></tr>
+                <tr><th scope="row">Difference</th><td>L<sub>1</sub> &minus; L<sub>2</sub> = L<sub>1</sub> &bsol; L<sub>2</sub> = {w | w &isin; L<sub>1</sub> and w &notin; L<sub>2</sub>}</td><td>In L<sub>1</sub>, but not in L<sub>2</sub></td></tr>
+                <tr><th scope="row">Symmetric difference</th><td>L<sub>1</sub> &Delta; L<sub>2</sub> = (L<sub>1</sub> &minus; L<sub>2</sub>) &cup; (L<sub>2</sub> &minus; L<sub>1</sub>)</td><td>In exactly one of the two languages</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>Symmetric difference is also sometimes written <strong>L<sub>1</sub> &oplus; L<sub>2</sub></strong>.</p>
+          <h4 class="graph-subheading">Small Example</h4>
+          <p>Take <strong>L<sub>1</sub> = {&epsilon;, a, ab}</strong> and <strong>L<sub>2</sub> = {a, b}</strong>.</p>
+          <ul>
+            <li><strong>Union:</strong> L<sub>1</sub> &cup; L<sub>2</sub> = {&epsilon;, a, ab, b}.</li>
+            <li><strong>Intersection:</strong> L<sub>1</sub> &cap; L<sub>2</sub> = {a}.</li>
+            <li><strong>Difference:</strong> L<sub>1</sub> &minus; L<sub>2</sub> = {&epsilon;, ab}, while L<sub>2</sub> &minus; L<sub>1</sub> = {b}.</li>
+            <li><strong>Symmetric difference:</strong> L<sub>1</sub> &Delta; L<sub>2</sub> = {&epsilon;, ab, b}.</li>
+          </ul>
+          <p class="worked-result"><strong>Remember:</strong> union includes common strings once; intersection keeps only common strings; symmetric difference removes common strings. Difference depends on the order of the languages.</p>
+        </section>
+        <section class="subtopic" id="language-reversal" aria-labelledby="language-reversal-heading">
+          <h3 id="language-reversal-heading">1.16 Reversal of a Language</h3>
+          <p>The <strong>reversal of a language L</strong>, denoted by <strong>L<sup>R</sup></strong>, is the set obtained by <strong>reversing every string in L</strong>.</p>
+          <p class="worked-result"><strong>L<sup>R</sup> = {w<sup>R</sup> | w &isin; L}</strong><br>Reverse each member individually; the order in which a set's members are listed does not matter.</p>
+          <h4 class="graph-subheading">Examples</h4>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Language L</th><th scope="col">Reversal L<sup>R</sup></th><th scope="col">Comparison</th></tr></thead>
+              <tbody>
+                <tr><td>{ab, aa, bab, ba}</td><td>{ba, aa, bab, ab}</td><td>L = L<sup>R</sup>: the same set of strings</td></tr>
+                <tr><td>{ab, abb, bb}</td><td>{ba, bba, bb}</td><td>L &ne; L<sup>R</sup></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="worked-result"><strong>|L| = |L<sup>R</sup>|.</strong> Reversal preserves cardinality: reversing twice gives the original string, so different strings have different reversals. This holds for finite and infinite languages.</p>
+          <article class="practice-question" id="reversal-palindromes-q6">
+            <h4>Q6. If L = L<sup>R</sup>, Is Every String in L a Palindrome?</h4>
+            <p><strong>Answer: No.</strong> Take <strong>L = {ab, ba}</strong>. Then <strong>L<sup>R</sup> = {ba, ab} = L</strong>, but neither ab nor ba is a palindrome.</p>
+            <p><strong>Reason:</strong> L = L<sup>R</sup> means that <strong>the reversal of every member is also in L</strong>. A string and its reversal may be different members of the same set.</p>
+            <p class="worked-result"><strong>Distinguish:</strong> w = w<sup>R</sup> says an individual string is a palindrome; L = L<sup>R</sup> says a language is closed under reversal.<br>If every string in L is a palindrome, then <strong>L = L<sup>R</sup></strong>. The converse is false.</p>
+          </article>
+        </section>
+        <section class="subtopic" id="language-concatenation" aria-labelledby="language-concatenation-heading">
+          <h3 id="language-concatenation-heading">1.17 Language Concatenation</h3>
+          <p>The <strong>concatenation of languages L<sub>1</sub> and L<sub>2</sub></strong>, written <strong>L<sub>1</sub>L<sub>2</sub></strong> or <strong>L<sub>1</sub> &middot; L<sub>2</sub></strong>, is formed by concatenating each string from L<sub>1</sub> with each string from L<sub>2</sub>, in that order.</p>
+          <p class="worked-result"><strong>L<sub>1</sub>L<sub>2</sub> = {wx | w &isin; L<sub>1</sub>, x &isin; L<sub>2</sub>}</strong><br>The result is a <strong>set of strings</strong>, so duplicate results are included only once.</p>
+          <h4 class="graph-subheading">Example</h4>
+          <p>Let <strong>L<sub>1</sub> = {a, ab}</strong> and <strong>L<sub>2</sub> = {b, ab}</strong>.</p>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">w from L<sub>1</sub></th><th scope="col">x from L<sub>2</sub></th><th scope="col">Concatenation wx</th></tr></thead>
+              <tbody>
+                <tr><td>a</td><td>b</td><td>ab</td></tr>
+                <tr><td>a</td><td>ab</td><td>aab</td></tr>
+                <tr><td>ab</td><td>b</td><td>abb</td></tr>
+                <tr><td>ab</td><td>ab</td><td>abab</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="worked-result"><strong>L<sub>1</sub>L<sub>2</sub> = {ab, aab, abb, abab}</strong>.</p>
+          <h4 class="graph-subheading">Concatenation with {&epsilon;} and &empty;</h4>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Rule</th><th scope="col">Reason</th></tr></thead>
+              <tbody>
+                <tr><td><strong>L{&epsilon;} = {&epsilon;}L = L</strong></td><td>Concatenating any string with &epsilon; leaves it unchanged: w&epsilon; = &epsilon;w = w.</td></tr>
+                <tr><td><strong>L&empty; = &empty;L = &empty;</strong></td><td>The empty language has no strings to pair with strings from L, so no concatenations can be formed.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Example:</strong> if L = {a, ab}, then L{&epsilon;} = {a&epsilon;, ab&epsilon;} = {a, ab} = L, while L&empty; = &empty;.</p>
+          <p class="worked-result"><strong>Remember:</strong> {&epsilon;} contains one string and acts as the identity for language concatenation. &empty; contains no strings and makes the result empty.</p>
+        </section>
+        <section class="subtopic" id="language-powers" aria-labelledby="language-powers-heading">
+          <h3 id="language-powers-heading">1.18 Powers of a Language</h3>
+          <p>For a nonnegative integer n, <strong>L<sup>n</sup></strong> is L concatenated with itself n times. Each factor independently contributes a string from L.</p>
+          <p class="worked-result"><strong>L<sup>0</sup> = {&epsilon;}</strong>, <strong>L<sup>1</sup> = L</strong>, and <strong>L<sup>n + 1</sup> = L<sup>n</sup>L</strong>.<br>For example, <strong>L<sup>4</sup> = LLLL = {wxyz | w, x, y, z &isin; L}</strong>.</p>
+          <h4 class="graph-subheading">String Powers vs Language Powers</h4>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Operation</th><th scope="col">Result Type</th><th scope="col">Zeroth Power</th></tr></thead>
+              <tbody>
+                <tr><td>Power of a string w</td><td>A string</td><td>w<sup>0</sup> = &epsilon;</td></tr>
+                <tr><td>Power of a language L</td><td>A language (set of strings)</td><td>L<sup>0</sup> = {&epsilon;}</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="worked-result"><strong>For every language:</strong> L<sup>0</sup> = {&epsilon;}, including <strong>&empty;<sup>0</sup> = {&epsilon;}</strong> and <strong>(&Sigma;*)<sup>0</sup> = {&epsilon;}</strong>. Thus L<sup>0</sup> is neither &epsilon; nor &empty;.</p>
+          <article class="practice-question" id="language-square-q7">
+            <h4>Q7. Find L<sup>2</sup> for L = {a<sup>n</sup>b<sup>n</sup> | n &ge; 0}</h4>
+            <p><strong>Solution:</strong> Choose a<sup>n</sup>b<sup>n</sup> from the first copy of L and a<sup>m</sup>b<sup>m</sup> from the second. The nonnegative integers n and m are <strong>independent</strong>.</p>
+            <p class="worked-result"><strong>L<sup>2</sup> = {a<sup>n</sup>b<sup>n</sup>a<sup>m</sup>b<sup>m</sup> | n, m &ge; 0}</strong>.</p>
+            <p><strong>Examples:</strong> &epsilon;, ab, aabb, aaabbb, abab, abaabb, aabbab, aabbaabb, &hellip;.</p>
+            <p>Taking n = 0 or m = 0 shows that <strong>L &sube; L<sup>2</sup></strong> here. Also, <strong>abab &isin; L<sup>2</sup></strong> but <strong>abab &notin; L</strong>, so L<sup>2</sup> &ne; L.</p>
+            <p><strong>Remember:</strong> L<sup>2</sup> pairs every string with every string; it does not require concatenating a string only with itself.</p>
+          </article>
+        </section>
+        <section class="subtopic" id="kleene-star" aria-labelledby="kleene-star-heading">
+          <h3 id="kleene-star-heading">1.19 Kleene Star</h3>
+          <p>The <strong>Kleene star</strong> (or <strong>star closure / Kleene closure</strong>) of a language L contains all strings obtained by concatenating <strong>zero or more strings from L</strong>. Repetition is allowed, and each concatenation uses finitely many factors.</p>
+          <p class="worked-result"><strong>L* = L<sup>0</sup> &cup; L<sup>1</sup> &cup; L<sup>2</sup> &cup; &hellip; = &bigcup;<sub>i &ge; 0</sub> L<sup>i</sup></strong><br>Because L<sup>0</sup> = {&epsilon;}, <strong>&epsilon; &isin; L*</strong> for every language L.</p>
+          <h4 class="graph-subheading">Example: L = {a, ab}</h4>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Power</th><th scope="col">Strings</th></tr></thead>
+              <tbody>
+                <tr><td>L<sup>0</sup></td><td>{&epsilon;}</td></tr>
+                <tr><td>L<sup>1</sup></td><td>{a, ab}</td></tr>
+                <tr><td>L<sup>2</sup></td><td>{aa, aab, aba, abab}</td></tr>
+                <tr><td>L<sup>3</sup></td><td>{aaa, aaab, aaba, aabab, abaa, abaab, ababa, ababab}</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>L*</strong> is the union of these sets and all higher powers. Examples in L<sup>4</sup> include <strong>aaaa = a &middot; a &middot; a &middot; a</strong>, <strong>aabaa = a &middot; ab &middot; a &middot; a</strong>, and <strong>ababaab = ab &middot; ab &middot; a &middot; ab</strong>.</p>
+          <p class="worked-result"><strong>A power counts factors, not symbols.</strong> For example, <strong>ab &middot; a &middot; a &middot; ab = abaaab &isin; L<sup>4</sup></strong>, although its length is 6. To prove membership, split the entire string into blocks that each belong to L.</p>
+        </section>
+        <section class="subtopic" id="positive-closure" aria-labelledby="positive-closure-heading">
+          <h3 id="positive-closure-heading">1.20 Positive Closure</h3>
+          <p>The <strong>positive closure</strong> of L, denoted by <strong>L<sup>+</sup></strong>, contains strings formed by concatenating <strong>one or more strings from L</strong>.</p>
+          <p class="worked-result"><strong>L<sup>+</sup> = L<sup>1</sup> &cup; L<sup>2</sup> &cup; L<sup>3</sup> &cup; &hellip;</strong><br>Therefore <strong>L* = {&epsilon;} &cup; L<sup>+</sup></strong>.</p>
+          <p><strong>Important:</strong> &ldquo;one or more&rdquo; counts factors, not symbols. If &epsilon; &isin; L, then &epsilon; &isin; L<sup>+</sup> too. Thus <strong>L<sup>+</sup> = L* &minus; {&epsilon;}</strong> only when <strong>&epsilon; &notin; L</strong>.</p>
+          <p><strong>Special cases:</strong> &empty;* = {&epsilon;}, &empty;<sup>+</sup> = &empty;, and {&epsilon;}* = {&epsilon;}<sup>+</sup> = {&epsilon;}.</p>
+          <article class="practice-question" id="gate-2012-star-q8">
+            <h4>Q8. GATE CSE 2012, Q25: Membership in L*</h4>
+            <p>Given <strong>L = {ab, aa, baa}</strong>, which of the following strings belong to <strong>L*</strong>?</p>
+            <ol class="question-options">
+              <li>abaabaaabaa</li>
+              <li>aaaabaaaa</li>
+              <li>baaaaabaaaab</li>
+              <li>baaaaabaa</li>
+            </ol>
+            <ol class="question-options" type="A">
+              <li>1, 2 and 3</li>
+              <li>2, 3 and 4</li>
+              <li>1, 2 and 4</li>
+              <li>1, 3 and 4</li>
+            </ol>
+            <p><strong>Solution:</strong> split each string into blocks from {ab, aa, baa}.</p>
+            <div class="table-wrap">
+              <table class="truth-table">
+                <thead><tr><th scope="col">String</th><th scope="col">Block Decomposition / Obstruction</th><th scope="col">In L*?</th></tr></thead>
+                <tbody>
+                  <tr><td>1. abaabaaabaa</td><td>ab &middot; aa &middot; baa &middot; ab &middot; aa</td><td>Yes: in L<sup>5</sup></td></tr>
+                  <tr><td>2. aaaabaaaa</td><td>aa &middot; aa &middot; baa &middot; aa</td><td>Yes: in L<sup>4</sup></td></tr>
+                  <tr><td>3. baaaaabaaaab</td><td>Forced blocks: baa &middot; aa &middot; ab &middot; aa &middot; aa, leaving an unmatched b</td><td>No</td></tr>
+                  <tr><td>4. baaaaabaa</td><td>baa &middot; aa &middot; ab &middot; aa</td><td>Yes: in L<sup>4</sup></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p>For string 3, each block is forced: a leading aa requires aa, a leading ab requires ab, and a leading b requires baa. The final b cannot form any allowed block, so no alternative split succeeds.</p>
+            <p class="worked-result"><strong>Answer: C. Strings 1, 2, and 4.</strong></p>
+            <p><a href="https://media.geeksforgeeks.org/wp-content/cdn-uploads/20211005202656/GATE2012.pdf">Source: GATE 2012 CS question paper, Q25 (page 5)</a>.</p>
+          </article>
+        </section>
+        <section class="subtopic" id="star-finiteness" aria-labelledby="star-finiteness-heading">
+          <h3 id="star-finiteness-heading">1.21 When Is L* Infinite?</h3>
+          <p><strong>Is L* infinite for every language L? No.</strong> There are two exceptions: L = &empty; and L = {&epsilon;}.</p>
+          <h4 class="graph-subheading">Case 1: L = &empty;</h4>
+          <p>The zeroth power is &empty;<sup>0</sup> = {&epsilon;}, while every positive power is &empty;. Hence:</p>
+          <p class="worked-result"><strong>&empty;* = {&epsilon;} &cup; &empty; &cup; &empty; &cup; &hellip; = {&epsilon;}</strong>.</p>
+          <h4 class="graph-subheading">Case 2: L = {&epsilon;}</h4>
+          <p>Every power equals {&epsilon;}, because concatenating copies of the empty string still gives the empty string.</p>
+          <p class="worked-result"><strong>{&epsilon;}* = {&epsilon;} &cup; {&epsilon;} &cup; &hellip; = {&epsilon;}</strong>.</p>
+          <h4 class="graph-subheading">All Other Languages</h4>
+          <p>If L &ne; &empty; and L &ne; {&epsilon;}, then L contains a <strong>nonempty string w</strong>, with |w| &ge; 1. The strings &epsilon;, w, w<sup>2</sup>, w<sup>3</sup>, &hellip; all belong to L*.</p>
+          <p>Their lengths are 0, |w|, 2|w|, 3|w|, &hellip;, so they are all distinct. Therefore <strong>L* is infinite</strong>.</p>
+          <p class="worked-result"><strong>L* is finite &hArr; L &sube; {&epsilon;}.</strong><br>Equivalently, <strong>L* is infinite &hArr; L contains at least one nonempty string</strong>. In either finite case, L* has exactly one member: &epsilon;.</p>
+          <article class="practice-question" id="gate-2013-closure-q9">
+            <h4>Q9. GATE CSE 2013, Q8: Empty Language and Star</h4>
+            <p>Let <strong>L<sub>1</sub> = &empty;</strong> and <strong>L<sub>2</sub> = {a}</strong>. Which language is represented by <strong>L<sub>1</sub>L<sub>2</sub>* &cup; L<sub>1</sub>*</strong>?</p>
+            <ol class="question-options" type="A">
+              <li>{&epsilon;}</li>
+              <li>&empty;</li>
+              <li>a* (all strings consisting only of a, including &epsilon;)</li>
+              <li>{&epsilon;, a}</li>
+            </ol>
+            <p><strong>Solution:</strong> L<sub>1</sub>L<sub>2</sub>* = &empty;L<sub>2</sub>* = &empty;, while L<sub>1</sub>* = &empty;* = {&epsilon;}.</p>
+            <p class="worked-result"><strong>&empty; &cup; {&epsilon;} = {&epsilon;}. Answer: A.</strong></p>
+          </article>
+        </section>
+        <section class="subtopic" id="star-examples" aria-labelledby="star-examples-heading">
+          <h3 id="star-examples-heading">1.22 More Examples of L*</h3>
+          <p>Throughout these examples, let <strong>&Sigma; = {a, b}</strong>. Recall that &Sigma;* contains every finite string over a and b, while L* uses only concatenations of strings from L.</p>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Language L</th><th scope="col">Kleene Star L*</th><th scope="col">Reason</th></tr></thead>
+              <tbody>
+                <tr><td>{aa}</td><td>{&epsilon;, aa, aaaa, aaaaaa, &hellip;} = {a<sup>2n</sup> | n &ge; 0}</td><td>Each factor adds exactly two a symbols</td></tr>
+                <tr><td>&empty;</td><td>{&epsilon;}</td><td>Only the zeroth power contributes a string</td></tr>
+                <tr><td>{&epsilon;}</td><td>{&epsilon;}</td><td>All concatenations remain &epsilon;</td></tr>
+                <tr><td>{a, b, abb, ab}</td><td>&Sigma;*</td><td>The single-symbol strings a and b can build every string over &Sigma;</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="worked-result"><strong>L* need not equal &Sigma;*.</strong> For L = {aa}, neither a nor b belongs to L*. For L = {a, b, abb, ab}, the extra blocks abb and ab add no strings beyond those already constructible using a and b.</p>
+        </section>
+        <section class="subtopic" id="language-complement" aria-labelledby="language-complement-heading">
+          <h3 id="language-complement-heading">1.23 Complement of a Language</h3>
+          <p>For a language <strong>L &sube; &Sigma;*</strong>, its <strong>complement</strong>, written <strong>L&#773;</strong>, contains every string over the <strong>given alphabet &Sigma;</strong> that does not belong to L.</p>
+          <p class="worked-result"><strong>L&#773; = &Sigma;* &minus; L = {w &isin; &Sigma;* | w &notin; L}</strong>.</p>
+          <p><strong>The alphabet determines the universe:</strong> complement is taken relative to &Sigma;*, so specifying &Sigma; matters.</p>
+          <article class="practice-question" id="complement-unary-q10">
+            <h4>Q10. Complement of L = {a<sup>n</sup> | n &ge; 0} over &Sigma; = {a, b}</h4>
+            <p><strong>Solution:</strong> L = {&epsilon;, a, aa, aaa, &hellip;} contains exactly the strings with no b. Any string over {a, b} outside L must therefore contain <strong>at least one b</strong>.</p>
+            <p class="worked-result"><strong>L&#773; = {w &isin; {a, b}* | w contains at least one b}</strong>.</p>
+            <p><strong>Examples in the complement:</strong> b, ab, ba, bb, aab, baba.<br><strong>Not in the complement:</strong> &epsilon;, a, aa, aaa, &hellip;.</p>
+            <p>If the alphabet were instead <strong>&Sigma; = {a}</strong>, the same L would equal &Sigma;*, and its complement would be <strong>&empty;</strong>.</p>
+          </article>
+          <h4 class="graph-subheading">Complement of Equal a and b Blocks</h4>
+          <p>Over <strong>&Sigma; = {a, b}</strong>, let <strong>L = {a<sup>n</sup>b<sup>n</sup> | n &ge; 0} = {&epsilon;, ab, aabb, aaabbb, &hellip;}</strong>.</p>
+          <p>A string outside L either has all its a symbols before all its b symbols but has <strong>unequal block lengths</strong>, or violates that order by containing the <strong>substring ba</strong>.</p>
+          <p class="worked-result"><strong>L&#773; = {a<sup>n</sup>b<sup>m</sup> | n, m &ge; 0 and n &ne; m} &cup; {w &isin; {a, b}* | w contains the substring ba}</strong>.</p>
+          <p><strong>Examples:</strong> aab and abb belong to the first set; ba and abab belong to the second. The empty string is not in the complement, since &epsilon; &isin; L.</p>
+          <article class="practice-question" id="star-plus-identities-q11">
+            <h4>Q11. Important: Which Star and Positive-Closure Identities Are Always True?</h4>
+            <p>Let L be a language over &Sigma;, and let &epsilon; denote the empty string. Select all statements that are <strong>always true</strong>.</p>
+            <ol class="question-options" type="A">
+              <li>&Sigma;* &minus; {&epsilon;} = &Sigma;<sup>+</sup></li>
+              <li>L* &minus; {&epsilon;} = L<sup>+</sup></li>
+              <li>&Sigma;* = &Sigma;<sup>+</sup> &cup; {&epsilon;}</li>
+              <li>L* = L<sup>+</sup> &cup; {&epsilon;}</li>
+            </ol>
+            <h4>Counterexample for B: L = {&epsilon;, a}</h4>
+            <p>Here, <strong>L* = {&epsilon;, a, aa, aaa, &hellip;}</strong>. Also, <strong>L<sup>+</sup> = {&epsilon;, a, aa, aaa, &hellip;}</strong>, because one or more factors from L may include &epsilon; itself.</p>
+            <p class="worked-result"><strong>L* &minus; {&epsilon;} = {a, aa, aaa, &hellip;}</strong>, but <strong>&epsilon; &isin; L<sup>+</sup></strong>.<br>The two sides differ, so <strong>B is not always true</strong>.</p>
+            <h4>Why the Other Options Are Correct</h4>
+            <ul>
+              <li><strong>A is true:</strong> &Sigma;<sup>+</sup> contains exactly the nonempty strings over &Sigma;. Alphabet symbols have length 1, so concatenating one or more symbols cannot produce &epsilon;.</li>
+              <li><strong>C is true:</strong> every string over &Sigma; is either nonempty (in &Sigma;<sup>+</sup>) or is &epsilon;.</li>
+              <li><strong>D is true:</strong> L* = L<sup>0</sup> &cup; L<sup>1</sup> &cup; &hellip; = {&epsilon;} &cup; L<sup>+</sup>. This remains true even when &epsilon; already belongs to L<sup>+</sup>, since sets do not count duplicates.</li>
+            </ul>
+            <p class="worked-result"><strong>Answer: A, C, and D.</strong><br><strong>Key condition:</strong> L* &minus; {&epsilon;} = L<sup>+</sup> holds exactly when &epsilon; &notin; L. In contrast, L* = L<sup>+</sup> &cup; {&epsilon;} holds for every language.</p>
+          </article>
+        </section>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="GATE Compiler Design study notes: introduction.">
+  <title>Compiler Design &mdash; Introduction</title>
+  <style>
+    :root { --ink: #111; --muted: #555; --line: #d9dce1; --paper: #fff; --page: #f1f2f4; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--page); font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 15px; line-height: 1.68; }
+    a { color: inherit; }
+    .topbar { position: sticky; top: 0; z-index: 10; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 58px; padding: 10px 24px; color: #fff; background: #111; }
+    .brand { font-size: 15px; font-weight: 750; letter-spacing: -0.2px; }
+    .topbar-meta { display: flex; align-items: center; gap: 12px; }
+    .author-credit { color: #bbb; font-size: 12px; }
+    .author-credit strong { color: #fff; }
+    .course-tag { padding: 3px 9px; border: 1px solid #666; border-radius: 999px; color: #ddd; font-size: 12px; letter-spacing: 0.08em; white-space: nowrap; }
+    .layout { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 24px; width: min(1280px, calc(100% - 40px)); margin: 24px auto; }
+    .sidebar { position: sticky; top: 74px; align-self: start; max-height: calc(100dvh - 90px); overflow-y: auto; padding: 4px 14px 12px 0; border-right: 1px solid var(--line); }
+    .sidebar-title { margin: 0 0 10px 10px; font-size: 12px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+    .sidebar a { display: block; padding: 8px 10px; border-left: 3px solid transparent; font-size: 13.5px; font-weight: 650; text-decoration: none; }
+    .sidebar a:hover, .sidebar a:focus-visible { background: var(--paper); border-left-color: var(--ink); }
+    a:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+    main { min-width: 0; padding: clamp(24px, 4vw, 46px); background: var(--paper); border-radius: 3px; box-shadow: 0 3px 14px rgb(0 0 0 / 4%); }
+    .page-heading { margin-top: 24px; }
+    .eyebrow { margin: 0 0 4px; color: var(--muted); font-size: 12px; font-weight: 750; letter-spacing: 0.12em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(26px, 3.4vw, 38px); line-height: 1.12; letter-spacing: -1.4px; }
+    .rule { margin-top: 28px; padding-top: 25px; border-top: 2px solid var(--ink); scroll-margin-top: 82px; }
+    .section-heading { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+    .section-number { color: var(--muted); font: 700 13px/1 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    h2 { margin: 0; font-size: 22px; letter-spacing: -0.4px; }
+    p { margin: 0 0 12px; }
+    ul { margin: 0; padding-left: 22px; }
+    li + li { margin-top: 6px; }
+    .sidebar a.sub-link { padding-left: 25px; color: var(--muted); font-size: 12.5px; }
+    .sidebar a.question-link { padding-left: 40px; color: var(--muted); font-size: 12px; }
+    .subtopic { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--line); scroll-margin-top: 82px; }
+    h3 { margin: 0 0 12px; font-size: 18px; }
+    .table-wrap { overflow-x: auto; margin: 14px 0; }
+    .worked-result { margin-top: 16px; padding: 12px 14px; background: #f8fafd; }
+    .practice-question { margin-top: 24px; padding: clamp(16px, 3vw, 24px); border-radius: 8px; background: #edf3fa; scroll-margin-top: 82px; }
+    .practice-question h4 { margin: 0 0 12px; font-size: 16px; }
+    .practice-question > :last-child { margin-bottom: 0; }
+    .question-options { margin: 12px 0; padding-left: 24px; }
+    .truth-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 14px; }
+    .truth-table th, .truth-table td { padding: 7px 12px; border: 1px solid var(--line); }
+    .truth-table th { background: var(--page); }
+    .graph-figure { margin: 18px 0 0; }
+    .graph-figure svg { display: block; width: 100%; max-width: 520px; height: auto; }
+    .graph-figure figcaption { color: var(--muted); font-size: 13px; }
+    .graph-examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); gap: 16px; margin: 18px 0; }
+    .graph-examples .graph-figure { margin: 0; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: #fafbfc; }
+    .graph-examples .graph-figure svg { margin: 0 auto; }
+    .graph-wide svg { max-width: 660px; }
+    .isomorphism-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .graph-subheading { margin: 24px 0 10px; font-size: 17px; }
+    @media (max-width: 760px) {
+      .isomorphism-options { grid-template-columns: 1fr; }
+      .topbar { padding: 10px 16px; }
+      .author-credit { display: none; }
+      .layout { grid-template-columns: 1fr; width: calc(100% - 24px); gap: 16px; margin: 12px auto; }
+      .sidebar { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--line); padding: 0 0 12px; }
+      main { padding: 24px 18px; }
+    }
+    .compiler-diagram { margin: 22px 0; }
+    .compiler-diagram-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: #fcfcfd; }
+    .compiler-diagram svg { display: block; width: 100%; min-width: 560px; height: auto; font-family: Inter, "Segoe UI", sans-serif; }
+    .compiler-diagram figcaption { margin-top: 10px; color: var(--muted); font-size: 13px; }
+    @media print {
+      .compiler-diagram-scroll { overflow: visible; }
+      .compiler-diagram svg { min-width: 0; }
+      .compiler-diagram { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Compiler Design</div>
+    <div class="topbar-meta">
+      <span class="author-credit">By <strong>ProFonCoDe</strong></span>
+      <span class="course-tag">GATE &middot; CD</span>
+    </div>
+  </header>
+  <div class="layout">
+    <aside class="sidebar" aria-label="Table of contents">
+      <p class="sidebar-title">Topic Index</p>
+      <nav aria-label="Sections">
+        <a href="#introduction">1. Introduction</a>
+        <a class="question-link" href="#gate-2023-front-back-end">GATE 2023: Front End and Back End</a>
+        <a href="#mn-vs-m-plus-n">2. M*N vs M+N</a>
+        <a href="#lexical-analyzer">3. Lexical Analyzer</a>
+        <a class="question-link" href="#lexical-q1">Q1. Token Count: Declaration and Assignment</a>
+        <a class="question-link" href="#lexical-q2">Q2. Token Count: while and Increment</a>
+        <a class="question-link" href="#lexical-q3">Q3. Token Count: printf and String Literal</a>
+        <a class="question-link" href="#lexical-q4">Q4. Token Count: printf and Address Operator</a>
+        <a class="question-link" href="#lexical-q5">Q5. ISRO CSE 2020: Token Count</a>
+        <a class="question-link" href="#lexical-q6">Q6. Managing Variable Information</a>
+        <a class="question-link" href="#lexical-q7">Q7. GATE CSE 2011: Recognizing Keywords</a>
+        <a class="question-link" href="#lexical-q8">Q8. Module That Checks Source Characters</a>
+        <a class="question-link" href="#lexical-q9">Q9. Partitioning Lexemes into Token Classes</a>
+        <a class="question-link" href="#lexical-q10">Q10. Maximal Munch: Scanner Output</a>
+        <a class="question-link" href="#lexical-q11">Q11. Conflict Resolution: No Global Backtracking</a>
+        <a class="question-link" href="#lexical-q12">Q12. GATE CSE 2018: Longest-Prefix Tokenization</a>
+        <a class="question-link" href="#lexical-q13">Q13. Scanner Time Complexity: Quadratic Rescanning</a>
+        <a class="question-link" href="#lexical-q14">Q14. Character Reads with Backtracking</a>
+        <a href="#lex-as-dfa">4. Lex as DFA</a>
+        <a href="#lexical-errors">5. Lexical Errors</a>
+        <a class="question-link" href="#lexical-q15">Q15. Lexical Analysis: True Statements</a>
+        <a class="question-link" href="#lexical-q16">Q16. Ada Identifier: Minimum DFA States</a>
+        <a href="#left-factoring">6. Left factoring</a>
+        <a href="#left-recursion">7. Left recursion</a>
+        <a href="#removing-indirect-left-recursion">8. Removing indirect left recursion</a>
+      </nav>
+    </aside>
+    <main>
+      <header class="page-heading">
+        <p class="eyebrow">GATE Study Notes</p>
+        <h1>Compiler Design</h1>
+      </header>
+      <p id="introduction" style="margin-top: 28px;">In the <strong>von Neumann stored-program model</strong>, instructions and data share memory; the CPU contains registers, an <strong>ALU</strong> for arithmetic and logical operations, and a <strong>control unit</strong> that decodes instructions and coordinates execution. Instructions follow the cycle <strong>fetch &rarr; decode &rarr; fetch operands &rarr; execute &rarr; write back</strong>. A CPU's <strong>instruction set</strong> defines the operations it supports; unsupported operations must be implemented using supported instructions. <strong>Machine language</strong> consists of binary instructions directly understood and executed by the processor, whereas <strong>assembly language</strong> uses mnemonics translated into machine code by an <strong>assembler</strong>, usually with a one-to-one instruction mapping (except macros and pseudo-instructions). Both machine and assembly languages are <strong>processor-dependent</strong>; high-level source code is generally portable but requires translation for the target platform. Machine code needs no prior translation, but <strong>translation time differs from execution time</strong>: programs producing the same machine instructions execute equally fast under the same conditions, regardless of their source language.</p>
+
+          <figure class="compiler-diagram">
+            <div class="compiler-diagram-scroll" tabindex="0" role="region" aria-label="Compiler phases diagram; scroll horizontally on small screens">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 1060" role="img" aria-labelledby="compiler-svg-title compiler-svg-desc">
+              <title id="compiler-svg-title">How a compiler works</title>
+              <desc id="compiler-svg-desc">Source program passes through the front end: lexical analysis, syntax analysis, semantic analysis, and intermediate code generation. Intermediate representation connects it to the back end: IR optimization, object code generation, and object code optimization, producing the target program.</desc>
+              <defs>
+                <marker id="compiler-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/></marker>
+              </defs>
+              <rect x="20" y="120" width="720" height="374" rx="18" fill="#eef4fb" stroke="#d5e2f1"/>
+              <text x="44" y="156" font-size="12" font-weight="800" letter-spacing="1.5" fill="#395575">FRONT END</text>
+              <text x="44" y="180" font-size="14" fill="#526781">Analysis</text>
+              <text x="44" y="213" font-size="12" fill="#526781">Understand the</text>
+              <text x="44" y="232" font-size="12" fill="#526781">source program</text>
+              <rect x="20" y="636" width="720" height="294" rx="18" fill="#edf6f1" stroke="#d4e6dc"/>
+              <text x="44" y="674" font-size="12" font-weight="800" letter-spacing="1.5" fill="#30634b">BACK END</text>
+              <text x="44" y="698" font-size="14" fill="#4b725e">Synthesis</text>
+              <text x="44" y="731" font-size="12" fill="#4b725e">Build the</text>
+              <text x="44" y="750" font-size="12" fill="#4b725e">target program</text>
+<rect x="214" y="24" width="344" height="64" rx="10" fill="#17212f" stroke="#17212f"/>
+<text x="386" y="51" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Source program</text>
+<text x="386" y="72" text-anchor="middle" font-size="12" fill="#cbd5e1">High-level source code</text>
+<rect x="214" y="148" width="344" height="64" rx="10" fill="#fff" stroke="#d9e0e8"/>
+<circle cx="240" cy="173" r="12" fill="#395575"/><text x="240" y="177" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">1</text>
+<text x="265" y="175" text-anchor="start" font-size="16" font-weight="700" fill="#17212f">Lexical analysis</text>
+<text x="265" y="196" text-anchor="start" font-size="12" fill="#64748b">Characters to tokens</text>
+<rect x="214" y="228" width="344" height="64" rx="10" fill="#fff" stroke="#d9e0e8"/>
+<circle cx="240" cy="253" r="12" fill="#395575"/><text x="240" y="257" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">2</text>
+<text x="265" y="255" text-anchor="start" font-size="16" font-weight="700" fill="#17212f">Syntax analysis</text>
+<text x="265" y="276" text-anchor="start" font-size="12" fill="#64748b">Tokens to a syntax tree</text>
+<rect x="214" y="308" width="344" height="64" rx="10" fill="#fff" stroke="#d9e0e8"/>
+<circle cx="240" cy="333" r="12" fill="#395575"/><text x="240" y="337" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">3</text>
+<text x="265" y="335" text-anchor="start" font-size="16" font-weight="700" fill="#17212f">Semantic analysis</text>
+<text x="265" y="356" text-anchor="start" font-size="12" fill="#64748b">Check types, declarations, and meaning</text>
+<rect x="214" y="388" width="344" height="64" rx="10" fill="#fff" stroke="#d9e0e8"/>
+<circle cx="240" cy="413" r="12" fill="#395575"/><text x="240" y="417" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">4</text>
+<text x="265" y="415" text-anchor="start" font-size="16" font-weight="700" fill="#17212f">Intermediate code generation</text>
+<text x="265" y="436" text-anchor="start" font-size="12" fill="#64748b">Produce an intermediate representation</text>
+<rect x="214" y="528" width="344" height="64" rx="10" fill="#fff" stroke="#d9e0e8"/>
+<text x="386" y="555" text-anchor="middle" font-size="16" font-weight="700" fill="#17212f">Intermediate representation (IR)</text>
+<text x="386" y="576" text-anchor="middle" font-size="12" fill="#64748b">A common, machine-independent form</text>
+<rect x="214" y="662" width="344" height="64" rx="10" fill="#fff" stroke="#d9e0e8"/>
+<circle cx="240" cy="687" r="12" fill="#30634b"/><text x="240" y="691" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">5</text>
+<text x="265" y="689" text-anchor="start" font-size="16" font-weight="700" fill="#17212f">IR optimization</text>
+<text x="265" y="710" text-anchor="start" font-size="12" fill="#64748b">Improve the intermediate code</text>
+<rect x="214" y="742" width="344" height="64" rx="10" fill="#fff" stroke="#d9e0e8"/>
+<circle cx="240" cy="767" r="12" fill="#30634b"/><text x="240" y="771" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">6</text>
+<text x="265" y="769" text-anchor="start" font-size="16" font-weight="700" fill="#17212f">Object code generation</text>
+<text x="265" y="790" text-anchor="start" font-size="12" fill="#64748b">Generate code for the target machine</text>
+<rect x="214" y="822" width="344" height="64" rx="10" fill="#fff" stroke="#d9e0e8"/>
+<circle cx="240" cy="847" r="12" fill="#30634b"/><text x="240" y="851" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">7</text>
+<text x="265" y="849" text-anchor="start" font-size="16" font-weight="700" fill="#17212f">Object code optimization</text>
+<text x="265" y="870" text-anchor="start" font-size="12" fill="#64748b">Improve target-specific code</text>
+<rect x="214" y="972" width="344" height="64" rx="10" fill="#17212f" stroke="#17212f"/>
+<text x="386" y="999" text-anchor="middle" font-size="16" font-weight="700" fill="#fff">Target program</text>
+<text x="386" y="1020" text-anchor="middle" font-size="12" fill="#cbd5e1">Code for the target machine</text>
+<path d="M386 91 V143" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#compiler-arrow)"/>
+<path d="M386 215 V223" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#compiler-arrow)"/>
+<path d="M386 295 V303" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#compiler-arrow)"/>
+<path d="M386 375 V383" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#compiler-arrow)"/>
+<path d="M386 455 V523" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#compiler-arrow)"/>
+<path d="M386 595 V657" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#compiler-arrow)"/>
+<path d="M386 729 V737" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#compiler-arrow)"/>
+<path d="M386 809 V817" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#compiler-arrow)"/>
+<path d="M386 889 V967" fill="none" stroke="#64748b" stroke-width="2" marker-end="url(#compiler-arrow)"/>
+<path d="M558 560 H582" fill="none" stroke="#a47830" stroke-width="1.5"/>
+              <text x="592" y="552" font-size="12" font-weight="700" fill="#8a6326">IR bridges</text>
+              <text x="592" y="571" font-size="12" fill="#8a6326">the two parts</text>
+            </svg>
+            </div>
+          </figure>
+
+      <div class="subtopic" id="compiler-design-notes">
+        <p><strong>1. Front-end and back-end independence:</strong> The front end is designed to be independent of the target machine, while the back end is designed to be independent of the source language. A common intermediate representation (IR) connects them.</p>
+        <p><strong>2. Intermediate code optimization:</strong> Code optimization phases are <strong>optional</strong>; a compiler can generate correct target code without them. Optimization adds implementation complexity and can increase compilation time, so it may be disabled. In a <strong>two-phase view</strong>, IR optimization may be grouped with the back end; in a <strong>three-phase view</strong>, it belongs to the <strong>middle end</strong>. We will follow the three-phase view for IR optimization.</p>
+      </div>
+      <article class="practice-question" id="gate-2023-front-back-end" aria-labelledby="gate-2023-front-back-end-heading">
+        <h4 id="gate-2023-front-back-end-heading">GATE CSE 2023: Front End and Back End</h4>
+        <p>Consider the following statements regarding the front-end and back-end of a compiler.</p>
+        <ul>
+          <li><strong>S1:</strong> The front-end includes phases that are independent of the target hardware.</li>
+          <li><strong>S2:</strong> The back-end includes phases that are specific to the target hardware.</li>
+          <li><strong>S3:</strong> The back-end includes phases that are specific to the programming language used in the source code.</li>
+        </ul>
+        <p style="margin-top: 12px;">Identify the <strong>CORRECT</strong> option.</p>
+        <ol class="question-options" type="A">
+          <li>Only S1 is TRUE.</li>
+          <li>Only S1 and S2 are TRUE.</li>
+          <li>S1, S2, and S3 are all TRUE.</li>
+          <li>Only S1 and S3 are TRUE.</li>
+        </ol>
+        <div class="worked-result"><strong>Answer: B &mdash; Only S1 and S2 are TRUE.</strong> The front end handles source-language analysis independently of the target hardware. The back end generates code for the target hardware from IR, independently of the original source language; hence S3 is false.</div>
+      </article>
+      <section class="rule" id="mn-vs-m-plus-n" aria-labelledby="mn-heading">
+        <div class="section-heading"><h2 id="mn-heading">M*N vs M+N</h2></div>
+        <p><strong>Why use intermediate code?</strong> Generating target code directly from source code is possible without IR. A common IR makes compiler components reusable across source languages and target machines.</p>
+        <p>Let <strong>M = number of source languages</strong> and <strong>N = number of target machines</strong>.</p>
+        <figure class="compiler-diagram">
+          <div class="compiler-diagram-scroll" tabindex="0" role="region" aria-label="M times N versus M plus N diagram; scroll horizontally on small screens">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430" role="img" aria-labelledby="reuse-title reuse-desc">
+<title id="reuse-title">Direct translation versus translation through a common IR</title>
+<desc id="reuse-desc">Without a shared IR, each of five source languages needs a separate compiler for each of four machines: twenty compilers. With a shared IR, five front ends connect to four back ends: nine components, with a shared optional IR optimizer.</desc>
+<defs><marker id="reuse-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#718096"/></marker></defs>
+<rect x="12" y="12" width="376" height="406" rx="14" fill="#f6f7f9" stroke="#d9dce1"/>
+<rect x="412" y="12" width="376" height="406" rx="14" fill="#edf6f1" stroke="#d4e6dc"/>
+<g font-family="Inter, Segoe UI, sans-serif" text-anchor="middle">
+<text x="200" y="46" font-size="18" font-weight="750" fill="#17212f">Without a common IR</text>
+<text x="600" y="46" font-size="18" font-weight="750" fill="#17212f">With a common IR</text>
+<text x="82" y="82" font-size="12" fill="#64748b">Languages</text><text x="318" y="82" font-size="12" fill="#64748b">Machines</text>
+<text x="471" y="82" font-size="12" fill="#4b725e">Front ends</text><text x="729" y="82" font-size="12" fill="#4b725e">Back ends</text>
+<path d="M126 116 L274 139" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 116 L274 185" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 116 L274 231" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 116 L274 277" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 162 L274 139" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 162 L274 185" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 162 L274 231" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 162 L274 277" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 208 L274 139" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 208 L274 185" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 208 L274 231" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 208 L274 277" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 254 L274 139" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 254 L274 185" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 254 L274 231" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 254 L274 277" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 300 L274 139" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 300 L274 185" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 300 L274 231" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M126 300 L274 277" stroke="#a8b4c6" stroke-width="1.2" opacity="0.65" fill="none"/>
+<path d="M511 116 L567 208" stroke="#7493b6" stroke-width="1.5" fill="none" marker-end="url(#reuse-arrow)"/>
+<path d="M511 162 L567 208" stroke="#7493b6" stroke-width="1.5" fill="none" marker-end="url(#reuse-arrow)"/>
+<path d="M511 208 L567 208" stroke="#7493b6" stroke-width="1.5" fill="none" marker-end="url(#reuse-arrow)"/>
+<path d="M511 254 L567 208" stroke="#7493b6" stroke-width="1.5" fill="none" marker-end="url(#reuse-arrow)"/>
+<path d="M511 300 L567 208" stroke="#7493b6" stroke-width="1.5" fill="none" marker-end="url(#reuse-arrow)"/>
+<path d="M633 208 L689 139" stroke="#6e9b82" stroke-width="1.5" fill="none" marker-end="url(#reuse-arrow)"/>
+<path d="M633 208 L689 185" stroke="#6e9b82" stroke-width="1.5" fill="none" marker-end="url(#reuse-arrow)"/>
+<path d="M633 208 L689 231" stroke="#6e9b82" stroke-width="1.5" fill="none" marker-end="url(#reuse-arrow)"/>
+<path d="M633 208 L689 277" stroke="#6e9b82" stroke-width="1.5" fill="none" marker-end="url(#reuse-arrow)"/>
+<rect x="38.0" y="101" width="88" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="82" y="121" font-size="13" font-weight="650" fill="#17212f">C</text>
+<rect x="431.0" y="101" width="80" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="471" y="121" font-size="13" font-weight="650" fill="#17212f">C / F1</text>
+<rect x="38.0" y="147" width="88" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="82" y="167" font-size="13" font-weight="650" fill="#17212f">C++</text>
+<rect x="431.0" y="147" width="80" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="471" y="167" font-size="13" font-weight="650" fill="#17212f">C++ / F2</text>
+<rect x="38.0" y="193" width="88" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="82" y="213" font-size="13" font-weight="650" fill="#17212f">Java</text>
+<rect x="431.0" y="193" width="80" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="471" y="213" font-size="13" font-weight="650" fill="#17212f">Java / F3</text>
+<rect x="38.0" y="239" width="88" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="82" y="259" font-size="13" font-weight="650" fill="#17212f">C#</text>
+<rect x="431.0" y="239" width="80" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="471" y="259" font-size="13" font-weight="650" fill="#17212f">C# / F4</text>
+<rect x="38.0" y="285" width="88" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="82" y="305" font-size="13" font-weight="650" fill="#17212f">Python</text>
+<rect x="431.0" y="285" width="80" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="471" y="305" font-size="13" font-weight="650" fill="#17212f">Python / F5</text>
+<rect x="274.0" y="124" width="88" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="318" y="144" font-size="13" font-weight="650" fill="#17212f">Machine 1</text>
+<rect x="689.0" y="124" width="80" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="729" y="144" font-size="13" font-weight="650" fill="#17212f">B1 / M1</text>
+<rect x="274.0" y="170" width="88" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="318" y="190" font-size="13" font-weight="650" fill="#17212f">Machine 2</text>
+<rect x="689.0" y="170" width="80" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="729" y="190" font-size="13" font-weight="650" fill="#17212f">B2 / M2</text>
+<rect x="274.0" y="216" width="88" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="318" y="236" font-size="13" font-weight="650" fill="#17212f">Machine 3</text>
+<rect x="689.0" y="216" width="80" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="729" y="236" font-size="13" font-weight="650" fill="#17212f">B3 / M3</text>
+<rect x="274.0" y="262" width="88" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="318" y="282" font-size="13" font-weight="650" fill="#17212f">Machine 4</text>
+<rect x="689.0" y="262" width="80" height="30" rx="6" fill="#fff" stroke="#d0d9e2"/><text x="729" y="282" font-size="13" font-weight="650" fill="#17212f">B4 / M4</text>
+<rect x="567.0" y="193" width="66" height="30" rx="6" fill="#17212f" stroke="#d0d9e2"/><text x="600" y="213" font-size="13" font-weight="650" fill="#fff">IR</text>
+<path d="M600 193 V150" stroke="#718096" fill="none" marker-end="url(#reuse-arrow)"/>
+<path d="M615 150 V187" stroke="#718096" fill="none" marker-end="url(#reuse-arrow)"/>
+<rect x="546" y="110" width="108" height="40" rx="7" fill="#fff" stroke="#c8dbd0"/>
+<text x="600" y="127" font-size="12" font-weight="650" fill="#30634b">IR optimizer</text><text x="600" y="142" font-size="10" fill="#4b725e">shared / optional</text>
+<text x="200" y="361" font-size="23" font-weight="750" fill="#17212f">5 &#215; 4 = 20</text>
+<text x="200" y="386" font-size="13" fill="#64748b">language-machine compilers</text>
+<text x="600" y="361" font-size="23" font-weight="750" fill="#30634b">5 + 4 = 9</text>
+<text x="600" y="386" font-size="13" fill="#4b725e">front-end and back-end components</text>
+</g></svg>
+          </div>
+        </figure>
+        <ul>
+          <li><strong>Without a common IR: M*N.</strong> A separate direct compiler is needed for each language-machine pair. For 5 languages and 4 machines: <strong>5*4 = 20 compilers</strong>.</li>
+          <li><strong>With a common IR: M+N.</strong> Build M language-specific front ends and N machine-specific back ends. For the same example: <strong>5+4 = 9 components</strong>, which can be combined to support all 20 pairs.</li>
+          <li><strong>Shared optimization:</strong> one optional IR optimizer can serve these combinations. It is counted separately from the M+N front ends and back ends.</li>
+        </ul>
+        <div class="worked-result"><strong>Adding support:</strong> A new source language needs one new front end; a new target machine needs one new back end, provided they use the common IR.</div>
+      </section>
+      <section class="rule" id="lexical-analyzer" aria-labelledby="lexical-analyzer-heading">
+        <div class="section-heading"><h2 id="lexical-analyzer-heading">Lexical Analyzer</h2></div>
+        <p><strong>Lexical analysis / scanning / tokenization</strong> is the first phase of a compiler. It reads source characters from left to right and groups them into tokens for the syntax analyzer.</p>
+        <div class="worked-result"><strong>Character stream &rarr; Lexical Analyzer &rarr; Token stream</strong></div>
+        <ul style="margin-top: 16px;">
+          <li><strong>Lexeme:</strong> the actual sequence of source characters matched to a token, e.g. <code>sum</code>.</li>
+          <li><strong>Token:</strong> represented as <code>&lt;token-name, attribute&gt;</code>. The token name identifies the category; the optional attribute provides a value or a reference to a table entry.</li>
+          <li><strong>Symbol table:</strong> the lexer records identifiers or looks up existing entries; an identifier token can carry a pointer to its entry. Later phases add information such as types.</li>
+          <li><strong>Whitespace and newlines:</strong> normally skipped in C-like languages; they separate lexemes but do not produce tokens in this example.</li>
+        </ul>
+        <div class="subtopic">
+          <h3>Example: <code>int sum = 9;</code></h3>
+          <div class="table-wrap">
+            <table class="truth-table">
+              <thead><tr><th scope="col">Lexeme</th><th scope="col">Token (illustrative)</th></tr></thead>
+              <tbody>
+                <tr><td><code>int</code></td><td><code>&lt;INT, &mdash;&gt;</code></td></tr>
+                <tr><td><code>sum</code></td><td><code>&lt;ID, pointer to sum's symbol-table entry&gt;</code></td></tr>
+                <tr><td><code>=</code></td><td><code>&lt;ASSIGN, &mdash;&gt;</code></td></tr>
+                <tr><td><code>9</code></td><td><code>&lt;NUMBER, 9&gt;</code></td></tr>
+                <tr><td><code>;</code></td><td><code>&lt;SEMICOLON, &mdash;&gt;</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p><strong>Total: 5 tokens.</strong> Spaces generate no tokens. <code>&mdash;</code> indicates no attribute is needed; a number token may alternatively refer to a constant-table entry.</p>
+        </div>
+      </section>
+      <section class="subtopic" id="lexical-questions" aria-labelledby="lexical-questions-heading">
+        <h3 id="lexical-questions-heading">Lexical Analyzer: Questions</h3>
+        <article class="practice-question" id="lexical-q1" aria-labelledby="lexical-q1-heading">
+          <h4 id="lexical-q1-heading">Q1. Token Count: Declaration and Assignment</h4>
+<p>How many tokens are generated for the following C code?</p><pre style="overflow-x: auto; white-space: pre; padding: 12px; background: #fff; border-radius: 6px;"><code>int a;
+a = a + 2;</code></pre><p><strong>Tokens:</strong> <code>int</code> &middot; <code>a</code> &middot; <code>;</code> &middot; <code>a</code> &middot; <code>=</code> &middot; <code>a</code> &middot; <code>+</code> &middot; <code>2</code> &middot; <code>;</code></p>          <div class="worked-result"><strong>Answer: 9 tokens.</strong> Every occurrence of an identifier counts as a separate token.</div>
+        </article>
+        <article class="practice-question" id="lexical-q2" aria-labelledby="lexical-q2-heading">
+          <h4 id="lexical-q2-heading">Q2. Token Count: while and Increment</h4>
+<p>How many tokens are generated for the following C code?</p><pre style="overflow-x: auto; white-space: pre; padding: 12px; background: #fff; border-radius: 6px;"><code>while (ip &lt; z)
+    ++ip;</code></pre><p><strong>Tokens:</strong> <code>while</code> &middot; <code>(</code> &middot; <code>ip</code> &middot; <code>&lt;</code> &middot; <code>z</code> &middot; <code>)</code> &middot; <code>++</code> &middot; <code>ip</code> &middot; <code>;</code></p>          <div class="worked-result"><strong>Answer: 9 tokens.</strong> <code>++</code> is one token; <code>+ +</code>, separated by whitespace, is two tokens.</div>
+        </article>
+        <article class="practice-question" id="lexical-q3" aria-labelledby="lexical-q3-heading">
+          <h4 id="lexical-q3-heading">Q3. Token Count: printf and String Literal</h4>
+<p>How many tokens are present in this C statement?</p><pre style="overflow-x: auto; white-space: pre; padding: 12px; background: #fff; border-radius: 6px;"><code>printf(&quot;Total = %d\n&quot;, score);</code></pre><p><strong>Tokens:</strong> <code>printf</code> &middot; <code>(</code> &middot; <code>&quot;Total = %d\n&quot;</code> &middot; <code>,</code> &middot; <code>score</code> &middot; <code>)</code> &middot; <code>;</code></p>          <div class="worked-result"><strong>Answer: 7 tokens.</strong> The entire string literal is one token, including its spaces, format specifier, and escape sequence.</div>
+        </article>
+        <article class="practice-question" id="lexical-q4" aria-labelledby="lexical-q4-heading">
+          <h4 id="lexical-q4-heading">Q4. Token Count: printf and Address Operator</h4>
+<p>How many tokens are present in this C statement?</p><pre style="overflow-x: auto; white-space: pre; padding: 12px; background: #fff; border-radius: 6px;"><code>printf(&quot;i=%d, &amp;i=%x&quot;, i, &amp;i);</code></pre><p><strong>Tokens:</strong> <code>printf</code> &middot; <code>(</code> &middot; <code>&quot;i=%d, &amp;i=%x&quot;</code> &middot; <code>,</code> &middot; <code>i</code> &middot; <code>,</code> &middot; <code>&amp;</code> &middot; <code>i</code> &middot; <code>)</code> &middot; <code>;</code></p>          <div class="worked-result"><strong>Answer: 10 tokens.</strong> Outside the string, <code>&amp;</code> and <code>i</code> are separate tokens; everything inside the quotes belongs to one string-literal token.</div>
+        </article>
+        <article class="practice-question" id="lexical-q5" aria-labelledby="lexical-q5-heading">
+          <h4 id="lexical-q5-heading">Q5. ISRO CSE 2020: Token Count</h4>
+<p>What is the number of tokens in the following code segment?</p><pre style="overflow-x: auto; white-space: pre; padding: 12px; background: #fff; border-radius: 6px;"><code>switch(inputvalue)
+{
+    case 1 : b=c*d; break;
+    default : b=b++; break;
+}</code></pre><ul><li><code>switch ( inputvalue )</code>: <strong>4</strong></li><li>Opening brace <code>{</code>: <strong>1</strong></li><li><code>case 1 : b = c * d ; break ;</code>: <strong>11</strong></li><li><code>default : b = b ++ ; break ;</code>: <strong>9</strong></li><li>Closing brace <code>}</code>: <strong>1</strong></li></ul>          <div class="worked-result"><strong>Answer: 4 + 1 + 11 + 9 + 1 = 26 tokens.</strong></div>
+        </article>
+        <article class="practice-question" id="lexical-q6" aria-labelledby="lexical-q6-heading">
+          <h4 id="lexical-q6-heading">Q6. Managing Variable Information</h4>
+<p>Which data structure in a compiler is used for managing information about variables and their attributes?</p><ol class="question-options" type="A"><li>Abstract syntax tree</li><li>Symbol table</li><li>Semantic stack</li><li>Parse table</li></ol>          <div class="worked-result"><strong>Answer: B &mdash; Symbol table.</strong> It records identifiers and associated attributes, such as type and scope.</div>
+        </article>
+        <article class="practice-question" id="lexical-q7" aria-labelledby="lexical-q7-heading">
+          <h4 id="lexical-q7-heading">Q7. GATE CSE 2011: Recognizing Keywords</h4>
+<p>In a compiler, keywords of a language are recognized during:</p><ol class="question-options" type="A"><li>Parsing of the program</li><li>Code generation</li><li>Lexical analysis of the program</li><li>Dataflow analysis</li></ol>          <div class="worked-result"><strong>Answer: C &mdash; Lexical analysis.</strong> The lexer classifies reserved keywords into their corresponding token categories.</div>
+        </article>
+        <article class="practice-question" id="lexical-q8" aria-labelledby="lexical-q8-heading">
+          <h4 id="lexical-q8-heading">Q8. Module That Checks Source Characters</h4>
+<p>In a compiler, the module that checks every character of the source text is called:</p><ol class="question-options" type="A"><li>The code generator</li><li>The code optimiser</li><li>The lexical analyser</li><li>The syntax analyser</li></ol>          <div class="worked-result"><strong>Answer: C &mdash; The lexical analyser.</strong> It scans source characters to generate tokens.</div>
+        </article>
+      </section>
+      <section class="subtopic" id="maximal-munch-questions" aria-labelledby="maximal-munch-heading">
+        <h3 id="maximal-munch-heading">Lexical Analyzer: Maximal Munch and Complexity</h3>
+        <p><strong>Rules:</strong> Choose the longest matching prefix; if lengths tie, choose the first listed rule. For the slide answers that report lexical errors, assume an explicit error rule for unmatched characters. Plain flex instead echoes unmatched characters by default. <a href="https://westes.github.io/flex/manual/Matching.html">Flex matching reference</a>.</p>
+<article class="practice-question" id="lexical-q9" aria-labelledby="lexical-q9-heading"><h4 id="lexical-q9-heading">Q9. Partitioning Lexemes into Token Classes</h4><p>Over the alphabet <code>{a,b,c}</code>, use these rules to partition <code>caacbaccaaccc</code> into lexemes and label their token classes. Blanks in the slide are only for readability.</p><pre style="overflow-x: auto; padding: 12px; background: #fff; border-radius: 6px;"><code>aac     { return token1; }
+ba+c    { return token2; }</code></pre><div class="worked-result"><strong>Slide interpretation:</strong> <code>+</code> means union, so token2 matches <code>ba</code> or <code>c</code>.<br><code>c | aac | ba | c | c | aac | c | c</code><br><strong>Classes:</strong> 2, 1, 2, 2, 2, 1, 2, 2 &mdash; <strong>8 tokens.</strong></div><p style="margin-top:12px;"><strong>Notation:</strong> Literal flex uses <code>ba|c</code> for this union. In flex, <code>ba+c</code> means b followed by one or more a characters, then c, and does not yield the slide's answer.</p></article>
+<article class="practice-question" id="lexical-q10" aria-labelledby="lexical-q10-heading"><h4 id="lexical-q10-heading">Q10. Maximal Munch: Scanner Output</h4><p>What output does this scanner produce for (i) <code>aaabccabbb</code>, (ii) <code>cbbbbac</code>, and (iii) <code>cbabc</code>?</p><pre style="overflow-x: auto; padding: 12px; background: #fff; border-radius: 6px;"><code>a*b       printf(&quot;1&quot;);
+(a|b)*b   printf(&quot;2&quot;);
+c*        printf(&quot;3&quot;);</code></pre><div class="worked-result"><strong>(i)</strong> <code>aaab | cc | abbb</code> &rarr; <strong>132</strong>. For <code>aaab</code>, rules 1 and 2 tie, so rule 1 wins.<br><strong>(ii)</strong> <code>c | bbbb | a...</code> &rarr; <strong>32, then lexical error at a</strong> under the error convention below.<br><strong>(iii)</strong> <code>c | bab | c</code> &rarr; <strong>323</strong>.</div><p style="margin-top:12px;">Choose the longest nonempty prefix; break equal-length ties using the earlier rule. An empty match of <code>c*</code> does not consume an unmatched <code>a</code>.</p></article>
+<article class="practice-question" id="lexical-q11" aria-labelledby="lexical-q11-heading"><h4 id="lexical-q11-heading">Q11. Conflict Resolution: No Global Backtracking</h4><p>What token sequence is returned for <code>aab</code>?</p><pre style="overflow-x: auto; padding: 12px; background: #fff; border-radius: 6px;"><code>&quot;aa&quot;   { return 1; }
+&quot;a&quot;    { return 2; }
+&quot;ab&quot;   { return 3; }</code></pre><ol class="question-options" type="A"><li>23</li><li>13</li><li>123</li><li>Lexical error</li></ol><div class="worked-result"><strong>Answer: D &mdash; Lexical error</strong> under the error convention below. The longest prefix <code>aa</code> returns 1, leaving unmatched <code>b</code>. The scanner does not reconsider that decision to choose <code>a | ab</code>.</div></article>
+<article class="practice-question" id="lexical-q12" aria-labelledby="lexical-q12-heading"><h4 id="lexical-q12-heading">Q12. GATE CSE 2018: Longest-Prefix Tokenization</h4><p>A lexical analyzer recognizes the following patterns over <code>{a,b,c}</code>. Here <code>?</code> means zero or one occurrence. For input <code>bbaacabc</code>, which token sequence is output using longest-prefix matching?</p><pre style="overflow-x: auto; padding: 12px; background: #fff; border-radius: 6px;"><code>T1: a?(b|c)*a
+T2: b?(a|c)*b
+T3: c?(b|a)*c</code></pre><ol class="question-options" type="A"><li>T1 T2 T3</li><li>T1 T1 T3</li><li>T2 T1 T3</li><li>T3 T3</li></ol><div class="worked-result"><strong>Answer: D &mdash; T3 T3.</strong> Partition as <code>bbaac | abc</code>. Both lexemes match T3, and <code>bbaac</code> is the longest matching initial prefix.</div></article>
+<article class="practice-question" id="lexical-q13" aria-labelledby="lexical-q13-heading"><h4 id="lexical-q13-heading">Q13. Scanner Time Complexity: Quadratic Rescanning</h4><p>For a conventional maximal-munch scanner that rescans after backing up, which input takes <strong>&Theta;(n<sup>2</sup>)</strong> time? Here a<sup>n</sup> denotes n copies of a.</p><pre style="overflow-x: auto; padding: 12px; background: #fff; border-radius: 6px;"><code>a*b   { return 1; }
+a     { return 2; }</code></pre><ol class="question-options" type="A"><li>a<sup>n</sup></li><li>a<sup>n</sup>b</li><li>a<sup>n<sup>2</sup></sup></li><li>b<sup>n</sup></li></ol><div class="worked-result"><strong>Answer: A &mdash; a<sup>n</sup>.</strong> Each attempt searches for a final b, reaches the end, then backs up to accept one a. Work is <code>n + (n-1) + ... + 1 = n(n+1)/2</code>, hence <strong>&Theta;(n<sup>2</sup>)</strong>. For a<sup>n</sup>b the first rule matches in one pass; a<sup>n<sup>2</sup></sup> takes &Theta;(n<sup>4</sup>) under the same model.</div></article>
+<article class="practice-question" id="lexical-q14" aria-labelledby="lexical-q14-heading"><h4 id="lexical-q14-heading">Q14. Character Reads with Backtracking</h4><p>An artificial language has numbers (one or more digits), short identifiers (one letter), and long identifiers (one or more letters followed by <code>$</code>). Count character reads, including rereads, for each input under maximal munch with backtracking.</p><pre style="overflow-x: auto; padding: 12px; background: #fff; border-radius: 6px;"><code>Number: [0-9]+
+Short:  [A-Za-z]
+Long:   [A-Za-z]+\$</code></pre><div class="table-wrap"><table class="truth-table"><thead><tr><th scope="col">Input</th><th scope="col">Short solution</th><th scope="col">Reads</th></tr></thead><tbody><tr><td><code>abcde0</code></td><td>Failed long-identifier scans: 6 + 5 + 4 + 3 + 2; then read 0 once.</td><td><strong>21</strong></td></tr><tr><td><code>012345</code></td><td>One number, scanned once.</td><td><strong>6</strong></td></tr><tr><td><code>abcde$</code></td><td>One long identifier, scanned once.</td><td><strong>6</strong></td></tr><tr><td><code>a0b1c2</code></td><td>Each letter-digit pair costs 2 + 1 reads: 3 pairs.</td><td><strong>9</strong></td></tr></tbody></table></div><p><strong>Counting convention:</strong> Count failed long-identifier scans and rescans of consumed input; exclude EOF checks and extra delimiter lookahead for completed number tokens. Low-level scanner read counts depend on implementation. For m letters followed by a digit, this model gives <code>(m+1)(m+2)/2</code> reads, hence quadratic growth.</p></article>
+        <p style="margin-top:16px;"><strong>Literal flex behavior:</strong> Without an explicit error rule, Q10(ii) prints <code>32a3</code>; in Q11, the first call returns 1 and a subsequent scan echoes the unmatched b. <a href="https://westes.github.io/flex/manual/Patterns.html">Flex pattern notation</a>.</p>
+      </section>
+      <section class="rule" id="lex-as-dfa" aria-labelledby="lex-as-dfa-heading">
+        <div class="section-heading"><h2 id="lex-as-dfa-heading">Lex as DFA</h2></div>
+        <p>Lex scans the input to find the <strong>longest matching token</strong>, then restarts the DFA from its start state at the first character after that token. It remembers the last accepting state; if a later transition fails, it backs up to that token boundary.</p>
+        <figure class="compiler-diagram">
+          <div class="compiler-diagram-scroll" tabindex="0" role="region" aria-label="Lex DFA diagram; scroll horizontally on small screens">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 550" role="img" aria-labelledby="lex-dfa-title lex-dfa-desc">
+              <title id="lex-dfa-title">Lex as a DFA</title>
+              <desc id="lex-dfa-desc">A digit leads from Start to accepting Number, which loops on digits. A letter leads to accepting Short. Further letters lead to a nonaccepting state that loops on letters. A dollar sign from either letter state leads to accepting Long.</desc>
+              <defs><marker id="lex-dfa-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#53657a"/></marker></defs>
+              <g fill="none" stroke="#53657a" stroke-width="2" marker-end="url(#lex-dfa-arrow)">
+                <path d="M28 248 H82"/>
+                <path d="M157 218 L342 119"/>
+                <path d="M166 264 L334 297"/>
+                <path d="M423 70 C550 -22 577 180 433 135"/>
+                <path d="M429 306 H573"/>
+                <path d="M643 266 C747 195 735 376 652 344"/>
+                <path d="M382 354 V426"/>
+                <path d="M588 345 L426 445"/>
+              </g>
+              <g fill="#fff" stroke="#53657a" stroke-width="2">
+                <circle cx="125" cy="248" r="42"/>
+                <circle cx="382" cy="100" r="48" fill="#eef4fb"/><circle cx="382" cy="100" r="42"/>
+                <circle cx="382" cy="306" r="48" fill="#eef4fb"/><circle cx="382" cy="306" r="42"/>
+                <circle cx="622" cy="306" r="48"/>
+                <circle cx="382" cy="474" r="48" fill="#edf6f1"/><circle cx="382" cy="474" r="42"/>
+              </g>
+              <g font-family="Inter, Segoe UI, sans-serif" font-size="16" fill="#17212f" text-anchor="middle">
+                <text x="125" y="254" font-weight="700">Start</text>
+                <text x="382" y="106" font-weight="700">Number</text>
+                <text x="382" y="312" font-weight="700">Short</text>
+                <text x="382" y="480" font-weight="700">Long</text>
+                <text x="244" y="151">[0&#8211;9]</text>
+                <text x="556" y="94">[0&#8211;9]</text>
+                <text x="251" y="260">[A&#8211;Za&#8211;z]</text>
+                <text x="503" y="289">[A&#8211;Za&#8211;z]</text>
+                <text x="675" y="204">[A&#8211;Za&#8211;z]</text>
+                <text x="403" y="395">$</text>
+                <text x="520" y="418">$</text>
+              </g>
+            </svg>
+          </div>
+          <figcaption>Double circles are accepting states: Number = [0-9]+, Short = [A-Za-z], Long = [A-Za-z]+ followed by $. Unshown transitions fail.</figcaption>
+        </figure>
+      </section>
+      <section class="rule" id="lexical-errors" aria-labelledby="lexical-errors-heading">
+        <div class="section-heading"><h2 id="lexical-errors-heading">Lexical Errors</h2></div>
+        <p>Errors detected by the lexical analyzer during scanning (tokenization).</p>
+        <ol>
+          <li><strong>Invalid token formation:</strong> a character sequence cannot form a valid token under the language's lexical rules; tokenization fails. This differs from a grammatically invalid sequence of valid tokens, which is a syntax error.</li>
+          <li><strong>Invalid or unknown characters:</strong> characters not allowed in the current context, e.g. <code>@</code> or <code>$</code> outside strings and comments in standard C.</li>
+          <li><strong>Unterminated string literal:</strong> a string is missing its closing quotation mark, e.g. <code>&quot;Hello world</code>.</li>
+          <li><strong>Unclosed comment:</strong> a multiline comment starts with <code>/*</code> but has no closing <code>*/</code>, e.g. <code>/* Hello world...</code>.</li>
+        </ol>
+      </section>
+      <article class="practice-question" id="lexical-q15" aria-labelledby="lexical-q15-heading">
+        <h4 id="lexical-q15-heading">Q15. Lexical Analysis: True Statements</h4>
+        <p>Which of the following statements is/are true?</p>
+        <ol class="question-options" type="A">
+          <li>Lexical analysis is recursive in order to handle nested parentheses.</li>
+          <li>Scanners don't know anything about the grammar of a language.</li>
+          <li>A regular expression is a type of pattern used to classify lexemes.</li>
+          <li>You can change state in a DFA without reading any input character.</li>
+        </ol>
+        <div class="worked-result"><strong>Answer: B and C.</strong>
+          <ul>
+            <li><strong>A &mdash; False:</strong> nesting is checked by the parser; the lexer recognizes individual parenthesis tokens.</li>
+            <li><strong>B &mdash; True in the intended sense:</strong> a scanner uses lexical rules, rather than the syntax grammar that determines how tokens form statements.</li>
+            <li><strong>C &mdash; True:</strong> regular expressions specify token patterns that match lexemes.</li>
+            <li><strong>D &mdash; False:</strong> every DFA transition consumes an input symbol; DFAs have no epsilon transitions.</li>
+          </ul>
+        </div>
+      </article>
+      <article class="practice-question" id="lexical-q16" aria-labelledby="lexical-q16-heading">
+        <h4 id="lexical-q16-heading">Q16. Ada Identifier: Minimum DFA States</h4>
+        <p>In Ada, an identifier must begin with a letter and can be followed by zero or more letters, digits, or underscore symbols. However, two underscores may not appear in a row, and the last character may not be an underscore. What is the minimum number of states required for a DFA to accept all valid identifiers?</p>
+        <div class="worked-result"><strong>Answer: 4 states, including the dead state.</strong> Track whether no character has been read, the current prefix ends in a letter/digit, it ends in an underscore, or it is already invalid.</div>
+        <div class="table-wrap">
+          <table class="truth-table">
+            <thead><tr><th scope="col">State</th><th scope="col">Letter</th><th scope="col">Digit</th><th scope="col">Underscore</th></tr></thead>
+            <tbody>
+              <tr><td>q0: Start</td><td>q1</td><td>Dead</td><td>Dead</td></tr>
+              <tr><td>q1: Letter/digit ending (accepting)</td><td>q1</td><td>q1</td><td>q2</td></tr>
+              <tr><td>q2: Underscore ending</td><td>q1</td><td>q1</td><td>Dead</td></tr>
+              <tr><td>Dead: Invalid prefix</td><td>Dead</td><td>Dead</td><td>Dead</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Why minimal?</strong> q1 is the only accepting state; a digit distinguishes q0 from q2, and a letter distinguishes either from Dead. Thus all four states are necessary. A diagram omitting the dead state shows only <strong>3 states</strong>, but represents a partial DFA.</p>
+      </article>
+      <section class="rule" id="left-factoring" aria-labelledby="left-factoring-heading">
+        <div class="section-heading"><h2 id="left-factoring-heading">6. Left factoring</h2></div>
+        <ul>
+          <li><strong>Non-left-factored grammar:</strong> two or more alternatives of the <strong>same nonterminal</strong> have a common nonempty prefix.</li>
+          <li><strong>Left-factored grammar (LFG):</strong> no two alternatives of any nonterminal share a nonempty prefix.</li>
+          <li><strong>Left factoring:</strong> a grammar transformation that extracts shared prefixes while preserving the generated language. It postpones the parser's choice until after the common prefix.</li>
+        </ul>
+        <div class="subtopic">
+          <h3>Transformation Rule</h3>
+          <p>The common prefix <strong>&alpha; &ne; &epsilon;</strong> can be a sequence of terminals, nonterminals, or both. Introduce a new nonterminal A&prime;:</p>
+          <div class="worked-result">
+            <p><strong>Before:</strong><br><code>A &rarr; &alpha;&beta;1 | &alpha;&beta;2 | ... | &alpha;&beta;n | &gamma;</code></p>
+            <p><strong>After:</strong><br><code>A &rarr; &alpha;A&prime; | &gamma;</code><br><code>A&prime; &rarr; &beta;1 | &beta;2 | ... | &beta;n</code></p>
+          </div>
+          <p style="margin-top:12px;">Here &gamma; represents alternatives that do not start with &alpha;. If an alternative is exactly &alpha;, its remaining suffix is &epsilon;. Repeat until no shared prefixes remain.</p>
+        </div>
+        <div class="subtopic">
+          <h3>Identify Left-Factored Grammars</h3>
+          <div class="table-wrap">
+            <table class="truth-table" style="text-align:left;">
+              <thead><tr><th scope="col">Grammar</th><th scope="col">Classification</th></tr></thead>
+              <tbody>
+                <tr><td><code>S &rarr; A</code><br><code>A &rarr; xA | yA | y</code></td><td><strong>Non-LFG:</strong> the last two A alternatives share <code>y</code>.</td></tr>
+                <tr><td><code>S &rarr; A</code><br><code>A &rarr; xA | yB</code><br><code>B &rarr; A | &epsilon;</code></td><td><strong>LFG:</strong> no alternatives for the same nonterminal share a written nonempty prefix.</td></tr>
+                <tr><td><code>S &rarr; Tu | wx</code><br><code>T &rarr; Sq | vyS</code></td><td><strong>LFG:</strong> each pair starts with different grammar symbols.</td></tr>
+                <tr><td><code>A &rarr; da | acB</code><br><code>B &rarr; abB | daA | daf | acB</code></td><td><strong>Non-LFG:</strong> B has shared prefixes <code>a</code> and <code>da</code>.</td></tr>
+                <tr><td><code>E &rarr; T or E | T</code><br><code>T &rarr; F and T | F</code><br><code>F &rarr; not F | (E) | true | false</code></td><td><strong>Non-LFG:</strong> E shares <code>T</code>; T shares <code>F</code>.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="subtopic">
+          <h3>Example: Common Prefix with Nonterminals</h3>
+          <p><code>S &rarr; iEtS | iEtSeS | a</code><br><code>E &rarr; b</code></p>
+          <p>The common prefix is <strong>&alpha; = iEtS</strong>. Factoring gives:</p>
+          <div class="worked-result"><code>S &rarr; iEtSS&prime; | a</code><br><code>S&prime; &rarr; eS | &epsilon;</code><br><code>E &rarr; b</code></div>
+        </div>
+        <div class="subtopic">
+          <h3>Nullable-Prefix Note</h3>
+          <p>For <code>S &rarr; Xa | Xb</code>, <code>X &rarr; &epsilon;</code>, substituting X gives <code>S &rarr; a | b</code>, which is left factored. <strong>As written</strong>, the original alternatives still share the grammar-symbol prefix X under the standard syntactic definition, even though X generates only the empty string.</p>
+          <p><strong>Remember:</strong> left factoring alone does not guarantee an LL(1) grammar or remove left recursion. <a href="https://csd.uwo.ca/~mmorenom/CS447/Lectures/Syntax.html/node9.html">Left-factoring reference</a>.</p>
+        </div>
+      </section>
+      <section class="rule" id="left-recursion" aria-labelledby="left-recursion-heading">
+        <div class="section-heading"><h2 id="left-recursion-heading">7. Left recursion</h2></div>
+        <p>A grammar is <strong>left recursive</strong> if some nonterminal A can derive a sentential form beginning with itself: <strong>A &rArr;<sup>+</sup> A&alpha;</strong>, in one or more derivation steps.</p>
+        <ul>
+          <li><strong>Immediate (direct) left recursion:</strong> a production directly starts with its own left-hand nonterminal, e.g. <code>A &rarr; A&alpha; | &beta;</code>.</li>
+          <li><strong>Indirect left recursion:</strong> the recursion passes through other nonterminals. For <code>S &rarr; Aa | b</code> and <code>A &rarr; Ac | Sd | &epsilon;</code>, <code>S &rArr; Aa &rArr; Sda</code>. This grammar also has immediate left recursion in <code>A &rarr; Ac</code>.</li>
+        </ul>
+        <div class="subtopic">
+          <h3>Eliminating Immediate Left Recursion</h3>
+          <p>For <code>A &rarr; A&alpha; | &beta;</code>, repeated recursive steps followed by &beta; produce <code>&beta;</code>, <code>&beta;&alpha;</code>, <code>&beta;&alpha;&alpha;</code>, and so on: the pattern <strong>&beta;&alpha;*</strong>.</p>
+          <div class="worked-result"><code>A &rarr; &beta;A&prime;</code><br><code>A&prime; &rarr; &alpha;A&prime; | &epsilon;</code></div>
+          <p style="margin-top:12px;">A&prime; is a new nonterminal, &alpha; is nonempty, and &beta; does not begin with A. The transformation preserves the language.</p>
+        </div>
+        <div class="subtopic">
+          <h3>Generalized Rule</h3>
+          <p><strong>Before:</strong><br><code>A &rarr; A&alpha;1 | A&alpha;2 | ... | A&alpha;m | &beta;1 | &beta;2 | ... | &beta;n</code></p>
+          <div class="worked-result">
+            <code>A &rarr; &beta;1A&prime; | &beta;2A&prime; | ... | &beta;nA&prime;</code><br>
+            <code>A&prime; &rarr; &alpha;1A&prime; | &alpha;2A&prime; | ... | &alpha;mA&prime; | &epsilon;</code>
+          </div>
+          <p style="margin-top:12px;">Separate recursive alternatives from nonrecursive ones, attach A&prime; to each &beta;, and move each recursive suffix &alpha; into A&prime;. This rule removes immediate recursion; indirect recursion may require substitution first.</p>
+        </div>
+        <div class="subtopic">
+          <h3>Solved Examples</h3>
+          <div class="table-wrap">
+            <table class="truth-table" style="text-align:left;">
+              <thead><tr><th scope="col">Original grammar</th><th scope="col">After elimination</th></tr></thead>
+              <tbody>
+                <tr><td><strong>1.</strong> <code>A &rarr; Aa | c</code></td><td><code>A &rarr; cA&prime;</code><br><code>A&prime; &rarr; aA&prime; | &epsilon;</code><br>Generates <code>ca*</code>.</td></tr>
+                <tr><td><strong>2.</strong> <code>S &rarr; Sa | b | c</code></td><td><code>S &rarr; bS&prime; | cS&prime;</code><br><code>S&prime; &rarr; aS&prime; | &epsilon;</code></td></tr>
+                <tr><td><strong>3.</strong> <code>S &rarr; Sa | Sb | c | d | e</code></td><td><code>S &rarr; cS&prime; | dS&prime; | eS&prime;</code><br><code>S&prime; &rarr; aS&prime; | bS&prime; | &epsilon;</code></td></tr>
+                <tr><td><strong>4.</strong> <code>E &rarr; E + T | T</code><br><code>T &rarr; T * F | F</code><br><code>F &rarr; (E) | id</code></td><td><code>E &rarr; TE&prime;</code><br><code>E&prime; &rarr; +TE&prime; | &epsilon;</code><br><code>T &rarr; FT&prime;</code><br><code>T&prime; &rarr; *FT&prime; | &epsilon;</code><br><code>F &rarr; (E) | id</code></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <section class="rule" id="removing-indirect-left-recursion" aria-labelledby="removing-indirect-left-recursion-heading">
+        <div class="section-heading"><h2 id="removing-indirect-left-recursion-heading">8. Removing indirect left recursion</h2></div>
+        <p><strong>Given:</strong> <code>S &rarr; Aa | b</code>, <code>A &rarr; Ac | Sd | &epsilon;</code>.</p>
+        <ol>
+          <li><strong>Fix an order:</strong> S, A.</li>
+          <li><strong>Process in order:</strong> S has no earlier nonterminal to substitute and no immediate left recursion, so it stays unchanged.</li>
+          <li><strong>Find the earlier leading nonterminal:</strong> in A's production <code>A &rarr; Sd</code>, S comes before A.</li>
+          <li><strong>Substitute:</strong> replace S using <code>S &rarr; Aa | b</code>, giving <code>A &rarr; Ac | Aad | bd | &epsilon;</code>.</li>
+          <li><strong>Remove immediate left recursion:</strong> recursive suffixes are <code>c</code> and <code>ad</code>; nonrecursive alternatives are <code>bd</code> and <code>&epsilon;</code>. Apply the standard rule with a new A&prime;.</li>
+        </ol>
+        <div class="worked-result">
+          <strong>Final grammar:</strong><br>
+          <code>S &rarr; Aa | b</code><br>
+          <code>A &rarr; bdA&prime; | A&prime;</code><br>
+          <code>A&prime; &rarr; cA&prime; | adA&prime; | &epsilon;</code>
+        </div>
+        <p style="margin-top:12px;"><strong>Key idea:</strong> substitution exposes indirect recursion as direct recursion, which is then eliminated. Here <code>&epsilon;A&prime; = A&prime;</code>.</p>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
